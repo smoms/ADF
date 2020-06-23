@@ -1,0 +1,166 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "ADFTutorialBulkCopyDFbanto"
+		},
+		"AWS_S3_Snowflake_ComplexDataTypes_secretAccessKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'secretAccessKey' of 'AWS_S3_Snowflake_ComplexDataTypes'"
+		},
+		"AzureBlobStorage1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
+		},
+		"AzureBlobStorage2_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage2'"
+		},
+		"AzureBlobStorageMurexDB_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorageMurexDB'"
+		},
+		"AzureBlobStorageMurexDBV2_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorageMurexDBV2'"
+		},
+		"AzureSqlDatabaseLinkedService_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabaseLinkedService'"
+		},
+		"AzureSqlDatabaseLinkedService001_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabaseLinkedService001'"
+		},
+		"AzureStorageLinkedService_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureStorageLinkedService'"
+		},
+		"ET51Q_BUSINESSOBJECTS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ET51Q_BUSINESSOBJECTS'"
+		},
+		"Oracle1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Oracle1'"
+		},
+		"AWS_S3_Snowflake_ComplexDataTypes_properties_typeProperties_accessKeyId": {
+			"type": "string",
+			"defaultValue": "AKIA57Z3DSAK3EIVDYI3"
+		},
+		"Trigger_73c_properties_pipeline_parameters_windowStart": {
+			"type": "string",
+			"defaultValue": "@trigger().outputs.windowStartTime"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"AWS_S3_Snowflake_ComplexDataTypes_secretAccessKey": {
+						"value": "[parameters('AWS_S3_Snowflake_ComplexDataTypes_secretAccessKey')]"
+					},
+					"AzureBlobStorage1_connectionString": {
+						"value": "[parameters('AzureBlobStorage1_connectionString')]"
+					},
+					"AzureBlobStorage2_connectionString": {
+						"value": "[parameters('AzureBlobStorage2_connectionString')]"
+					},
+					"AzureBlobStorageMurexDB_connectionString": {
+						"value": "[parameters('AzureBlobStorageMurexDB_connectionString')]"
+					},
+					"AzureBlobStorageMurexDBV2_connectionString": {
+						"value": "[parameters('AzureBlobStorageMurexDBV2_connectionString')]"
+					},
+					"AzureSqlDatabaseLinkedService_connectionString": {
+						"value": "[parameters('AzureSqlDatabaseLinkedService_connectionString')]"
+					},
+					"AzureSqlDatabaseLinkedService001_connectionString": {
+						"value": "[parameters('AzureSqlDatabaseLinkedService001_connectionString')]"
+					},
+					"AzureStorageLinkedService_connectionString": {
+						"value": "[parameters('AzureStorageLinkedService_connectionString')]"
+					},
+					"AWS_S3_Snowflake_ComplexDataTypes_properties_typeProperties_accessKeyId": {
+						"value": "[parameters('AWS_S3_Snowflake_ComplexDataTypes_properties_typeProperties_accessKeyId')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"ET51Q_BUSINESSOBJECTS_connectionString": {
+						"value": "[parameters('ET51Q_BUSINESSOBJECTS_connectionString')]"
+					},
+					"Oracle1_connectionString": {
+						"value": "[parameters('Oracle1_connectionString')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_0')]"
+			]
+		},
+		{
+			"name": "ArmTemplate_2",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_2.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"Trigger_73c_properties_pipeline_parameters_windowStart": {
+						"value": "[parameters('Trigger_73c_properties_pipeline_parameters_windowStart')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_1')]"
+			]
+		}
+	]
+}

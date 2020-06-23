@@ -1,0 +1,51 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "ADFTutorialBulkCopyDFbanto"
+		},
+		"AWS_S3_Snowflake_ComplexDataTypes_secretAccessKey": {
+			"value": ""
+		},
+		"AzureBlobStorage1_connectionString": {
+			"value": ""
+		},
+		"AzureBlobStorage2_connectionString": {
+			"value": ""
+		},
+		"AzureBlobStorageMurexDB_connectionString": {
+			"value": ""
+		},
+		"AzureBlobStorageMurexDBV2_connectionString": {
+			"value": ""
+		},
+		"AzureSqlDatabaseLinkedService_connectionString": {
+			"value": ""
+		},
+		"AzureSqlDatabaseLinkedService001_connectionString": {
+			"value": ""
+		},
+		"AzureStorageLinkedService_connectionString": {
+			"value": ""
+		},
+		"ET51Q_BUSINESSOBJECTS_connectionString": {
+			"value": ""
+		},
+		"Oracle1_connectionString": {
+			"value": ""
+		},
+		"AWS_S3_Snowflake_ComplexDataTypes_properties_typeProperties_accessKeyId": {
+			"value": "AKIA57Z3DSAK3EIVDYI3"
+		},
+		"Trigger_73c_properties_pipeline_parameters_windowStart": {
+			"value": "@trigger().outputs.windowStartTime"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
