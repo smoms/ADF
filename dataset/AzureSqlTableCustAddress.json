@@ -1,0 +1,40 @@
+{
+	"name": "AzureSqlTableCustAddress",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabaseLinkedService001",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "cust_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "street",
+				"type": "varchar"
+			},
+			{
+				"name": "num",
+				"type": "varchar"
+			},
+			{
+				"name": "zip",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "city",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "cust_address"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

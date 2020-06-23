@@ -1,0 +1,7 @@
+{
+	"name": "IR-Fujitsu",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "test BI use cases"
+	}
+}

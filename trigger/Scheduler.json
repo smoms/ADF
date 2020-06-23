@@ -1,0 +1,25 @@
+{
+	"name": "Scheduler",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "GetTableListAndTriggerCopyData",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 5,
+				"startTime": "2020-05-19T11:06:00Z",
+				"endTime": "2020-05-19T15:06:00Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}

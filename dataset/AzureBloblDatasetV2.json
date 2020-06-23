@@ -1,0 +1,24 @@
+{
+	"name": "AzureBloblDatasetV2",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageMurexDBV2",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "murexdbv2"
+			},
+			"columnDelimiter": ",",
+			"compressionCodec": "gzip",
+			"compressionLevel": "Fastest",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

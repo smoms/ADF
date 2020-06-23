@@ -1,0 +1,50 @@
+{
+	"name": "BlobSinkComplexDataTypes",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureStorageLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"SourceSystem": {
+				"type": "string",
+				"defaultValue": "ORACLE"
+			},
+			"DB_Name": {
+				"type": "string",
+				"defaultValue": "MX09"
+			},
+			"Schema_Name": {
+				"type": "string",
+				"defaultValue": "MX_DATAMART"
+			},
+			"Table_Name": {
+				"type": "string",
+				"defaultValue": "TST_DATA_TYPES"
+			},
+			"Extraction_Timestamp": {
+				"type": "string"
+			},
+			"Bucket": {
+				"type": "string",
+				"defaultValue": "tst-alpiq-datalake-bi"
+			}
+		},
+		"annotations": [],
+		"type": "Avro",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": {
+					"value": "@concat(dataset().SourceSystem,'/',dataset().DB_Name,'/',dataset().Schema_Name,'/',dataset().Table_Name,'/',dataset().Extraction_Timestamp)",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().Bucket",
+					"type": "Expression"
+				}
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

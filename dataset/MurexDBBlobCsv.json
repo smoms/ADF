@@ -1,0 +1,22 @@
+{
+	"name": "MurexDBBlobCsv",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageMurexDB",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "murexdb"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

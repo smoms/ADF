@@ -1,0 +1,17 @@
+{
+	"name": "MurexDB_dev",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Oracle1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "OracleTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "MX_DATAMART",
+			"table": "ALPIQ_DLT_EXP_HR_REP"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

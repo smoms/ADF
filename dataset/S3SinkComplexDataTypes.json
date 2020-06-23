@@ -1,0 +1,45 @@
+{
+	"name": "S3SinkComplexDataTypes",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AWS_S3_Snowflake_ComplexDataTypes",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"SourceSystem": {
+				"type": "string"
+			},
+			"DB_Name": {
+				"type": "string"
+			},
+			"Schema_Name": {
+				"type": "string"
+			},
+			"Table_Name": {
+				"type": "string"
+			},
+			"Extraction_Timestamp": {
+				"type": "string"
+			},
+			"Bucket": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Avro",
+		"typeProperties": {
+			"location": {
+				"type": "AmazonS3Location",
+				"bucketName": {
+					"value": "@dataset().Bucket",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@concat(dataset().SourceSystem,'/',dataset().DB_Name,'/',dataset().Schema_Name,'/',dataset().Table_Name,'/',dataset().Extraction_Timestamp)",
+					"type": "Expression"
+				}
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

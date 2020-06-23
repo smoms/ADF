@@ -1,0 +1,39 @@
+{
+	"name": "TestWhereClause",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTableCustomer",
+						"type": "DatasetReference"
+					},
+					"name": "AzureSQLCustomer"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTableCustAddress",
+						"type": "DatasetReference"
+					},
+					"name": "AzureSQLCustAddr"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AzureBlobDatasetWhereTest",
+						"type": "DatasetReference"
+					},
+					"name": "sinkToBlob"
+				}
+			],
+			"transformations": [
+				{
+					"name": "Join1"
+				}
+			],
+			"script": "source(output(\n\t\tid as integer,\n\t\tname as string,\n\t\tsurname as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> AzureSQLCustomer\nsource(output(\n\t\tcust_id as integer,\n\t\tstreet as string,\n\t\tnum as string,\n\t\tzip as integer,\n\t\tcity as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> AzureSQLCustAddr\nAzureSQLCustomer, AzureSQLCustAddr join(id == cust_id,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> Join1\nJoin1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sinkToBlob"
+		}
+	}
+}

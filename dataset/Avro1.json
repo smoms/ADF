@@ -1,0 +1,18 @@
+{
+	"name": "Avro1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageMurexDBV2",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Avro",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "murexdbv2"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

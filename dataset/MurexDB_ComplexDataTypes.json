@@ -1,0 +1,17 @@
+{
+	"name": "MurexDB_ComplexDataTypes",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Oracle1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "OracleTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "MX_DATAMART",
+			"table": "TST_DATA_TYPES"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

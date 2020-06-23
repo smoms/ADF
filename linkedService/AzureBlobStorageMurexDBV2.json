@@ -1,0 +1,12 @@
+{
+	"name": "AzureBlobStorageMurexDBV2",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobStorage",
+		"typeProperties": {
+			"connectionString": "DefaultEndpointsProtocol=https;AccountName=storagemeshtest01;EndpointSuffix=core.windows.net;",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkFERlRVVE9SSUFMQlVMS0NPUFlERkJBTlRPX2U1YTIxNWY1LTAxMjEtNDM3NC04M2MzLTA4ODE3MzhlZDUwYSINCn0="
+		}
+	}
+}

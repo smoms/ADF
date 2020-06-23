@@ -1,0 +1,17 @@
+{
+	"name": "ET51Q_BUSINESSOBJECTS",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"description": "ET51Q DB Connection for the BUSINESSOBJECTS user",
+		"annotations": [],
+		"type": "Oracle",
+		"typeProperties": {
+			"connectionString": "host=eteldbwts;port=1521;sid=ET51Q;user id=BUSINESSOBJECTS",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI1ZGUyZmQ0Ni0xNTkxLTRjNTEtYTgyYi04NDhkYzI5ODJhODgiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "IR-Fujitsu",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

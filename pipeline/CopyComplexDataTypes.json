@@ -1,0 +1,71 @@
+{
+	"name": "CopyComplexDataTypes",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"partitionOption": "None",
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "AvroSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "AvroWriteSettings",
+							"quoteAllText": true
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MurexDB_ComplexDataTypes",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "BlobSinkComplexDataTypes",
+						"type": "DatasetReference",
+						"parameters": {
+							"SourceSystem": "ORACLE",
+							"DB_Name": "MX09",
+							"Schema_Name": "MX_DATAMART",
+							"Table_Name": "TST_DATA_TYPES",
+							"Extraction_Timestamp": {
+								"value": "@utcnow('yyyy-MM-dd HH-mm-ss')",
+								"type": "Expression"
+							},
+							"Bucket": "tst-alpiq-datalake-bi"
+						}
+					}
+				]
+			}
+		],
+		"annotations": []
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
