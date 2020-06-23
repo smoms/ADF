@@ -1,5 +1,5 @@
 {
-	"name": "SourceDataset_b66",
+	"name": "sourcedataset_b66",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorage2",
