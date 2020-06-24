@@ -68,7 +68,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"TableName": {
-											"value": "string(@item())",
+											"value": "@json(item())",
 											"type": "Expression"
 										},
 										"SchemaName": "PS_ADMIN"
