@@ -1,0 +1,21 @@
+{
+	"name": "PlainDump",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageDataExtraction",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "ERSExtractionJobTesting/Destination"
+		},
+		"annotations": [],
+		"type": "Avro",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "data-extraction-poc"
+			},
+			"avroCompressionCodec": "snappy"
+		}
+	}
+}
