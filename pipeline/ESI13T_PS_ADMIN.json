@@ -94,6 +94,35 @@
 									}
 								}
 							]
+						},
+						{
+							"name": "SnowflakeViewStatement",
+							"description": "Selects the needed information for the snowflake create statement",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "OracleSource",
+									"oracleReaderQuery": {
+										"value": "@concat(\n'SELECT \n  COLUMN_NAME\n, DATA_TYPE\n, DATA_TYPE_MOD\n, DATA_TYPE_OWNER\n, DATA_LENGTH\n, DATA_PRECISION\n, DATA_SCALE\n, NULLABLE\n, COLUMN_ID\n, DEFAULT_LENGTH\n, DATA_DEFAULT\n, CHARACTER_SET_NAME\n, CHAR_COL_DECL_LENGTH\n, QUALIFIED_COL_NAME\nFROM ALL_TAB_COLS\nWHERE TABLE_NAME =', item().OBJECT_NAME)",
+										"type": "Expression"
+									},
+									"partitionOption": "None",
+									"queryTimeout": "02:00:00"
+								},
+								"dataset": {
+									"referenceName": "ESI13T_Dynamic",
+									"type": "DatasetReference"
+								}
+							}
 						}
 					]
 				}
