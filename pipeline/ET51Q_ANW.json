@@ -1,0 +1,74 @@
+{
+	"name": "ET51Q_ANW",
+	"properties": {
+		"activities": [
+			{
+				"name": "ET51Q_ANW",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"partitionOption": "None",
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "AvroSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "AvroWriteSettings",
+							"quoteAllText": true
+						}
+					},
+					"enableStaging": false,
+					"dataIntegrationUnits": 2,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ET51Q_Dynamic",
+						"type": "DatasetReference",
+						"parameters": {
+							"TableName": "ANW",
+							"SchemaName": "ET3000"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DataExtractionSink",
+						"type": "DatasetReference",
+						"parameters": {
+							"SourceSystem": "ORACLE",
+							"DBName": "ET51Q",
+							"SchemaName": "ET3000",
+							"TableName": "ANW",
+							"ExtractionTimestamp": "@utcnow('yyyy-MM-dd HH-mm-ss')"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "ERSExtractionJobTesting"
+		},
+		"annotations": []
+	}
+}
