@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "ForEach1",
+				"name": "ForEachTable",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -68,7 +68,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"TableName": {
-											"value": "@item()",
+											"value": "string(@item())",
 											"type": "Expression"
 										},
 										"SchemaName": "PS_ADMIN"
