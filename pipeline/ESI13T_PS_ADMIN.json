@@ -43,7 +43,7 @@
 									"type": "AvroSink",
 									"storeSettings": {
 										"type": "AzureBlobStorageWriteSettings",
-										"maxConcurrentConnections": 1
+										"maxConcurrentConnections": 2
 									},
 									"formatSettings": {
 										"type": "AvroWriteSettings",
