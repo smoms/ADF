@@ -23,7 +23,8 @@
 					"sink": {
 						"type": "AvroSink",
 						"storeSettings": {
-							"type": "AzureBlobStorageWriteSettings"
+							"type": "AzureBlobStorageWriteSettings",
+							"blockSizeInMB": 10
 						},
 						"formatSettings": {
 							"type": "AvroWriteSettings",
@@ -41,8 +42,7 @@
 									"type": "Decimal"
 								},
 								"sink": {
-									"name": "NUMMER#",
-									"type": "Decimal"
+									"name": "NUMMER"
 								}
 							},
 							{
