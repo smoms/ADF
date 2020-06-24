@@ -1,5 +1,5 @@
 {
-	"name": "ESI13T_PS_ADMIN_Dynamic",
+	"name": "ESI13T_Dynamic",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "ESI13T_BUSINESSOBJECTS",
@@ -7,6 +7,9 @@
 		},
 		"parameters": {
 			"TableName": {
+				"type": "string"
+			},
+			"SchemaName": {
 				"type": "string"
 			}
 		},
