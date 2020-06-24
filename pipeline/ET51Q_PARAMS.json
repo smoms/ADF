@@ -34,6 +34,1038 @@
 					"dataIntegrationUnits": 2,
 					"translator": {
 						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "NUMMER#",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "NUMMER#",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "KURZBEZ",
+									"type": "String"
+								},
+								"sink": {
+									"name": "KURZBEZ",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "TYP1",
+									"type": "String"
+								},
+								"sink": {
+									"name": "TYP1",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "GUE_AB",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "GUE_AB",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "BET_ANL_NR",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "BET_ANL_NR",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "TRANSIT_GP",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "TRANSIT_GP",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "WAE_CODE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "WAE_CODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "VER_NR",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "VER_NR",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "ABSCH_NR",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "ABSCH_NR",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "UBET_GP",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "UBET_GP",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "BET_GP",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "BET_GP",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "GESPAR_NR",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "GESPAR_NR",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "REGION_NR",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "REGION_NR",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "AUF_ART",
+									"type": "String"
+								},
+								"sink": {
+									"name": "AUF_ART",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BEZ",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BEZ",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRODTYP",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PRODTYP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ERT_STEL",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ERT_STEL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "UMSCHREIB",
+									"type": "String"
+								},
+								"sink": {
+									"name": "UMSCHREIB",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "LEISTUNG",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "LEISTUNG",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "TYP2",
+									"type": "String"
+								},
+								"sink": {
+									"name": "TYP2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "GRUPPE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "GRUPPE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ERT_ART",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ERT_ART",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "AUF_STEL",
+									"type": "String"
+								},
+								"sink": {
+									"name": "AUF_STEL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "RICHTUNG",
+									"type": "String"
+								},
+								"sink": {
+									"name": "RICHTUNG",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "GUE_BIS",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "GUE_BIS",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "INDIREKT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "INDIREKT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "FEHLBETRAG",
+									"type": "String"
+								},
+								"sink": {
+									"name": "FEHLBETRAG",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "FAHRPLAN",
+									"type": "String"
+								},
+								"sink": {
+									"name": "FAHRPLAN",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "GESFAKTOR",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "GESFAKTOR",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "REF_EGREFERENZ",
+									"type": "String"
+								},
+								"sink": {
+									"name": "REF_EGREFERENZ",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "VERRECHNUNGSSTELLE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VERRECHNUNGSSTELLE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PARTNERREFERENZ",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PARTNERREFERENZ",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SAPZAHLUNGSBEDINGUNG",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SAPZAHLUNGSBEDINGUNG",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SAPZAHLUNGSWEG",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SAPZAHLUNGSWEG",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "VERRECHNUNGSART",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VERRECHNUNGSART",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ZUKONT_NR",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "ZUKONT_NR",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "MAT_NR",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "MAT_NR",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "VORGANG",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VORGANG",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SWEP",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SWEP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "UMSATZWIRKSAM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "UMSATZWIRKSAM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BERECHNET",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BERECHNET",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "FARBE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "FARBE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SEEWERTE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SEEWERTE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "UUBET_GP",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "UUBET_GP",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "VERMITTELT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VERMITTELT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "VON_BKR",
+									"type": "Double"
+								},
+								"sink": {
+									"name": "VON_BKR",
+									"type": "Double"
+								}
+							},
+							{
+								"source": {
+									"name": "VON_RZ",
+									"type": "Double"
+								},
+								"sink": {
+									"name": "VON_RZ",
+									"type": "Double"
+								}
+							},
+							{
+								"source": {
+									"name": "NACH_BKR",
+									"type": "Double"
+								},
+								"sink": {
+									"name": "NACH_BKR",
+									"type": "Double"
+								}
+							},
+							{
+								"source": {
+									"name": "NACH_RZ",
+									"type": "Double"
+								},
+								"sink": {
+									"name": "NACH_RZ",
+									"type": "Double"
+								}
+							},
+							{
+								"source": {
+									"name": "BKR_AUSWAHL",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BKR_AUSWAHL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR1",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR1",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR2",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR3",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR3",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR4",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR4",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR5",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR5",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR6",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR6",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR7",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR7",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR8",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR8",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR9",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR9",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR10",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR10",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR11",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR11",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR12",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR12",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "RZ_AUSGLEICH",
+									"type": "String"
+								},
+								"sink": {
+									"name": "RZ_AUSGLEICH",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "GRENZWERT_H",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "GRENZWERT_H",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "SUBOWNER_NR",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SUBOWNER_NR",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "BILANZTYP",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "BILANZTYP",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "MULTI_DEAL",
+									"type": "String"
+								},
+								"sink": {
+									"name": "MULTI_DEAL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DAY_FP_REQUIRED",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DAY_FP_REQUIRED",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "GRID_REQUIRED",
+									"type": "String"
+								},
+								"sink": {
+									"name": "GRID_REQUIRED",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SAME_DEALID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SAME_DEALID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PORTFOLIO",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "PORTFOLIO",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "MWST_SATZ",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "MWST_SATZ",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "VERR_SEPARAT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VERR_SEPARAT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "VON_PORTFOLIO",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "VON_PORTFOLIO",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "NACH_PORTFOLIO",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "NACH_PORTFOLIO",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "SPROD_VERTRAG_NR",
+									"type": "Double"
+								},
+								"sink": {
+									"name": "SPROD_VERTRAG_NR",
+									"type": "Double"
+								}
+							},
+							{
+								"source": {
+									"name": "PF_AUSGLEICH",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PF_AUSGLEICH",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "VERRKTO_NR",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "VERRKTO_NR",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "KOSTART_NR",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "KOSTART_NR",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "NO_NETTING",
+									"type": "String"
+								},
+								"sink": {
+									"name": "NO_NETTING",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "TO_KW",
+									"type": "String"
+								},
+								"sink": {
+									"name": "TO_KW",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "KEINE_VERR",
+									"type": "String"
+								},
+								"sink": {
+									"name": "KEINE_VERR",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "QUALITAET_NR",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "QUALITAET_NR",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "MAKE_DEALCONF",
+									"type": "String"
+								},
+								"sink": {
+									"name": "MAKE_DEALCONF",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BIL_NEUTRAL",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BIL_NEUTRAL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "MWST_DEF_ID",
+									"type": "Double"
+								},
+								"sink": {
+									"name": "MWST_DEF_ID",
+									"type": "Double"
+								}
+							},
+							{
+								"source": {
+									"name": "LTC",
+									"type": "String"
+								},
+								"sink": {
+									"name": "LTC",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "USE_FROM_TO_PORTFOLIO",
+									"type": "String"
+								},
+								"sink": {
+									"name": "USE_FROM_TO_PORTFOLIO",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CAPAIDDEFTSO",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CAPAIDDEFTSO",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CAPAIDSECTSO",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CAPAIDSECTSO",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CAPACITY_TYPE",
+									"type": "Double"
+								},
+								"sink": {
+									"name": "CAPACITY_TYPE",
+									"type": "Double"
+								}
+							},
+							{
+								"source": {
+									"name": "DAY_AHEAD1",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DAY_AHEAD1",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "FP_VORLAUFZEIT",
+									"type": "Double"
+								},
+								"sink": {
+									"name": "FP_VORLAUFZEIT",
+									"type": "Double"
+								}
+							},
+							{
+								"source": {
+									"name": "FP_VORLAUFZEIT_RUND",
+									"type": "String"
+								},
+								"sink": {
+									"name": "FP_VORLAUFZEIT_RUND",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SUBBALANCE_NR",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SUBBALANCE_NR",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "BILANZ",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "BILANZ",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "IGNORE_CHANGES_INTRA_BEFORE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "IGNORE_CHANGES_INTRA_BEFORE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SCHEDULING_OUTAREA",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SCHEDULING_OUTAREA",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SCHEDULING_INAREA",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SCHEDULING_INAREA",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "X_POS_YESNO",
+									"type": "String"
+								},
+								"sink": {
+									"name": "X_POS_YESNO",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "COLOR_SEQ_NR",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "COLOR_SEQ_NR",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "DEALTICKET_REQUIRED",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEALTICKET_REQUIRED",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ALWAYS_NEUTRAL",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ALWAYS_NEUTRAL",
+									"type": "String"
+								}
+							}
+						],
 						"typeConversion": true,
 						"typeConversionSettings": {
 							"allowDataTruncation": true,
