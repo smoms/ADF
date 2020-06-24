@@ -31,7 +31,7 @@
 			"location": {
 				"type": "AzureBlobStorageLocation",
 				"folderPath": {
-					"value": "@dataset().SourceSystem,'/',dataset().DBName,'/',dataset().SchemaName,'/',dataset().TableName,'/',dataset().ExtractionTimestamp",
+					"value": "@concat(dataset().SourceSystem,'/',dataset().DBName,'/',dataset().SchemaName,'/',dataset().TableName,'/',dataset().ExtractionTimestamp)",
 					"type": "Expression"
 				},
 				"container": "data-extraction-poc"
