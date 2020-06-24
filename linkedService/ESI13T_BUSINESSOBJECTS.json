@@ -1,0 +1,17 @@
+{
+	"name": "ESI13T_BUSINESSOBJECTS",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"description": "ESI13T Connection with the BUSINESSOBJECTS user",
+		"annotations": [],
+		"type": "Oracle",
+		"typeProperties": {
+			"connectionString": "host=odadb03apr-vip;port=1521;sid=ESI13T;user id=BUSINESSOBJECTS",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI3NzYwZDI0Yy05OGQxLTQ2NDMtYjMzMC1iNTFlY2UxMTZjMGQiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "IR-Fujitsu",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
