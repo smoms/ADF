@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "ET51Q_ANW",
+				"name": "ET51Q",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -37,7 +37,8 @@
 						"typeConversion": true,
 						"typeConversionSettings": {
 							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
+							"treatBooleanAsNumber": false,
+							"culture": "en-us"
 						}
 					}
 				},
@@ -46,8 +47,14 @@
 						"referenceName": "ET51Q_Dynamic",
 						"type": "DatasetReference",
 						"parameters": {
-							"TableName": "ANW",
-							"SchemaName": "ET3000"
+							"TableName": {
+								"value": "@pipeline().parameters.TableName",
+								"type": "Expression"
+							},
+							"SchemaName": {
+								"value": "@pipeline().parameters.SchemaName",
+								"type": "Expression"
+							}
 						}
 					}
 				],
@@ -58,14 +65,34 @@
 						"parameters": {
 							"SourceSystem": "ORACLE",
 							"DBName": "ET51Q",
-							"SchemaName": "ET3000",
-							"TableName": "ANW",
+							"SchemaName": {
+								"value": "@pipeline().parameters.SchemaName",
+								"type": "Expression"
+							},
+							"TableName": {
+								"value": "@pipeline().parameters.TableName",
+								"type": "Expression"
+							},
 							"ExtractionTimestamp": "@utcnow('yyyy-MM-dd HH-mm-ss')"
 						}
 					}
 				]
 			}
 		],
+		"parameters": {
+			"SchemaName": {
+				"type": "string"
+			},
+			"DBName": {
+				"type": "string"
+			},
+			"SourceSystem": {
+				"type": "string"
+			},
+			"TableName": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "ERSExtractionJobTesting"
 		},
