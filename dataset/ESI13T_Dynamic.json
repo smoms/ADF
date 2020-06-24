@@ -20,7 +20,10 @@
 		"type": "OracleTable",
 		"schema": [],
 		"typeProperties": {
-			"schema": "PS_ADMIN",
+			"schema": {
+				"value": "@dataset().SchemaName",
+				"type": "Expression"
+			},
 			"table": {
 				"value": "@dataset().TableName",
 				"type": "Expression"
