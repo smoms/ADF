@@ -1,0 +1,27 @@
+{
+	"name": "ESI13T_PS_ADMIN_Dynamic",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ESI13T_BUSINESSOBJECTS",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"TableName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "ERSExtractionJobTesting/Source"
+		},
+		"annotations": [],
+		"type": "OracleTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "PS_ADMIN",
+			"table": {
+				"value": "@dataset().TableName",
+				"type": "Expression"
+			}
+		}
+	}
+}
