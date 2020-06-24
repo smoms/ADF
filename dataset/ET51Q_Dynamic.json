@@ -1,0 +1,24 @@
+{
+	"name": "ET51Q_Dynamic",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ET51Q_BUSINESSOBJECTS",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"TableName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "OracleTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "BUSINESSOBJECTS",
+			"table": {
+				"value": "@dataset().TableName",
+				"type": "Expression"
+			}
+		}
+	}
+}
