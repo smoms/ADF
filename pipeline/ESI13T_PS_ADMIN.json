@@ -68,7 +68,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"TableName": {
-											"value": "@json(item())",
+											"value": "@item().OBJECT_NAME",
 											"type": "Expression"
 										},
 										"SchemaName": "PS_ADMIN"
@@ -84,7 +84,7 @@
 										"DBName": "ESI13T",
 										"SchemaName": "PS_ADMIN",
 										"TableName": {
-											"value": "@item()",
+											"value": "@item().OBJECT_NAME",
 											"type": "Expression"
 										},
 										"ExtractionTimestamp": {
