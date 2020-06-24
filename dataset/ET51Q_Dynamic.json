@@ -8,6 +8,9 @@
 		"parameters": {
 			"TableName": {
 				"type": "string"
+			},
+			"SchemaName": {
+				"type": "string"
 			}
 		},
 		"folder": {
@@ -17,7 +20,10 @@
 		"type": "OracleTable",
 		"schema": [],
 		"typeProperties": {
-			"schema": "BUSINESSOBJECTS",
+			"schema": {
+				"value": "@dataset().SchemaName",
+				"type": "Expression"
+			},
 			"table": {
 				"value": "@dataset().TableName",
 				"type": "Expression"
