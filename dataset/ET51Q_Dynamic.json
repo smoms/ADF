@@ -10,6 +10,9 @@
 				"type": "string"
 			}
 		},
+		"folder": {
+			"name": "ERSExtractionJobTesting/Source"
+		},
 		"annotations": [],
 		"type": "OracleTable",
 		"schema": [],
