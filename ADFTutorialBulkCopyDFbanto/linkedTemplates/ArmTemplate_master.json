@@ -19,6 +19,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage2'"
 		},
+		"AzureBlobStorageDataExtraction_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorageDataExtraction'"
+		},
 		"AzureBlobStorageMurexDB_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorageMurexDB'"
@@ -39,6 +43,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureStorageLinkedService'"
 		},
+		"ESI13T_BUSINESSOBJECTS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ESI13T_BUSINESSOBJECTS'"
+		},
 		"ET51Q_BUSINESSOBJECTS_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ET51Q_BUSINESSOBJECTS'"
@@ -54,6 +62,17 @@
 		"Trigger_73c_properties_pipeline_parameters_windowStart": {
 			"type": "string",
 			"defaultValue": "@trigger().outputs.windowStartTime"
+		},
+		"SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+			"type": "string",
+			"defaultValue": "mydptest001.database.windows.net"
+		},
+		"SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+			"type": "string",
+			"defaultValue": "antonio"
+		},
+		"SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+			"type": "secureString"
 		},
 		"containerUri": {
 			"type": "string",
@@ -91,6 +110,9 @@
 					"AzureBlobStorage2_connectionString": {
 						"value": "[parameters('AzureBlobStorage2_connectionString')]"
 					},
+					"AzureBlobStorageDataExtraction_connectionString": {
+						"value": "[parameters('AzureBlobStorageDataExtraction_connectionString')]"
+					},
 					"AzureBlobStorageMurexDB_connectionString": {
 						"value": "[parameters('AzureBlobStorageMurexDB_connectionString')]"
 					},
@@ -108,6 +130,15 @@
 					},
 					"AWS_S3_Snowflake_ComplexDataTypes_properties_typeProperties_accessKeyId": {
 						"value": "[parameters('AWS_S3_Snowflake_ComplexDataTypes_properties_typeProperties_accessKeyId')]"
+					},
+					"SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+						"value": "[parameters('SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint')]"
+					},
+					"SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+						"value": "[parameters('SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName')]"
+					},
+					"SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+						"value": "[parameters('SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
 					}
 				}
 			},
@@ -126,6 +157,9 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"ESI13T_BUSINESSOBJECTS_connectionString": {
+						"value": "[parameters('ESI13T_BUSINESSOBJECTS_connectionString')]"
 					},
 					"ET51Q_BUSINESSOBJECTS_connectionString": {
 						"value": "[parameters('ET51Q_BUSINESSOBJECTS_connectionString')]"

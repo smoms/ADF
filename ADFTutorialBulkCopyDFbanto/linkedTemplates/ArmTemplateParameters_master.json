@@ -14,6 +14,9 @@
 		"AzureBlobStorage2_connectionString": {
 			"value": ""
 		},
+		"AzureBlobStorageDataExtraction_connectionString": {
+			"value": ""
+		},
 		"AzureBlobStorageMurexDB_connectionString": {
 			"value": ""
 		},
@@ -29,6 +32,9 @@
 		"AzureStorageLinkedService_connectionString": {
 			"value": ""
 		},
+		"ESI13T_BUSINESSOBJECTS_connectionString": {
+			"value": ""
+		},
 		"ET51Q_BUSINESSOBJECTS_connectionString": {
 			"value": ""
 		},
@@ -40,6 +46,15 @@
 		},
 		"Trigger_73c_properties_pipeline_parameters_windowStart": {
 			"value": "@trigger().outputs.windowStartTime"
+		},
+		"SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+			"value": "mydptest001.database.windows.net"
+		},
+		"SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+			"value": "antonio"
+		},
+		"SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+			"value": ""
 		},
 		"containerUri": {
 			"value": ""
