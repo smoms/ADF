@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "ExecuteLocalIncrementSSIS",
+				"name": "ExecuteLocalIncrement",
 				"type": "ExecuteSSISPackage",
 				"dependsOn": [],
 				"policy": {
@@ -35,6 +35,38 @@
 							}
 						}
 					}
+				}
+			},
+			{
+				"name": "LoadCMDServersFromAWS",
+				"type": "ExecuteSSISPackage",
+				"dependsOn": [
+					{
+						"activity": "ExecuteLocalIncrement",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"packageLocation": {
+						"packagePath": "AmineTest/AzureSSISTest/SSIS_ADF_Test.dtsx",
+						"type": "SSISDB"
+					},
+					"environmentPath": null,
+					"connectVia": {
+						"referenceName": "SSIS-IR",
+						"type": "IntegrationRuntimeReference"
+					},
+					"loggingLevel": "Basic"
 				}
 			}
 		],
