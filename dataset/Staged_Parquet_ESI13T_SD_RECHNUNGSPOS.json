@@ -1,0 +1,304 @@
+{
+	"name": "Staged_Parquet_ESI13T_SD_RECHNUNGSPOS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageDataExtraction",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "ERSExtractionJobTesting/Source"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "ORACLE/ESI13T/PS_ADMIN/SD_RECHNUNGSPOS/2020-06-29 09-30-00",
+				"container": "data-extraction-poc"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "REP_BETRAG",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_FIBLFDNR_H",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_FIBLFDNR_S",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_ID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_KZ",
+				"type": "INT96"
+			},
+			{
+				"name": "REP_LDATE",
+				"type": "INT96"
+			},
+			{
+				"name": "REP_MANID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_MAS_DOWID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_MENGE",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_RABATT1",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_RECID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_SH",
+				"type": "UTF8"
+			},
+			{
+				"name": "REP_USEID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_ABLDAT",
+				"type": "INT96"
+			},
+			{
+				"name": "REP_ABLID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_ABRBIS",
+				"type": "INT96"
+			},
+			{
+				"name": "REP_ABRVON",
+				"type": "INT96"
+			},
+			{
+				"name": "REP_BEZ",
+				"type": "UTF8"
+			},
+			{
+				"name": "REP_AUF_DPCID_H",
+				"type": "UTF8"
+			},
+			{
+				"name": "REP_KST_DPCID_H",
+				"type": "UTF8"
+			},
+			{
+				"name": "REP_PC_DPCID_H",
+				"type": "UTF8"
+			},
+			{
+				"name": "REP_PSP_DPCID_H",
+				"type": "UTF8"
+			},
+			{
+				"name": "REP_AUF_DPCID_S",
+				"type": "UTF8"
+			},
+			{
+				"name": "REP_KST_DPCID_S",
+				"type": "UTF8"
+			},
+			{
+				"name": "REP_PC_DPCID_S",
+				"type": "UTF8"
+			},
+			{
+				"name": "REP_PSP_DPCID_S",
+				"type": "UTF8"
+			},
+			{
+				"name": "REP_EINGABEREQ",
+				"type": "UTF8"
+			},
+			{
+				"name": "REP_FIBLFDNR_H_MWST",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_FIBLFDNR_S_MWST",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_FIBU_PRSID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_FIXIERT",
+				"type": "UTF8"
+			},
+			{
+				"name": "REP_FREIVERBR",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_FREMD_BETRAG",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_FREMD_WAEID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_GERID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_KONSTANTE",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_MENGERECH",
+				"type": "UTF8"
+			},
+			{
+				"name": "REP_MULTIPLIKATOR",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_NORMFAKTOR",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_SORTNR",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_STAND",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_STORNOFLAG_OLD",
+				"type": "UTF8"
+			},
+			{
+				"name": "REP_TARID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_UEBID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_URMENGE",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_VABLDAT",
+				"type": "INT96"
+			},
+			{
+				"name": "REP_VKNID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_VSTAND",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_GRUPPEN_REPID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_NOFMAS_DOWID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_BIMID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_KTPID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_MECID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_TCOID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_PTYID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_FREMDNR",
+				"type": "UTF8"
+			},
+			{
+				"name": "REP_POSTYPE",
+				"type": "UTF8"
+			},
+			{
+				"name": "REP_CDEID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_VETID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_DET_INTID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_NETTO",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_FREMD_NETTO",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_UR_MAS_DOWID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_AMOUNTUNITCODE",
+				"type": "DECIMAL",
+				"precision": 38,
+				"scale": 18
+			},
+			{
+				"name": "REP_DURATION",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_DURATIONUNITCODE",
+				"type": "DECIMAL",
+				"precision": 38,
+				"scale": 18
+			},
+			{
+				"name": "REP_ARTID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REP_REFERENCE",
+				"type": "UTF8"
+			},
+			{
+				"name": "REP_TAPIDENTIFIER",
+				"type": "UTF8"
+			}
+		]
+	}
+}
