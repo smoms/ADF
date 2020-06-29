@@ -24,10 +24,7 @@
 								"DBName": "ESI13T",
 								"SchemaName": "PS_ADMIN",
 								"TableName": "SD_RECHNUNGSPOS",
-								"ExtractionTimestamp": {
-									"value": "@utcnow()",
-									"type": "Expression"
-								}
+								"ExtractionTimestamp": "2020-06-29 09-30-00"
 							}
 						}
 					},
