@@ -1,0 +1,46 @@
+{
+	"name": "ExecuteDataFlow",
+	"properties": {
+		"activities": [
+			{
+				"name": "ParquetSplitAvro",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "ParquetSplitAvro",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"DataExtractionSinkAvro": {
+								"SourceSystem": "AzureBLOB",
+								"DBName": "ESI13T",
+								"SchemaName": "PS_ADMIN",
+								"TableName": "SD_RECHNUNGSPOS",
+								"ExtractionTimestamp": {
+									"value": "@utcnow()",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "ERSExtractionJobTesting"
+		},
+		"annotations": []
+	}
+}
