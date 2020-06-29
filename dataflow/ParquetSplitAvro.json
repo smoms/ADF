@@ -25,7 +25,7 @@
 				}
 			],
 			"transformations": [],
-			"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> StagedParquet\nStagedParquet sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tfilePattern:(concat($TableName, '_', toString(partitionId()))),\n\tpartitionBy('roundRobin', 10),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DataExtractionSinkAvro"
+			"script": "parameters{\n\tTableName as string\n}\nsource(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> StagedParquet\nStagedParquet sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tfilePattern:(concat($TableName, '_', toString(partitionId()))),\n\tpartitionBy('roundRobin', 10),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DataExtractionSinkAvro"
 		}
 	}
 }
