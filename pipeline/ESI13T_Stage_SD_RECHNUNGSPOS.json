@@ -1,6 +1,66 @@
 {
 	"name": "ESI13T_Stage_SD_RECHNUNGSPOS",
 	"properties": {
+		"activities": [
+			{
+				"name": "Copy_SD_RECHNUNGSPOS_Parquet",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"partitionOption": "None",
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ESI13T_Dynamic",
+						"type": "DatasetReference",
+						"parameters": {
+							"TableName": "SD_RECHNUNGSPOS",
+							"SchemaName": "PS_ADMIN"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DataExtractionSink_Parquet",
+						"type": "DatasetReference",
+						"parameters": {
+							"SourceSystem": "ORACLE",
+							"DBName": "ESI13T",
+							"SchemaName": "PS_ADMIN",
+							"TableName": "SD_RECHNUNGSPOS",
+							"ExtractionTimestamp": "2020-06-29 09-30-00"
+						}
+					}
+				]
+			}
+		],
 		"folder": {
 			"name": "ERSExtractionJobTesting"
 		},
