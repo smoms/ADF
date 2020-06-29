@@ -1,5 +1,5 @@
 {
-	"name": "PlainDump",
+	"name": "PlainDump_Avro",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageDataExtraction",
