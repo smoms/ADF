@@ -1,0 +1,29 @@
+{
+	"name": "TMP_BINARY",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageDataExtraction",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"ExtractionTimestamp": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "ERSExtractionJobTesting/Source"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": {
+					"value": "@concat('TMP/',dataset().ExtractionTimestamp,'/')",
+					"type": "Expression"
+				},
+				"container": "data-extraction-poc"
+			}
+		}
+	}
+}
