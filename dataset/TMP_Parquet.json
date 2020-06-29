@@ -1,0 +1,33 @@
+{
+	"name": "TMP_Parquet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageDataExtraction",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"TableName": {
+				"type": "string"
+			},
+			"ExtractiopnTimestamp": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "ERSExtractionJobTesting/Source"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": {
+					"value": "@concat('TMP/',dataset().TableName,'_',dataset().ExtractionTimestamp,'/')",
+					"type": "Expression"
+				}
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}
