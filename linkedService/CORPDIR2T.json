@@ -1,0 +1,16 @@
+{
+	"name": "CORPDIR2T",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": "integrated security=False;data source=alpsqldbs32vp.argon.corp.ch;initial catalog=ITF_CDIR;user id=ITF_CDIR",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI4MDE0YmUzOS1jMTE0LTRlNTAtYTVkZC0yODUwNzMxMjc2N2EiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "IR-Fujitsu",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
