@@ -24,7 +24,17 @@
 						"referenceName": "SSIS-IR",
 						"type": "IntegrationRuntimeReference"
 					},
-					"loggingLevel": "Basic"
+					"loggingLevel": "Basic",
+					"packageConnectionManagers": {
+						"mydptest001": {
+							"Password": {
+								"value": {
+									"type": "SecureString",
+									"value": "**********"
+								}
+							}
+						}
+					}
 				}
 			}
 		],
