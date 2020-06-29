@@ -83,7 +83,10 @@
 									"referenceName": "ESI13T_Dynamic",
 									"type": "DatasetReference",
 									"parameters": {
-										"TableName": "@item().OBJECT_NAME",
+										"TableName": {
+											"value": "@item().OBJECT_NAME",
+											"type": "Expression"
+										},
 										"SchemaName": "PS_ADMIN"
 									}
 								}
@@ -95,6 +98,10 @@
 									"parameters": {
 										"ExtractionTimestamp": {
 											"value": "@pipeline().parameters.ExtractionTimestamp",
+											"type": "Expression"
+										},
+										"TableName": {
+											"value": "@item().OBJECT_NAME ",
 											"type": "Expression"
 										}
 									}

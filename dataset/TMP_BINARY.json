@@ -8,6 +8,9 @@
 		"parameters": {
 			"ExtractionTimestamp": {
 				"type": "string"
+			},
+			"TableName": {
+				"type": "string"
 			}
 		},
 		"folder": {
@@ -19,7 +22,7 @@
 			"location": {
 				"type": "AzureBlobStorageLocation",
 				"folderPath": {
-					"value": "@concat('TMP/',dataset().ExtractionTimestamp,'/')",
+					"value": "@concat('TMP/',dataset().TableName,'_',dataset().ExtractionTimestamp,'/')",
 					"type": "Expression"
 				},
 				"container": "data-extraction-poc"
