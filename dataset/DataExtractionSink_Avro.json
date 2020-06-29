@@ -1,5 +1,5 @@
 {
-	"name": "DataExtractionSink",
+	"name": "DataExtractionSink_Avro",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageDataExtraction",
