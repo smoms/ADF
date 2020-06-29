@@ -65,6 +65,10 @@
 							"typeProperties": {
 								"source": {
 									"type": "OracleSource",
+									"oracleReaderQuery": {
+										"value": "@concat('Select * from ', item().OBJECT_NAME, ' where rownum < 5000')",
+										"type": "Expression"
+									},
 									"partitionOption": "None",
 									"queryTimeout": "02:00:00"
 								},
