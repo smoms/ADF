@@ -51,7 +51,7 @@
 					},
 					"activities": [
 						{
-							"name": "CopyTableToBinary",
+							"name": "CopyTableToParquet_TEMP",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
@@ -69,14 +69,22 @@
 									"queryTimeout": "02:00:00"
 								},
 								"sink": {
-									"type": "BinarySink",
+									"type": "ParquetSink",
 									"storeSettings": {
 										"type": "AzureBlobStorageWriteSettings"
 									}
 								},
 								"enableStaging": false,
 								"parallelCopies": 1,
-								"dataIntegrationUnits": 2
+								"dataIntegrationUnits": 2,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
 							},
 							"inputs": [
 								{
@@ -93,15 +101,15 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "TMP_BINARY",
+									"referenceName": "TMP_Parquet",
 									"type": "DatasetReference",
 									"parameters": {
-										"ExtractionTimestamp": {
-											"value": "@pipeline().parameters.ExtractionTimestamp",
+										"TableName": {
+											"value": "@item().OBJECT_NAME",
 											"type": "Expression"
 										},
-										"TableName": {
-											"value": "@item().OBJECT_NAME ",
+										"ExtractionTimestamp": {
+											"value": "@pipeline().parameters.ExtractionTimestamp",
 											"type": "Expression"
 										}
 									}
