@@ -115,6 +115,71 @@
 									}
 								}
 							]
+						},
+						{
+							"name": "ParquetSplitAvro",
+							"type": "ExecuteDataFlow",
+							"dependsOn": [
+								{
+									"activity": "CopyTableToParquet_TEMP",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataflow": {
+									"referenceName": "ParquetSplitAvro",
+									"type": "DataFlowReference",
+									"parameters": {
+										"TableName": {
+											"value": "'@{item().OBJECT_NAME}'",
+											"type": "Expression"
+										},
+										"ExtractionTimestamp": {
+											"value": "'@{pipeline().parameters.ExtractionTimestamp}'",
+											"type": "Expression"
+										}
+									},
+									"datasetParameters": {
+										"StagedParquet": {
+											"TableName": {
+												"value": "@item().OBJECT_NAME",
+												"type": "Expression"
+											},
+											"ExtractionTimestamp": {
+												"value": "@pipeline().parameters.ExtractionTimestamp",
+												"type": "Expression"
+											}
+										},
+										"DataExtractionSinkAvro": {
+											"SourceSystem": "ORACLE",
+											"DBName": "ESI13T",
+											"SchemaName": "PS_ADMIN",
+											"TableName": {
+												"value": "@item().OBJECT_NAME",
+												"type": "Expression"
+											},
+											"ExtractionTimestamp": {
+												"value": "@utcnow('yyyy-MM-dd HH-mm-ss')",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								"compute": {
+									"coreCount": 8,
+									"computeType": "General"
+								}
+							}
 						}
 					]
 				}
