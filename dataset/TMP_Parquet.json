@@ -9,7 +9,7 @@
 			"TableName": {
 				"type": "string"
 			},
-			"ExtractiopnTimestamp": {
+			"ExtractionTimestamp": {
 				"type": "string"
 			}
 		},
@@ -24,7 +24,8 @@
 				"folderPath": {
 					"value": "@concat('TMP/',dataset().TableName,'_',dataset().ExtractionTimestamp,'/')",
 					"type": "Expression"
-				}
+				},
+				"container": "data-extraction-poc"
 			},
 			"compressionCodec": "snappy"
 		},
