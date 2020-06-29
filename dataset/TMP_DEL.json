@@ -1,0 +1,77 @@
+{
+	"name": "TMP_DEL",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageDataExtraction",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "TMP",
+				"container": "data-extraction-poc"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "ACCOUNTTYPE",
+				"type": "UTF8"
+			},
+			{
+				"name": "INVOICETYPENO",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "ACCOUNTINGTYPE",
+				"type": "UTF8"
+			},
+			{
+				"name": "CANCELLATION",
+				"type": "UTF8"
+			},
+			{
+				"name": "INVOICETYPE",
+				"type": "UTF8"
+			},
+			{
+				"name": "POSTINGSYMBOLDEBIT",
+				"type": "UTF8"
+			},
+			{
+				"name": "POSTINGKEYDEBIT",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "POSTINGSYMBOLCREDIT",
+				"type": "UTF8"
+			},
+			{
+				"name": "POSTINGKEYCREDIT",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "REPLACETAXCODE",
+				"type": "UTF8"
+			},
+			{
+				"name": "CLIENT",
+				"type": "UTF8"
+			},
+			{
+				"name": "LMDATE",
+				"type": "INT96"
+			},
+			{
+				"name": "LMUSEID",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "EDATE",
+				"type": "INT96"
+			}
+		]
+	}
+}
