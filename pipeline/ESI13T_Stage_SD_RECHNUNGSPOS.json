@@ -1,0 +1,9 @@
+{
+	"name": "ESI13T_Stage_SD_RECHNUNGSPOS",
+	"properties": {
+		"folder": {
+			"name": "ERSExtractionJobTesting"
+		},
+		"annotations": []
+	}
+}
