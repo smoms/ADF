@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"packageLocation": {
-						"packagePath": "AmineTest/AzureSSISTest/SSIS_ADF_Test.dtsx",
+						"packagePath": "AmineTest/AzureSSISTest/LocalOperation.dtsx",
 						"type": "SSISDB"
 					},
 					"environmentPath": null,
@@ -24,25 +24,7 @@
 						"referenceName": "SSIS-IR",
 						"type": "IntegrationRuntimeReference"
 					},
-					"loggingLevel": "Basic",
-					"packageConnectionManagers": {
-						"cmdb.cluster-cyiesepjpd3o.eu-central-1.rds.amazonaws.com.CMDB.ev_user": {
-							"Password": {
-								"value": {
-									"type": "SecureString",
-									"value": "**********"
-								}
-							}
-						},
-						"mydptest001": {
-							"Password": {
-								"value": {
-									"type": "SecureString",
-									"value": "**********"
-								}
-							}
-						}
-					}
+					"loggingLevel": "Basic"
 				}
 			}
 		],
