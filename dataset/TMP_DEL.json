@@ -5,6 +5,9 @@
 			"referenceName": "AzureBlobStorageDataExtraction",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "ERSExtractionJobTesting/Source"
+		},
 		"annotations": [],
 		"type": "Parquet",
 		"typeProperties": {
