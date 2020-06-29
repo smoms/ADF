@@ -51,7 +51,7 @@
 					},
 					"activities": [
 						{
-							"name": "TopyTableToBinary",
+							"name": "CopyTableToBinary",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
