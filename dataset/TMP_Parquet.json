@@ -22,7 +22,7 @@
 			"location": {
 				"type": "AzureBlobStorageLocation",
 				"folderPath": {
-					"value": "@concat('TMP/',dataset().TableName,'_',dataset().ExtractionTimestamp,'/')",
+					"value": "@concat('TMP/',dataset().TableName,'/',dataset().ExtractionTimestamp,'/')",
 					"type": "Expression"
 				},
 				"container": "data-extraction-poc"
