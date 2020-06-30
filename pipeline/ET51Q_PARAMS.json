@@ -22,13 +22,9 @@
 						"queryTimeout": "02:00:00"
 					},
 					"sink": {
-						"type": "AvroSink",
+						"type": "ParquetSink",
 						"storeSettings": {
 							"type": "AzureBlobStorageWriteSettings"
-						},
-						"formatSettings": {
-							"type": "AvroWriteSettings",
-							"quoteAllText": true
 						}
 					},
 					"enableStaging": false,
@@ -55,14 +51,11 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "DataExtractionSink_Avro",
+						"referenceName": "TMP_Parquet",
 						"type": "DatasetReference",
 						"parameters": {
-							"SourceSystem": "ORACLE",
-							"DBName": "ET51Q",
-							"SchemaName": "ET3000",
 							"TableName": "PROGFP_ID",
-							"ExtractionTimestamp": "2020-06-30 14-30-00"
+							"ExtractionTimestamp": "2020-06-30 15-00-00"
 						}
 					}
 				]
