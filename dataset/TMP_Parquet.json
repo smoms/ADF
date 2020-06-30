@@ -21,10 +21,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"folderPath": {
-					"value": "@concat('TMP/',dataset().TableName,'/',dataset().ExtractionTimestamp,'/')",
-					"type": "Expression"
-				},
+				"folderPath": "TMP",
 				"container": "data-extraction-poc"
 			},
 			"compressionCodec": "snappy"
