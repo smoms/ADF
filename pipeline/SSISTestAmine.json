@@ -58,7 +58,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"packageLocation": {
-						"packagePath": "AmineTest/AzureSSISTest/SSIS_ADF_Test.dtsx",
+						"packagePath": "AmineTest/AzureSSISTest/GetServersFromAWS.dtsx",
 						"type": "SSISDB"
 					},
 					"environmentPath": null,
