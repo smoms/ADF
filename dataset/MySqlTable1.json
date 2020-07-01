@@ -1,0 +1,12 @@
+{
+	"name": "MySqlTable1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MySQLCMDBServer",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "MySqlTable",
+		"schema": []
+	}
+}

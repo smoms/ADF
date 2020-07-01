@@ -1,0 +1,16 @@
+{
+	"name": "LoadServersFromAWS",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"name": "CDMServers"
+				}
+			],
+			"sinks": [],
+			"transformations": [],
+			"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false) ~> CDMServers"
+		}
+	}
+}
