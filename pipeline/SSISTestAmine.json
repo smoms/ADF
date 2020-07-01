@@ -66,7 +66,25 @@
 						"referenceName": "SSIS-IR",
 						"type": "IntegrationRuntimeReference"
 					},
-					"loggingLevel": "Basic"
+					"loggingLevel": "Basic",
+					"packageConnectionManagers": {
+						"cmdb.cluster-cyiesepjpd3o.eu-central-1.rds.amazonaws.com.CMDB.ev_user": {
+							"Password": {
+								"value": {
+									"type": "SecureString",
+									"value": "**********"
+								}
+							}
+						},
+						"mydptest001": {
+							"Password": {
+								"value": {
+									"type": "SecureString",
+									"value": "**********"
+								}
+							}
+						}
+					}
 				}
 			}
 		],
