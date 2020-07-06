@@ -13,6 +13,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
+				"folderPath": "TMP",
 				"container": "data-extraction-poc"
 			},
 			"compressionCodec": "snappy"
