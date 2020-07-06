@@ -1,0 +1,22 @@
+{
+	"name": "S3_Copy",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageDataExtraction",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "ERSExtractionJobTesting/Source"
+		},
+		"annotations": [],
+		"type": "Avro",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "S3-Copy",
+				"container": "data-extraction-poc"
+			},
+			"avroCompressionCodec": "snappy"
+		}
+	}
+}
