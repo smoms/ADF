@@ -5,35 +5,14 @@
 			"referenceName": "AzureBlobStorageDataExtraction",
 			"type": "LinkedServiceReference"
 		},
-		"parameters": {
-			"SourceSystem": {
-				"type": "string"
-			},
-			"DBName": {
-				"type": "string"
-			},
-			"SchemaName": {
-				"type": "string"
-			},
-			"TableName": {
-				"type": "string"
-			},
-			"ExtractionTimestamp": {
-				"type": "string"
-			}
-		},
 		"folder": {
-			"name": "ERSExtractionJobTesting/Destination"
+			"name": "ERSExtractionJobTesting"
 		},
 		"annotations": [],
 		"type": "Avro",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"folderPath": {
-					"value": "@concat(dataset().SourceSystem,'/',dataset().DBName,'/',dataset().SchemaName,'/',dataset().TableName,'/',dataset().ExtractionTimestamp)",
-					"type": "Expression"
-				},
 				"container": "data-extraction-poc"
 			},
 			"avroCompressionCodec": "snappy"
