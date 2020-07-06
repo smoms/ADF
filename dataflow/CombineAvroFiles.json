@@ -1,5 +1,5 @@
 {
-	"name": "CopyFromS3",
+	"name": "CombineAvroFiles",
 	"properties": {
 		"folder": {
 			"name": "ERSExtractionJobTesting"
@@ -25,7 +25,7 @@
 				}
 			],
 			"transformations": [],
-			"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\twildcardPaths:['EXP_HR_S3/*.avro']) ~> S3Dump\nS3Dump sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ParquetGeneralization"
+			"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\twildcardPaths:['EXP_HR_S3/*.avro'],\n\tpartitionBy('hash', 1)) ~> S3Dump\nS3Dump sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionFileNames:['ALPIQ_DLT_EXP_HR_REP_20200703181006.parquet'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ParquetGeneralization"
 		}
 	}
 }
