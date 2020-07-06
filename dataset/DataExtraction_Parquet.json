@@ -13,7 +13,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"folderPath": "TMP",
+				"folderPath": "EXP_HR_PARQUET",
 				"container": "data-extraction-poc"
 			},
 			"compressionCodec": "snappy"
