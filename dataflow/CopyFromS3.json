@@ -1,0 +1,31 @@
+{
+	"name": "CopyFromS3",
+	"properties": {
+		"folder": {
+			"name": "ERSExtractionJobTesting"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "AWS_S3_Datalake_BI_tst",
+						"type": "DatasetReference"
+					},
+					"name": "S3Location"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "S3_Copy",
+						"type": "DatasetReference"
+					},
+					"name": "S3Copy"
+				}
+			],
+			"transformations": [],
+			"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\twildcardPaths:['ORACLE/MX01/MX_DATAMART/ALPIQ_DLT_EXP_HR_REP/2020-06-08 08-20-48/']) ~> S3Location\nS3Location sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> S3Copy"
+		}
+	}
+}
