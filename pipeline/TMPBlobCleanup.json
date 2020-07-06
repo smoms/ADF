@@ -3,42 +3,9 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "FindFiles",
-				"type": "Lookup",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "ParquetSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true
-						}
-					},
-					"dataset": {
-						"referenceName": "TMP_DEL",
-						"type": "DatasetReference"
-					}
-				}
-			},
-			{
 				"name": "DeleteFiles",
 				"type": "Delete",
-				"dependsOn": [
-					{
-						"activity": "FindFiles",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
