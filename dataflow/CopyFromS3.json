@@ -9,23 +9,23 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "AWS_S3_Datalake_BI_tst",
+						"referenceName": "DataExtraction_Avro",
 						"type": "DatasetReference"
 					},
-					"name": "S3Location"
+					"name": "S3Dump"
 				}
 			],
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "S3_Copy",
+						"referenceName": "DataExtraction_Parquet",
 						"type": "DatasetReference"
 					},
-					"name": "S3Copy"
+					"name": "ParquetGeneralization"
 				}
 			],
 			"transformations": [],
-			"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\twildcardPaths:['ORACLE/MX01/MX_DATAMART/ALPIQ_DLT_EXP_HR_REP/2020-06-08 08-20-48/']) ~> S3Location\nS3Location sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> S3Copy"
+			"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\twildcardPaths:['EXP_HR_S3']) ~> S3Dump\nS3Dump sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ParquetGeneralization"
 		}
 	}
 }
