@@ -1,0 +1,22 @@
+{
+	"name": "AWS_S3_Datalake_BI_tst",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AWS_S3_Snowflake_ComplexDataTypes",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "ERSExtractionJobTesting/Source"
+		},
+		"annotations": [],
+		"type": "Avro",
+		"typeProperties": {
+			"location": {
+				"type": "AmazonS3Location",
+				"bucketName": "tst-alpiq-datalake-bi",
+				"folderPath": "ORACLE/MX01/MX_DATAMART/ALPIQ_DLT_EXP_HR_REP/2020-06-08 08-20-48"
+			},
+			"avroCompressionCodec": "snappy"
+		}
+	}
+}
