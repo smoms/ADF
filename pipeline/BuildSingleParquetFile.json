@@ -1,9 +1,9 @@
 {
-	"name": "CopyFromS3",
+	"name": "BuildSingleParquetFile",
 	"properties": {
 		"activities": [
 			{
-				"name": "CopyFromS3",
+				"name": "CombineAvroToParquet",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "CopyFromS3",
+						"referenceName": "CombineAvroFiles",
 						"type": "DataFlowReference"
 					},
 					"compute": {
