@@ -1,12 +1,12 @@
 {
-	"name": "DataExtractionSink_Parquet",
+	"name": "DataExtraction_Parquet",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageDataExtraction",
 			"type": "LinkedServiceReference"
 		},
 		"folder": {
-			"name": "ERSExtractionJobTesting/Destination"
+			"name": "ERSExtractionJobTesting"
 		},
 		"annotations": [],
 		"type": "Parquet",
