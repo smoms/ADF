@@ -18,7 +18,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "DataExtractionSink_Avro",
+						"referenceName": "DataExtraction_Avro",
 						"type": "DatasetReference"
 					},
 					"name": "DataExtractionSinkAvro"
