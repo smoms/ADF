@@ -159,19 +159,6 @@
 												"value": "@pipeline().parameters.ExtractionTimestamp",
 												"type": "Expression"
 											}
-										},
-										"DataExtractionSinkAvro": {
-											"SourceSystem": "ORACLE",
-											"DBName": "ESI13T",
-											"SchemaName": "PS_ADMIN",
-											"TableName": {
-												"value": "@item().OBJECT_NAME",
-												"type": "Expression"
-											},
-											"ExtractionTimestamp": {
-												"value": "@utcnow('yyyy-MM-dd HH-mm-ss')",
-												"type": "Expression"
-											}
 										}
 									}
 								},
