@@ -48,7 +48,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "DataExtractionSink_Parquet",
+						"referenceName": "DataExtraction_Parquet",
 						"type": "DatasetReference",
 						"parameters": {
 							"SourceSystem": "ORACLE",
