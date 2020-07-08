@@ -1,0 +1,31 @@
+{
+	"name": "ParquetSplitParquet",
+	"properties": {
+		"folder": {
+			"name": "ERSExtractionJobTesting"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DataExtraction_Parquet",
+						"type": "DatasetReference"
+					},
+					"name": "ParquetSingleFile"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DataExtraction_Parquet",
+						"type": "DatasetReference"
+					},
+					"name": "ParquetSplitted"
+				}
+			],
+			"transformations": [],
+			"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\twildcardPaths:['EXP_HR_PARQUET']) ~> ParquetSingleFile\nParquetSingleFile sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tfilePattern:'EXP_HR_PARQUET_[n]',\n\tpartitionBy('roundRobin', 25),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ParquetSplitted"
+		}
+	}
+}
