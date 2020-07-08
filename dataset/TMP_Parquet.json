@@ -6,10 +6,7 @@
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"TableName": {
-				"type": "string"
-			},
-			"ExtractionTimestamp": {
+			"Folder": {
 				"type": "string"
 			}
 		},
@@ -21,7 +18,10 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"folderPath": "TMP",
+				"folderPath": {
+					"value": "@dataset().Folder",
+					"type": "Expression"
+				},
 				"container": "data-extraction-poc"
 			},
 			"compressionCodec": "snappy"
