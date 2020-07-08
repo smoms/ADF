@@ -13,7 +13,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"folderPath": "EXP_HR_PARQUET",
+				"folderPath": "EXP_HR_PARQUET_SPLITTED",
 				"container": "data-extraction-poc"
 			},
 			"compressionCodec": "snappy"
