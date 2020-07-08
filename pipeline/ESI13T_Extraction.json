@@ -108,14 +108,7 @@
 									"referenceName": "TMP_Parquet",
 									"type": "DatasetReference",
 									"parameters": {
-										"TableName": {
-											"value": "@item().OBJECT_NAME",
-											"type": "Expression"
-										},
-										"ExtractionTimestamp": {
-											"value": "@pipeline().parameters.ExtractionTimestamp",
-											"type": "Expression"
-										}
+										"Folder": "TMP"
 									}
 								}
 							]
@@ -147,18 +140,6 @@
 										"TableName": {
 											"value": "'@{item().OBJECT_NAME}'",
 											"type": "Expression"
-										}
-									},
-									"datasetParameters": {
-										"StagedParquet": {
-											"TableName": {
-												"value": "@item().OBJECT_NAME",
-												"type": "Expression"
-											},
-											"ExtractionTimestamp": {
-												"value": "@pipeline().parameters.ExtractionTimestamp",
-												"type": "Expression"
-											}
 										}
 									}
 								},

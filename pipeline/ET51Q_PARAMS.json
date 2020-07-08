@@ -17,7 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "OracleSource",
-						"oracleReaderQuery": "select * from ET3000.PROGFP_ID\nwhere trunc(last_update) > to_date('2020-06-29 16-00-00', 'YYYY-MM-DD HH24-MI-SS') and trunc(last_update) <= to_date('2020-06-30 16-00-00', 'YYYY-MM-DD HH24-MI-SS')",
+						"oracleReaderQuery": "select * from ET3000.PROGFP_ID\nwhere trunc(last_update) > to_date('2020-07-07 16-00-00', 'YYYY-MM-DD HH24-MI-SS') and trunc(last_update) <= to_date('2020-07-08 16-00-00', 'YYYY-MM-DD HH24-MI-SS')",
 						"partitionOption": "None",
 						"queryTimeout": "02:00:00"
 					},
@@ -54,11 +54,29 @@
 						"referenceName": "TMP_Parquet",
 						"type": "DatasetReference",
 						"parameters": {
-							"TableName": "PROGFP_ID",
-							"ExtractionTimestamp": "2020-06-30 15-00-00"
+							"Folder": "ET51Q"
 						}
 					}
 				]
+			},
+			{
+				"name": "Custom1",
+				"type": "Custom",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"referenceObjects": {
+						"linkedServices": [],
+						"datasets": []
+					}
+				}
 			}
 		],
 		"folder": {
