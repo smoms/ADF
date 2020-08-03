@@ -1,0 +1,410 @@
+{
+	"name": "ET51Q_SpecialCols",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"partitionOption": "None",
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "AvroSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings",
+							"maxConcurrentConnections": 4
+						},
+						"formatSettings": {
+							"type": "AvroWriteSettings",
+							"quoteAllText": true
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "GES_NR#",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "GES_NR"
+								}
+							},
+							{
+								"source": {
+									"name": "FP_NR#",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "FP_NR"
+								}
+							},
+							{
+								"source": {
+									"name": "CREATED",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "CREATED",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "LAST_UPDATE",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "LAST_UPDATE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "UPDATED_BY",
+									"type": "String"
+								},
+								"sink": {
+									"name": "UPDATED_BY",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CREATOR",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CREATOR",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "MW_ZR_ID",
+									"type": "Double"
+								},
+								"sink": {
+									"name": "MW_ZR_ID",
+									"type": "Double"
+								}
+							},
+							{
+								"source": {
+									"name": "PRICE_ZR_ID",
+									"type": "Double"
+								},
+								"sink": {
+									"name": "PRICE_ZR_ID",
+									"type": "Double"
+								}
+							},
+							{
+								"source": {
+									"name": "ANL_NR",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "ANL_NR",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "VALUE_ZR_ID",
+									"type": "Double"
+								},
+								"sink": {
+									"name": "VALUE_ZR_ID",
+									"type": "Double"
+								}
+							},
+							{
+								"source": {
+									"name": "FIX_PREIS",
+									"type": "Double"
+								},
+								"sink": {
+									"name": "FIX_PREIS",
+									"type": "Double"
+								}
+							},
+							{
+								"source": {
+									"name": "PREISDEF_NR",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "PREISDEF_NR",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "OPERATOR",
+									"type": "String"
+								},
+								"sink": {
+									"name": "OPERATOR",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "OP_WERT",
+									"type": "Double"
+								},
+								"sink": {
+									"name": "OP_WERT",
+									"type": "Double"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR1",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR1",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR2",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR3",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR3",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR4",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR4",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR5",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR5",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR6",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR6",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR7",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR7",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR8",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR8",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR9",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR9",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR10",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR10",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR11",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR11",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BENATR12",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BENATR12",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SPEZ_CONTRACT_TYPE",
+									"type": "Double"
+								},
+								"sink": {
+									"name": "SPEZ_CONTRACT_TYPE",
+									"type": "Double"
+								}
+							},
+							{
+								"source": {
+									"name": "XML_OPENLINK_PROZENT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "XML_OPENLINK_PROZENT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "TS_UPD_FLAG",
+									"type": "String"
+								},
+								"sink": {
+									"name": "TS_UPD_FLAG",
+									"type": "String"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ET51Q_Dynamic",
+						"type": "DatasetReference",
+						"parameters": {
+							"TableName": {
+								"value": "@variables('table')",
+								"type": "Expression"
+							},
+							"SchemaName": {
+								"value": "@variables('schema')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "PlainDump_Avro",
+						"type": "DatasetReference",
+						"parameters": {
+							"Folder": "ET51Q"
+						}
+					}
+				]
+			},
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"partitionOption": "None",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "ET51Q_Dynamic",
+						"type": "DatasetReference",
+						"parameters": {
+							"TableName": {
+								"value": "@variables('table')",
+								"type": "Expression"
+							},
+							"SchemaName": {
+								"value": "@variables('schema')",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			}
+		],
+		"variables": {
+			"schema": {
+				"type": "String",
+				"defaultValue": "ET3000"
+			},
+			"table": {
+				"type": "String",
+				"defaultValue": "PROGFP_ID"
+			}
+		},
+		"folder": {
+			"name": "ERSExtractionJobTesting"
+		},
+		"annotations": []
+	}
+}
