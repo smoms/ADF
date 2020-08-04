@@ -28,6 +28,24 @@
 					"referenceName": "AzureFunction1",
 					"type": "LinkedServiceReference"
 				}
+			},
+			{
+				"name": "WebHook1",
+				"type": "WebHook",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://ersmetadataprocessingpoc.azurewebsites.net/api/HTTPSample?code=yRZ5U2LHD4GhnNznBIL5f4JEhWhFkZDa4Th6HDiLalfYxQpmGjZowQ==&name=Bob",
+					"method": "POST",
+					"headers": {
+						"name": "Bob"
+					},
+					"body": {
+						"value": "test"
+					},
+					"timeout": "00:10:00",
+					"reportStatusOnCallBack": true
+				}
 			}
 		],
 		"folder": {
