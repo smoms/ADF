@@ -371,7 +371,7 @@
 								"source": {
 									"type": "OracleSource",
 									"oracleReaderQuery": {
-										"value": "@concat('SELECT * from ', variables('db_schema'), '.', item().OBJECT_NAME, ' where closing_date > ''', variables('refvalue'),'''')",
+										"value": "@concat('SELECT * from ', variables('db_schema'), '.', item().OBJECT_NAME, ' where closing_date > ''', variables('refvalueClosing'),'''')",
 										"type": "Expression"
 									},
 									"partitionOption": "None",
@@ -429,7 +429,7 @@
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "refvalue",
+								"variableName": "refvalueClosing",
 								"value": "02.08.20"
 							}
 						}
@@ -450,6 +450,9 @@
 				"type": "String"
 			},
 			"refvalue": {
+				"type": "String"
+			},
+			"refvalueClosing": {
 				"type": "String"
 			}
 		},
