@@ -16,13 +16,16 @@
 				"userProperties": [],
 				"typeProperties": {
 					"functionName": "HTTPSample",
-					"method": "GET",
+					"method": "POST",
 					"headers": {
-						"code": "yRZ5U2LHD4GhnNznBIL5f4JEhWhFkZDa4Th6HDiLalfYxQpmGjZowQ=="
+						"name": "John"
+					},
+					"body": {
+						"name": "Bob"
 					}
 				},
 				"linkedServiceName": {
-					"referenceName": "ERSMetadataFunctionsAPP",
+					"referenceName": "AzureFunction1",
 					"type": "LinkedServiceReference"
 				}
 			}
