@@ -184,7 +184,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@array(activity('Lookup - 15 Tables').output).value)",
+						"value": "@array(activity('Lookup - 15 Tables').output.value)",
 						"type": "Expression"
 					},
 					"batchCount": 2,
