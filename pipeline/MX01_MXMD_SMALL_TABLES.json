@@ -60,7 +60,7 @@
 						"type": "Expression"
 					},
 					"isSequential": false,
-					"batchCount": 4,
+					"batchCount": 2,
 					"activities": [
 						{
 							"name": "Copy2Parquet_plain",
@@ -187,6 +187,7 @@
 						"value": "@array(activity('Lookup - 15 Tables').output).value)",
 						"type": "Expression"
 					},
+					"batchCount": 2,
 					"activities": [
 						{
 							"name": "Copy2Parquet_whereTimestamp",
