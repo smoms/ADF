@@ -5,7 +5,14 @@
 			{
 				"name": "GetGroupCount",
 				"type": "Lookup",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "extractionTimestamp",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -177,7 +184,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"folder": {
-											"value": "@concat('ORACLE/MX01/MX_DATAMART/',variables('tableName'))",
+											"value": "@concat('ORACLE/MX01/MX_DATAMART/',variables('tableName'),'/',variables('extractionTimestamp'))",
 											"type": "Expression"
 										}
 									}
@@ -186,6 +193,19 @@
 						}
 					]
 				}
+			},
+			{
+				"name": "extractionTimestamp",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "extractionTimestamp",
+					"value": {
+						"value": "@formatDateTime(utcnow(),'yyyy-MM-dd HH-mm-ss')",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"variables": {
@@ -193,6 +213,9 @@
 				"type": "String"
 			},
 			"tableName": {
+				"type": "String"
+			},
+			"extractionTimestamp": {
 				"type": "String"
 			}
 		},
