@@ -63,7 +63,7 @@
 					"batchCount": 4,
 					"activities": [
 						{
-							"name": "Copy2Parquet",
+							"name": "Copy2Parquet_plain",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
@@ -179,12 +179,6 @@
 						"dependencyConditions": [
 							"Succeeded"
 						]
-					},
-					{
-						"activity": "LastTimestamp",
-						"dependencyConditions": [
-							"Succeeded"
-						]
 					}
 				],
 				"userProperties": [],
@@ -296,22 +290,6 @@
 				}
 			},
 			{
-				"name": "LastTimestamp",
-				"type": "Lookup",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"firstRowOnly": false
-				}
-			},
-			{
 				"name": "Lookup - 1 Table",
 				"type": "Lookup",
 				"dependsOn": [
@@ -352,33 +330,11 @@
 				}
 			},
 			{
-				"name": "LastClosing",
-				"type": "Lookup",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"firstRowOnly": false
-				}
-			},
-			{
-				"name": "ForEach2_copy1",
+				"name": "ForEach3",
 				"type": "ForEach",
 				"dependsOn": [
 					{
 						"activity": "Lookup - 1 Table",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "LastClosing",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -389,7 +345,94 @@
 					"items": {
 						"value": "@array(activity('Lookup - 1 Table').output.value)",
 						"type": "Expression"
-					}
+					},
+					"activities": [
+						{
+							"name": "Copy2Parquet_whereClosing",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "refvalue_closing",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "OracleSource",
+									"oracleReaderQuery": {
+										"value": "@concat('SELECT * from ', variables('db_schema'), '.', item().OBJECT_NAME, ' where closing_date > ', variables('refvalue'))",
+										"type": "Expression"
+									},
+									"partitionOption": "None",
+									"queryTimeout": "02:00:00"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"maxConcurrentConnections": 2
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "MX01_MXDM_Dynamic",
+									"type": "DatasetReference",
+									"parameters": {
+										"db_schema": {
+											"value": "@variables('db_schema')",
+											"type": "Expression"
+										},
+										"db_table": {
+											"value": "@item().OBJECT_NAME",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DataExtraction_Parquet",
+									"type": "DatasetReference",
+									"parameters": {
+										"folder": {
+											"value": "@concat('ORACLE/',variables('db_host'),'/',variables('db_schema'),'/',item().OBJECT_NAME,'/',variables('extraction_timestamp'))",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "refvalue_closing",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "refvalue",
+								"value": "02.08.20"
+							}
+						}
+					]
 				}
 			}
 		],
