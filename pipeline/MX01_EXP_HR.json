@@ -22,26 +22,6 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"source": {
-						"type": "OracleSource",
-						"oracleReaderQuery": {
-							"value": "@concat('select ceil((select count(*) from ',variables('tableName'),')/2000000) as group_no from dual')",
-							"type": "Expression"
-						},
-						"partitionOption": "None",
-						"queryTimeout": "02:00:00"
-					},
-					"dataset": {
-						"referenceName": "MX01_MXDM_Dynamic",
-						"type": "DatasetReference",
-						"parameters": {
-							"db_schema": "MX_DATAMART",
-							"db_table": {
-								"value": "@variables('tableName')",
-								"type": "Expression"
-							}
-						}
-					},
 					"firstRowOnly": true
 				}
 			},
@@ -85,26 +65,6 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"source": {
-						"type": "OracleSource",
-						"oracleReaderQuery": {
-							"value": "@concat('select\nCASE\n  WHEN grp_nbr = 1\n  THEN min(ora_rowscn)\n  WHEN grp_nbr > 1\n  THEN min(ora_rowscn) +1\n  END as Starting_Value\n, max(ora_rowscn) as Ending_Value\n, count(*)        as Total_Records\n, grp_nbr         as Group_Nbr\nfrom (\nselect ora_rowscn,\nntile(',variables('numberOfGroups') ,') over (order by ora_rowscn) grp_nbr\nfrom ',variables('tableName') ,'\n)\ngroup by grp_nbr\nORDER BY grp_nbr ASC')",
-							"type": "Expression"
-						},
-						"partitionOption": "None",
-						"queryTimeout": "02:00:00"
-					},
-					"dataset": {
-						"referenceName": "MX01_MXDM_Dynamic",
-						"type": "DatasetReference",
-						"parameters": {
-							"db_schema": "MX_DATAMART",
-							"db_table": {
-								"value": "@variables('tableName')",
-								"type": "Expression"
-							}
-						}
-					},
 					"firstRowOnly": false
 				}
 			},
@@ -140,56 +100,8 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"source": {
-									"type": "OracleSource",
-									"oracleReaderQuery": {
-										"value": "@concat('SELECT * FROM ',variables('tableName'),' WHERE ORA_ROWSCN BETWEEN ', item().STARTING_VALUE, ' AND ',item().ENDING_VALUE)",
-										"type": "Expression"
-									},
-									"partitionOption": "None",
-									"queryTimeout": "02:00:00"
-								},
-								"sink": {
-									"type": "ParquetSink",
-									"storeSettings": {
-										"type": "AzureBlobStorageWriteSettings"
-									}
-								},
-								"enableStaging": false,
-								"translator": {
-									"type": "TabularTranslator",
-									"typeConversion": true,
-									"typeConversionSettings": {
-										"allowDataTruncation": true,
-										"treatBooleanAsNumber": false
-									}
-								}
-							},
-							"inputs": [
-								{
-									"referenceName": "MX01_MXDM_Dynamic",
-									"type": "DatasetReference",
-									"parameters": {
-										"db_schema": "MX_DATAMART",
-										"db_table": {
-											"value": "@variables('tableName')",
-											"type": "Expression"
-										}
-									}
-								}
-							],
-							"outputs": [
-								{
-									"referenceName": "DataExtraction_Parquet",
-									"type": "DatasetReference",
-									"parameters": {
-										"folder": {
-											"value": "@concat('ORACLE/MX01/MX_DATAMART/',variables('tableName'),'/',variables('extractionTimestamp'))",
-											"type": "Expression"
-										}
-									}
-								}
-							]
+								"enableStaging": false
+							}
 						}
 					]
 				}
