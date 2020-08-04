@@ -25,7 +25,7 @@
 					"source": {
 						"type": "OracleSource",
 						"oracleReaderQuery": {
-							"value": "@concat('select ceil((select count(*) from ',variables('tableName'),')/2000000) from dual')",
+							"value": "@concat('select ceil((select count(*) from ',variables('tableName'),')/2000000) as group_no from dual')",
 							"type": "Expression"
 						},
 						"partitionOption": "None",
@@ -42,7 +42,7 @@
 							}
 						}
 					},
-					"firstRowOnly": false
+					"firstRowOnly": true
 				}
 			},
 			{
@@ -60,7 +60,7 @@
 				"typeProperties": {
 					"variableName": "numberOfGroups",
 					"value": {
-						"value": "@activity('GetGroupCount').output.value",
+						"value": "@string(activity('GetGroupCount').output.firstRow.GROUP_NO)",
 						"type": "Expression"
 					}
 				}
@@ -213,7 +213,8 @@
 				"type": "String"
 			},
 			"tableName": {
-				"type": "String"
+				"type": "String",
+				"defaultValue": "ALPIQ_DLT_EXP_HR_REP"
 			},
 			"extractionTimestamp": {
 				"type": "String"
