@@ -5,6 +5,11 @@
 			"referenceName": "AzureBlobStorageDataExtraction",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"folder": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "ERSExtractionJobTesting"
 		},
@@ -13,7 +18,10 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"folderPath": "EXP_HR_PARQUET_SPLITTED",
+				"folderPath": {
+					"value": "@dataset().folder",
+					"type": "Expression"
+				},
 				"container": "data-extraction-poc"
 			},
 			"compressionCodec": "snappy"
