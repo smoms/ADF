@@ -1,5 +1,5 @@
 {
-	"name": "OracleTable1",
+	"name": "MX01_MXDM_Dynamic",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "MX01_MX_DATAMART",
