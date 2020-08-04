@@ -38,9 +38,16 @@
 				}
 			},
 			{
-				"name": "Copy data1",
-				"type": "Copy",
-				"dependsOn": [],
+				"name": "Azure Function1",
+				"type": "AzureFunctionActivity",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -50,7 +57,24 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"enableStaging": false
+					"functionName": "HTTP_Snowflake_Statement_Parser",
+					"method": "POST",
+					"headers": {
+						"host": "ESI13T",
+						"schema": "PS_ADMIN",
+						"table": {
+							"value": "@pipeline().parameters.TableName",
+							"type": "Expression"
+						}
+					},
+					"body": {
+						"value": "@activity('Lookup1').output",
+						"type": "Expression"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ERSMetadataFunctionsAPP",
+					"type": "LinkedServiceReference"
 				}
 			}
 		],
