@@ -16,7 +16,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"functionName": "HTTPSample",
-					"method": "GET"
+					"method": "GET",
+					"headers": {
+						"code": "yRZ5U2LHD4GhnNznBIL5f4JEhWhFkZDa4Th6HDiLalfYxQpmGjZowQ=="
+					}
 				},
 				"linkedServiceName": {
 					"referenceName": "ERSMetadataFunctionsAPP",
