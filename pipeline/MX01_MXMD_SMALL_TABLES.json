@@ -1,6 +1,57 @@
 {
 	"name": "MX01_MXMD_SMALL_TABLES",
 	"properties": {
+		"activities": [
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN(\n'ALPIQ_LOCATION_COUNTRY_VIEW'\n,'V_STRATEGY_TREE_DBF'\n,'V_TRN_FLAGS_DBF'\n)",
+						"partitionOption": "None",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "MX01_MXDM_Dynamic",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_schema": {
+								"value": "@variables('db_schema')",
+								"type": "Expression"
+							},
+							"db_table": "ALL_OBJECTS"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": []
+			}
+		],
+		"variables": {
+			"db_host": {
+				"type": "String",
+				"defaultValue": "MX01"
+			},
+			"db_schema": {
+				"type": "String",
+				"defaultValue": "MX_DATAMART"
+			}
+		},
 		"folder": {
 			"name": "ERSExtractionJobTesting"
 		},
