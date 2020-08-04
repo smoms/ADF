@@ -34,7 +34,8 @@
 							},
 							"SchemaName": "PS_ADMIN"
 						}
-					}
+					},
+					"firstRowOnly": false
 				}
 			},
 			{
