@@ -25,7 +25,7 @@
 				}
 			],
 			"transformations": [],
-			"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\twildcardPaths:['EXP_HR_PARQUET']) ~> ParquetSingleFile\nParquetSingleFile sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionBy('roundRobin', 150),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ParquetSplitted"
+			"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpurgeFiles: true,\n\tformat: 'parquet') ~> ParquetSingleFile\nParquetSingleFile sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionBy('roundRobin', 150),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ParquetSplitted"
 		}
 	}
 }
