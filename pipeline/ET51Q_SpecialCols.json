@@ -40,7 +40,7 @@
 					},
 					"enableStaging": false,
 					"translator": {
-						"value": "@activity('Azure Function1').output",
+						"value": "@activity('HTTP_Snowflake_Statement_Parser').output.value",
 						"type": "Expression"
 					}
 				},
@@ -86,7 +86,7 @@
 					"source": {
 						"type": "OracleSource",
 						"oracleReaderQuery": {
-							"value": "@concat(\n'SELECT \nCOLUMN_NAME\n, DATA_TYPE\n, DATA_TYPE_MOD\n, DATA_TYPE_OWNER\n, DATA_LENGTH\n, DATA_PRECISION\n, DATA_SCALE\n, NULLABLE\n, COLUMN_ID\n, DEFAULT_LENGTH\n, DATA_DEFAULT\n, CHARACTER_SET_NAME\n, CHAR_COL_DECL_LENGTH\n, QUALIFIED_COL_NAME\nFROM ALL_TAB_COLS\nWHERE TABLE_NAME =''',\nvariables('table')\n, ''' '\n)",
+							"value": "@concat(\n'SELECT \nCOLUMN_NAME\n, DATA_TYPE\n, DATA_TYPE_MOD\n, DATA_TYPE_OWNER\n, DATA_LENGTH\n, DATA_PRECISION\n, DATA_SCALE\n, NULLABLE\n, COLUMN_ID\n, DEFAULT_LENGTH\n, DATA_DEFAULT\n, CHARACTER_SET_NAME\n, CHAR_COL_DECL_LENGTH\n, QUALIFIED_COL_NAME\nFROM ALL_TAB_COLS\nWHERE \nCOLUMN_NAME NOT LIKE(''','SYS_%',''') AND\nTABLE_NAME =''',\nvariables('table')\n, ''' '\n)",
 							"type": "Expression"
 						},
 						"partitionOption": "None",
