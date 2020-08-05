@@ -72,6 +72,50 @@
 					"referenceName": "ERSMetadataFunctionsAPP",
 					"type": "LinkedServiceReference"
 				}
+			},
+			{
+				"name": "HTTP_Snowflake_Statement_Parser",
+				"type": "AzureFunctionActivity",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"functionName": "HTTP_Snowflake_Statement_Parser",
+					"method": "POST",
+					"headers": {
+						"code": "ed3j7zQJWo/htwUaVYRGmxLHW4YIDlmp/Y5rqqZKZIsMicAQo0GRQg==",
+						"host": "ET51Q",
+						"schema": {
+							"value": "@variables('schema')",
+							"type": "Expression"
+						},
+						"table": {
+							"value": "@variables('table')",
+							"type": "Expression"
+						}
+					},
+					"body": {
+						"value": "@activity('Lookup1').output",
+						"type": "Expression"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ERSMetadataFunctionsAPP",
+					"type": "LinkedServiceReference"
+				}
 			}
 		],
 		"variables": {
