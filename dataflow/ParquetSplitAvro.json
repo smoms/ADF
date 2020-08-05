@@ -13,9 +13,6 @@
 						"type": "DatasetReference"
 					},
 					"name": "StagedParquet"
-				},
-				{
-					"name": "source1"
 				}
 			],
 			"sinks": [
@@ -28,7 +25,7 @@
 				}
 			],
 			"transformations": [],
-			"script": "parameters{\n\tTableName as string\n}\nsource(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> StagedParquet\nsource(allowSchemaDrift: true,\n\tvalidateSchema: false) ~> source1\nStagedParquet sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tfilePattern:(concat($TableName, '_', toString(partitionId()))),\n\tpartitionBy('roundRobin', 10),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DataExtractionSinkAvro"
+			"script": "parameters{\n\tTableName as string\n}\nsource(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> StagedParquet\nStagedParquet sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionBy('roundRobin', 10),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DataExtractionSinkAvro"
 		}
 	}
 }
