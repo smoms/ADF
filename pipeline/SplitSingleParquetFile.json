@@ -17,7 +17,18 @@
 				"typeProperties": {
 					"dataflow": {
 						"referenceName": "ParquetSplitParquet",
-						"type": "DataFlowReference"
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"ParquetSingleFile": {
+								"folder": "ParquetSingleFile"
+							},
+							"ParquetSplitted": {
+								"folder": {
+									"value": "@concat('ParquetSplit/',utcnow())",
+									"type": "Expression"
+								}
+							}
+						}
 					},
 					"compute": {
 						"coreCount": 8,
