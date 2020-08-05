@@ -7,7 +7,7 @@
 				"type": "Lookup",
 				"dependsOn": [
 					{
-						"activity": "Set variable1",
+						"activity": "Set Timestamp",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -134,7 +134,7 @@
 				"type": "Lookup",
 				"dependsOn": [
 					{
-						"activity": "Set variable1",
+						"activity": "Set Timestamp",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -278,7 +278,7 @@
 				}
 			},
 			{
-				"name": "Set variable1",
+				"name": "Set Timestamp",
 				"type": "SetVariable",
 				"dependsOn": [],
 				"userProperties": [],
@@ -295,7 +295,7 @@
 				"type": "Lookup",
 				"dependsOn": [
 					{
-						"activity": "Set variable1",
+						"activity": "Set Timestamp",
 						"dependencyConditions": [
 							"Succeeded"
 						]
