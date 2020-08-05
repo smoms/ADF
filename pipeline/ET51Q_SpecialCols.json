@@ -3,74 +3,6 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Copy data1",
-				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "HTTP_Snowflake_Statement_Parser",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "OracleSource",
-						"partitionOption": "None",
-						"queryTimeout": "02:00:00"
-					},
-					"sink": {
-						"type": "AvroSink",
-						"storeSettings": {
-							"type": "AzureBlobStorageWriteSettings",
-							"maxConcurrentConnections": 4
-						},
-						"formatSettings": {
-							"type": "AvroWriteSettings",
-							"quoteAllText": true
-						}
-					},
-					"enableStaging": false,
-					"translator": {
-						"value": "@activity('HTTP_Snowflake_Statement_Parser').output.value",
-						"type": "Expression"
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "ET51Q_Dynamic",
-						"type": "DatasetReference",
-						"parameters": {
-							"TableName": {
-								"value": "@variables('table')",
-								"type": "Expression"
-							},
-							"SchemaName": {
-								"value": "@variables('schema')",
-								"type": "Expression"
-							}
-						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "PlainDump_Avro",
-						"type": "DatasetReference",
-						"parameters": {
-							"Folder": "ET51Q"
-						}
-					}
-				]
-			},
-			{
 				"name": "Lookup1",
 				"type": "Lookup",
 				"dependsOn": [],
@@ -110,7 +42,7 @@
 				}
 			},
 			{
-				"name": "HTTP_Snowflake_Statement_Parser",
+				"name": "HTTP_Parse_Mapping",
 				"type": "AzureFunctionActivity",
 				"dependsOn": [
 					{
@@ -129,19 +61,8 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"functionName": "HTTP_Snowflake_Statement_Parser",
+					"functionName": "HTTP_Parse_Mapping",
 					"method": "POST",
-					"headers": {
-						"schema": {
-							"value": "@variables('schema')",
-							"type": "Expression"
-						},
-						"table": {
-							"value": "@variables('table')",
-							"type": "Expression"
-						},
-						"host": "ESI13T"
-					},
 					"body": {
 						"value": "@activity('Lookup1').output",
 						"type": "Expression"
