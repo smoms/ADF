@@ -136,10 +136,12 @@
 								"dataflow": {
 									"referenceName": "ParquetSplitAvro",
 									"type": "DataFlowReference",
-									"parameters": {
-										"TableName": {
-											"value": "'@{item().OBJECT_NAME}'",
-											"type": "Expression"
+									"datasetParameters": {
+										"StagedParquet": {
+											"Folder": {
+												"value": "@concat('ParquetSplit/',utcnow())",
+												"type": "Expression"
+											}
 										}
 									}
 								},
