@@ -371,7 +371,7 @@
 								"source": {
 									"type": "OracleSource",
 									"oracleReaderQuery": {
-										"value": "@concat('SELECT * from ', variables('db_schema'), '.', item().OBJECT_NAME, ' where closing_date > ''', variables('refvalueClosing'),'''')",
+										"value": "@concat('SELECT * from ', variables('db_schema'), '.', item().OBJECT_NAME, ' where closing_date > ''', string(variables('refvalueClosing')),'''')",
 										"type": "Expression"
 									},
 									"partitionOption": "None",
