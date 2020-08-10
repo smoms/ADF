@@ -3,11 +3,18 @@
 	"properties": {
 		"annotations": [],
 		"runtimeState": "Started",
-		"pipelines": [],
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "MX01_MXMD_SMALL_TABLES",
+					"type": "PipelineReference"
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
-				"frequency": "Minute",
+				"frequency": "Month",
 				"interval": 1,
 				"startTime": "2020-08-10T14:45:00.000Z",
 				"timeZone": "UTC"
