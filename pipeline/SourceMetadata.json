@@ -39,7 +39,7 @@
 				}
 			},
 			{
-				"name": "HTTP_Parse_Mapping",
+				"name": "Anonymus",
 				"type": "AzureFunctionActivity",
 				"dependsOn": [
 					{
@@ -71,7 +71,7 @@
 				}
 			},
 			{
-				"name": "HTTP_PARSER",
+				"name": "FunctionLevel",
 				"type": "AzureFunctionActivity",
 				"dependsOn": [
 					{
@@ -91,6 +91,46 @@
 				"userProperties": [],
 				"typeProperties": {
 					"functionName": "HTTP_Snowflake_Statement_Parser",
+					"method": "POST",
+					"headers": {
+						"schema": "PS_ADMIN",
+						"host": "ESI13T",
+						"table": {
+							"value": "@pipeline().parameters.TableName",
+							"type": "Expression"
+						}
+					},
+					"body": {
+						"value": "@activity('Lookup1').output",
+						"type": "Expression"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ERSMetadataFunctionsAPP",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Azure Function1",
+				"type": "AzureFunctionActivity",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"functionName": "HTTP_Parse",
 					"method": "POST",
 					"headers": {
 						"schema": "PS_ADMIN",
