@@ -31,6 +31,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorageMurexDBV2'"
 		},
+		"AzureFunction1_functionKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'functionKey' of 'AzureFunction1'"
+		},
 		"AzureSqlDatabaseLinkedService_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabaseLinkedService'"
@@ -43,6 +47,14 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureStorageLinkedService'"
 		},
+		"CORPDIR2T_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'CORPDIR2T'"
+		},
+		"ERSMetadataFunctionsAPP_functionKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'functionKey' of 'ERSMetadataFunctionsAPP'"
+		},
 		"ESI13T_BUSINESSOBJECTS_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ESI13T_BUSINESSOBJECTS'"
@@ -51,6 +63,14 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ET51Q_BUSINESSOBJECTS'"
 		},
+		"MX01_MX_DATAMART_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'MX01_MX_DATAMART'"
+		},
+		"MySQLCMDBServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'MySQLCMDBServer'"
+		},
 		"Oracle1_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'Oracle1'"
@@ -58,6 +78,14 @@
 		"AWS_S3_Snowflake_ComplexDataTypes_properties_typeProperties_accessKeyId": {
 			"type": "string",
 			"defaultValue": "AKIA57Z3DSAK3EIVDYI3"
+		},
+		"AzureFunction1_properties_typeProperties_functionAppUrl": {
+			"type": "string",
+			"defaultValue": "https://ersmetadataprocessingpoc.azurewebsites.net"
+		},
+		"ERSMetadataFunctionsAPP_properties_typeProperties_functionAppUrl": {
+			"type": "string",
+			"defaultValue": "https://ersmetadataprocessingpoc.azurewebsites.net"
 		},
 		"Trigger_73c_properties_pipeline_parameters_windowStart": {
 			"type": "string",
@@ -119,6 +147,9 @@
 					"AzureBlobStorageMurexDBV2_connectionString": {
 						"value": "[parameters('AzureBlobStorageMurexDBV2_connectionString')]"
 					},
+					"AzureFunction1_functionKey": {
+						"value": "[parameters('AzureFunction1_functionKey')]"
+					},
 					"AzureSqlDatabaseLinkedService_connectionString": {
 						"value": "[parameters('AzureSqlDatabaseLinkedService_connectionString')]"
 					},
@@ -128,8 +159,20 @@
 					"AzureStorageLinkedService_connectionString": {
 						"value": "[parameters('AzureStorageLinkedService_connectionString')]"
 					},
+					"ERSMetadataFunctionsAPP_functionKey": {
+						"value": "[parameters('ERSMetadataFunctionsAPP_functionKey')]"
+					},
+					"MySQLCMDBServer_connectionString": {
+						"value": "[parameters('MySQLCMDBServer_connectionString')]"
+					},
 					"AWS_S3_Snowflake_ComplexDataTypes_properties_typeProperties_accessKeyId": {
 						"value": "[parameters('AWS_S3_Snowflake_ComplexDataTypes_properties_typeProperties_accessKeyId')]"
+					},
+					"AzureFunction1_properties_typeProperties_functionAppUrl": {
+						"value": "[parameters('AzureFunction1_properties_typeProperties_functionAppUrl')]"
+					},
+					"ERSMetadataFunctionsAPP_properties_typeProperties_functionAppUrl": {
+						"value": "[parameters('ERSMetadataFunctionsAPP_properties_typeProperties_functionAppUrl')]"
 					},
 					"SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
 						"value": "[parameters('SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint')]"
@@ -157,15 +200,6 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
-					},
-					"ESI13T_BUSINESSOBJECTS_connectionString": {
-						"value": "[parameters('ESI13T_BUSINESSOBJECTS_connectionString')]"
-					},
-					"ET51Q_BUSINESSOBJECTS_connectionString": {
-						"value": "[parameters('ET51Q_BUSINESSOBJECTS_connectionString')]"
-					},
-					"Oracle1_connectionString": {
-						"value": "[parameters('Oracle1_connectionString')]"
 					}
 				}
 			},
@@ -187,13 +221,68 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"CORPDIR2T_connectionString": {
+						"value": "[parameters('CORPDIR2T_connectionString')]"
+					},
+					"ESI13T_BUSINESSOBJECTS_connectionString": {
+						"value": "[parameters('ESI13T_BUSINESSOBJECTS_connectionString')]"
+					},
+					"ET51Q_BUSINESSOBJECTS_connectionString": {
+						"value": "[parameters('ET51Q_BUSINESSOBJECTS_connectionString')]"
+					},
+					"MX01_MX_DATAMART_connectionString": {
+						"value": "[parameters('MX01_MX_DATAMART_connectionString')]"
+					},
+					"Oracle1_connectionString": {
+						"value": "[parameters('Oracle1_connectionString')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_1')]"
+			]
+		},
+		{
+			"name": "ArmTemplate_3",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_3.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_2')]"
+			]
+		},
+		{
+			"name": "ArmTemplate_4",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_4.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
 					"Trigger_73c_properties_pipeline_parameters_windowStart": {
 						"value": "[parameters('Trigger_73c_properties_pipeline_parameters_windowStart')]"
 					}
 				}
 			},
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_1')]"
+				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_3')]"
 			]
 		}
 	]

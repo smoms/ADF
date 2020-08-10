@@ -23,6 +23,9 @@
 		"AzureBlobStorageMurexDBV2_connectionString": {
 			"value": ""
 		},
+		"AzureFunction1_functionKey": {
+			"value": ""
+		},
 		"AzureSqlDatabaseLinkedService_connectionString": {
 			"value": ""
 		},
@@ -32,10 +35,22 @@
 		"AzureStorageLinkedService_connectionString": {
 			"value": ""
 		},
+		"CORPDIR2T_connectionString": {
+			"value": ""
+		},
+		"ERSMetadataFunctionsAPP_functionKey": {
+			"value": ""
+		},
 		"ESI13T_BUSINESSOBJECTS_connectionString": {
 			"value": ""
 		},
 		"ET51Q_BUSINESSOBJECTS_connectionString": {
+			"value": ""
+		},
+		"MX01_MX_DATAMART_connectionString": {
+			"value": ""
+		},
+		"MySQLCMDBServer_connectionString": {
 			"value": ""
 		},
 		"Oracle1_connectionString": {
@@ -43,6 +58,12 @@
 		},
 		"AWS_S3_Snowflake_ComplexDataTypes_properties_typeProperties_accessKeyId": {
 			"value": "AKIA57Z3DSAK3EIVDYI3"
+		},
+		"AzureFunction1_properties_typeProperties_functionAppUrl": {
+			"value": "https://ersmetadataprocessingpoc.azurewebsites.net"
+		},
+		"ERSMetadataFunctionsAPP_properties_typeProperties_functionAppUrl": {
+			"value": "https://ersmetadataprocessingpoc.azurewebsites.net"
 		},
 		"Trigger_73c_properties_pipeline_parameters_windowStart": {
 			"value": "@trigger().outputs.windowStartTime"

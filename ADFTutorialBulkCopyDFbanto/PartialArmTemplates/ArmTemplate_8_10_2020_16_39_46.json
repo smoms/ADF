@@ -1,0 +1,2456 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "ADFTutorialBulkCopyDFbanto"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/BuildSingleParquetFile')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CombineAvroToParquet",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "CombineAvroFiles",
+								"type": "DataFlowReference",
+								"datasetParameters": {
+									"ParquetGeneralization": {
+										"folder": {
+											"value": "@concat('ParquetSplit/',utcnow())",
+											"type": "Expression"
+										}
+									}
+								}
+							},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							}
+						}
+					}
+				],
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/CombineAvroFiles')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ESI13T_Extraction')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetTableList",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": "Select OBJECT_NAME \nFROM ALL_OBJECTS \nWHERE OBJECT_NAME IN (\n'ATEL_ACCOUNTSELECTION'\n,'ATEL_BOOKSTRUCTURE'\n,'ATEL_POSTINGPARAMETER'\n,'SDKCLIENTS'\n,'SDKCURRENCIES'\n,'SDKDETAILSCOPES'\n,'SDKLOVS'\n,'SDKLOVVALUES'\n,'SDKMATURITYRULES'\n,'SDKSYSTEMPARAMETERS'\n,'SDKUNITS'\n,'SDKUSERLOVVALUES'\n,'SDKUSERS'\n,'SD_ANLAGEN'\n,'SD_ANLAGENTYPEN'\n,'SD_ANSCHRIFTEN'\n,'SD_BELEGTYPEN'\n,'SD_BILLMARKET'\n,'SD_BUSINESSAREAS'\n,'SD_DETAILPROPERTIES'\n,'SD_DETAILS'\n,'SD_DETAILTYPES'\n,'SD_DOMAINWERTE'\n,'SD_FIBU'\n,'SD_HOLIDAYS'\n,'SD_HOLIDAYZONE'\n,'SD_KONTAKTE'\n,'SD_KUNDEN'\n,'SD_LOVVALUE'\n,'SD_MANDANTEN'\n,'SD_PERSONEN'\n,'SD_POSTINGTYPE'\n,'SD_RECHNUNGEN'\n,'SD_RECHNUNGSPOS'\n,'SD_TAXCODE'\n,'SD_TRADECONTRACT'\n,'SD_TRADECONTRACTDET'\n,'SD_USER'\n,'SD_VERTRAEGE'\n,'SD_VERTRAGSGRUPPEN'\n,'SD_VERTRAGSTYPEN'\n,'SD_WAEHRUNGEN'\n,'ALPIQ_SCHEDULE_MAPPING'\n) \nAND OWNER = 'PS_ADMIN'",
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "ESI13T_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"TableName": "ALL_OBJECTS",
+									"SchemaName": "PUBLIC"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEachTableInList",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "GetTableList",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@array(activity('GetTableList').output.value)",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "CopyTableToParquet_TEMP",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"oracleReaderQuery": {
+												"value": "@concat('Select * from ', item().OBJECT_NAME, ' where rownum < 5000')",
+												"type": "Expression"
+											},
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											}
+										},
+										"enableStaging": false,
+										"parallelCopies": 1,
+										"dataIntegrationUnits": 2,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "ESI13T_Dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"TableName": {
+													"value": "@item().OBJECT_NAME",
+													"type": "Expression"
+												},
+												"SchemaName": "PS_ADMIN"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "TMP_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"Folder": "TMP"
+											}
+										}
+									]
+								},
+								{
+									"name": "ParquetSplitAvro",
+									"type": "ExecuteDataFlow",
+									"dependsOn": [
+										{
+											"activity": "CopyTableToParquet_TEMP",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataflow": {
+											"referenceName": "ParquetSplitAvro",
+											"type": "DataFlowReference",
+											"datasetParameters": {
+												"StagedParquet": {
+													"Folder": {
+														"value": "@concat('ParquetSplit/',utcnow())",
+														"type": "Expression"
+													}
+												}
+											}
+										},
+										"compute": {
+											"coreCount": 8,
+											"computeType": "General"
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"ExtractionTimestamp": {
+						"type": "string",
+						"defaultValue": "utcnow('yyyy-MM-dd HH-mm-ss')"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/TMP_Parquet')]",
+				"[concat(variables('factoryId'), '/dataflows/ParquetSplitAvro')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ESI13T_Stage_SD_RECHNUNGSPOS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy_SD_RECHNUNGSPOS_Parquet",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ESI13T_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"TableName": "SD_RECHNUNGSPOS",
+									"SchemaName": "PS_ADMIN"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DataExtraction_Parquet",
+								"type": "DatasetReference",
+								"parameters": {
+									"folder": {
+										"value": "@concat('CopyParquet/',utcnow())",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DataExtraction_Parquet')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ET51Q_PARAMS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ET51Q",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": "select * from ET3000.PROGFP_ID\nwhere trunc(last_update) > to_date('2020-07-07 16-00-00', 'YYYY-MM-DD HH24-MI-SS') and trunc(last_update) <= to_date('2020-07-08 16-00-00', 'YYYY-MM-DD HH24-MI-SS')",
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"dataIntegrationUnits": 2,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false,
+									"culture": "en-us"
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ET51Q_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"TableName": "PROGFP_ID",
+									"SchemaName": "ET3000"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "TMP_Parquet",
+								"type": "DatasetReference",
+								"parameters": {
+									"Folder": "ET51Q"
+								}
+							}
+						]
+					}
+				],
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/TMP_Parquet')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ET51Q_SpecialCols')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup1",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "@concat(\n'SELECT \nCOLUMN_NAME\n, DATA_TYPE\n, DATA_TYPE_MOD\n, DATA_TYPE_OWNER\n, DATA_LENGTH\n, DATA_PRECISION\n, DATA_SCALE\n, NULLABLE\n, COLUMN_ID\n, DEFAULT_LENGTH\n, DATA_DEFAULT\n, CHARACTER_SET_NAME\n, CHAR_COL_DECL_LENGTH\n, QUALIFIED_COL_NAME\nFROM ALL_TAB_COLS\nWHERE \nCOLUMN_NAME NOT LIKE(''','SYS_%',''') AND\nTABLE_NAME =''',\nvariables('table')\n, ''' '\n)",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "ET51Q_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"TableName": {
+										"value": "@variables('table')",
+										"type": "Expression"
+									},
+									"SchemaName": {
+										"value": "@variables('schema')",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "HTTP_Parse_Mapping",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "HTTP_Parse_Mapping",
+							"method": "POST",
+							"body": {
+								"value": "@activity('Lookup1').output",
+								"type": "Expression"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "ERSMetadataFunctionsAPP",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "HTTP_Snowflake_Statement_Parser",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "HTTP_Snowflake_Statement_Parser",
+							"method": "POST",
+							"headers": {
+								"code": "ed3j7zQJWo/htwUaVYRGmxLHW4YIDlmp/Y5rqqZKZIsMicAQo0GRQg==",
+								"host": "ET51Q",
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"table": {
+									"value": "@variables('table')",
+									"type": "Expression"
+								}
+							},
+							"body": {
+								"value": "@activity('Lookup1').output",
+								"type": "Expression"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "ERSMetadataFunctionsAPP",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"variables": {
+					"schema": {
+						"type": "String",
+						"defaultValue": "ET3000"
+					},
+					"table": {
+						"type": "String",
+						"defaultValue": "PROGFP_ID"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ERSMetadataFunctionsAPP')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ExecuteDataFlow')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ParquetSplitAvro",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "ParquetSplitAvro",
+								"type": "DataFlowReference",
+								"datasetParameters": {
+									"StagedParquet": {
+										"Folder": {
+											"value": "@concat('ParquetSplit/',utcnow())",
+											"type": "Expression"
+										}
+									}
+								}
+							},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							}
+						}
+					}
+				],
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/ParquetSplitAvro')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/FunctionsTest')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "HTTPSample",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "HTTPSample",
+							"method": "POST",
+							"headers": {
+								"name": "John"
+							},
+							"body": {
+								"name": "Bob"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureFunction1",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "WebHook1",
+						"type": "WebHook",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"url": "https://ersmetadataprocessingpoc.azurewebsites.net/api/HTTPSample?code=yRZ5U2LHD4GhnNznBIL5f4JEhWhFkZDa4Th6HDiLalfYxQpmGjZowQ==&name=Bob",
+							"method": "POST",
+							"headers": {
+								"name": "Bob"
+							},
+							"body": {
+								"value": "test"
+							},
+							"timeout": "00:10:00",
+							"reportStatusOnCallBack": true
+						}
+					}
+				],
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureFunction1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MX01_EXP_HR')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetGroupCount",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "extractionTimestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "@concat('select ceil((select count(*) from ',variables('tableName'),')/8000000) as group_no from dual')",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX01_MXDM_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": "MX_DATAMART",
+									"db_table": {
+										"value": "@variables('tableName')",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "NumberOfSCNGroups",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetGroupCount",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "numberOfGroups",
+							"value": {
+								"value": "@string(activity('GetGroupCount').output.firstRow.GROUP_NO)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "GetGroupSCN",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "NumberOfSCNGroups",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "@concat('select\nCASE\n  WHEN grp_nbr = 1\n  THEN min(ora_rowscn)\n  WHEN grp_nbr > 1\n  THEN min(ora_rowscn) +1\n  END as Starting_Value\n, max(ora_rowscn) as Ending_Value\n, count(*)        as Total_Records\n, grp_nbr         as Group_Nbr\nfrom (\nselect ora_rowscn,\nntile(',variables('numberOfGroups') ,') over (order by ora_rowscn) grp_nbr\nfrom ',variables('tableName') ,'\n)\ngroup by grp_nbr\nORDER BY grp_nbr ASC')",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX01_MXDM_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": "MX_DATAMART",
+									"db_table": {
+										"value": "@variables('tableName')",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEachGroup",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "GetGroupSCN",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('GetGroupSCN').output.value",
+								"type": "Expression"
+							},
+							"batchCount": 8,
+							"activities": [
+								{
+									"name": "CopySCNGroup",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"oracleReaderQuery": {
+												"value": "@concat('SELECT /*+ NO_PARALLEL(\"', variables('tableName'),'\") */  * FROM ',variables('tableName'),' WHERE ORA_ROWSCN BETWEEN ', item().STARTING_VALUE, ' AND ',item().ENDING_VALUE)",
+												"type": "Expression"
+											},
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MX01_MXDM_Dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"db_schema": "MX_DATAMART",
+												"db_table": {
+													"value": "@variables('tableName')",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataExtraction_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder": {
+													"value": "@concat('ORACLE/MX01/MX_DATAMART/',variables('tableName'),'/',variables('extractionTimestamp'))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "extractionTimestamp",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "extractionTimestamp",
+							"value": {
+								"value": "@formatDateTime(utcnow(),'yyyy-MM-dd HH-mm-ss')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"variables": {
+					"numberOfGroups": {
+						"type": "String"
+					},
+					"tableName": {
+						"type": "String",
+						"defaultValue": "ALPIQ_DLT_EXP_HR_REP"
+					},
+					"extractionTimestamp": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/MX01_MXDM_Dynamic')]",
+				"[concat(variables('factoryId'), '/datasets/DataExtraction_Parquet')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MX01_MXMD_SMALL_TABLES')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup - 3 Tables",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Set Timestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN(\n'ALPIQ_LOCATION_COUNTRY_VIEW'\n,'V_STRATEGY_TREE_DBF'\n,'V_TRN_FLAGS_DBF'\n)",
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX01_MXDM_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": {
+										"value": "@variables('db_schema')",
+										"type": "Expression"
+									},
+									"db_table": "ALL_OBJECTS"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup - 3 Tables",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@array(activity('Lookup - 3 Tables').output.value)",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 2,
+							"activities": [
+								{
+									"name": "Copy2Parquet_plain",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings",
+												"maxConcurrentConnections": 2
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MX01_MXDM_Dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"db_schema": {
+													"value": "@variables('db_schema')",
+													"type": "Expression"
+												},
+												"db_table": {
+													"value": "@item().OBJECT_NAME",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataExtraction_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder": {
+													"value": "@concat('ORACLE/',variables('db_host'),'/',variables('db_schema'),'/',item().OBJECT_NAME,'/',variables('extraction_timestamp'))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Lookup - 15 Tables",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Set Timestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'ALPIQ_MASTER_AGR_REP'\n,'ALPIQ_SIM_PURGED_REP'\n,'ALPIQ_SIM_STOCK_REP'\n,'ATEL_CMAT_REP'\n,'ATEL_CS_ACTUALS_REP'\n,'ATEL_CS_FORECAST_REP'\n,'ATEL_MDL_FX_REP'\n,'ATEL_OPTIONS_REP'\n,'ATEL_SIM_OPT_GRK_REP'\n,'ATEL_SQL_CNTP_REP'\n,'ATEL_SQL_FEE_REP'\n,'ATEL_SQL_INDEX_REP'\n,'ATEL_SQL_PFTREE_REP'\n,'ATEL_SQL_PF_REP'\n,'ATEL_SQL_PR_IND_REP'\n)",
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX01_MXDM_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": {
+										"value": "@variables('db_schema')",
+										"type": "Expression"
+									},
+									"db_table": "ALL_OBJECTS"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach2",
+						"description": "",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup - 15 Tables",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@array(activity('Lookup - 15 Tables').output.value)",
+								"type": "Expression"
+							},
+							"batchCount": 2,
+							"activities": [
+								{
+									"name": "Copy2Parquet_whereTimestamp",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "refvalue",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"oracleReaderQuery": {
+												"value": "@concat('SELECT * from ', variables('db_schema'), '.', item().OBJECT_NAME, ' where m_ref_data in (select d.m_ref_data from DYN_AUDIT_REP d, JOB_AUDIT_REP j where d.m_idjob=j.m_mx_ref_job and d.M_DELETED  = ''N'' and j.M_STATUS in  (''Done'',''Corrected'') and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') >', '''',variables('refvalue'),  '''', ' and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') <= ', '''', variables('extraction_timestamp'),''')')",
+												"type": "Expression"
+											},
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings",
+												"maxConcurrentConnections": 2
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MX01_MXDM_Dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"db_schema": {
+													"value": "@variables('db_schema')",
+													"type": "Expression"
+												},
+												"db_table": {
+													"value": "@item().OBJECT_NAME",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataExtraction_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder": {
+													"value": "@concat('ORACLE/',variables('db_host'),'/',variables('db_schema'),'/',item().OBJECT_NAME,'/',variables('extraction_timestamp'))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "refvalue",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "refvalue",
+										"value": "20200803 000000"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Set Timestamp",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "extraction_timestamp",
+							"value": {
+								"value": "@formatDateTime(utcnow(),'yyyy-MM-dd HH-mm-ss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Lookup - 1 Table",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Set Timestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'ALPIQ_CMIP_EXPORT'\n)",
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX01_MXDM_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": {
+										"value": "@variables('db_schema')",
+										"type": "Expression"
+									},
+									"db_table": "ALL_OBJECTS"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach3",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup - 1 Table",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@array(activity('Lookup - 1 Table').output.value)",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy2Parquet_whereClosing",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "refvalue_closing",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"oracleReaderQuery": {
+												"value": "@concat('SELECT * from ', variables('db_schema'), '.', item().OBJECT_NAME, ' where closing_date > to_date(''', string(variables('refvalueClosing')),''',''DD.MM.YYYY'')')",
+												"type": "Expression"
+											},
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings",
+												"maxConcurrentConnections": 2
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MX01_MXDM_Dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"db_schema": {
+													"value": "@variables('db_schema')",
+													"type": "Expression"
+												},
+												"db_table": {
+													"value": "@item().OBJECT_NAME",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataExtraction_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder": {
+													"value": "@concat('ORACLE/',variables('db_host'),'/',variables('db_schema'),'/',item().OBJECT_NAME,'/',variables('extraction_timestamp'))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "refvalue_closing",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "refvalueClosing",
+										"value": "02.08.2020"
+									}
+								}
+							]
+						}
+					}
+				],
+				"variables": {
+					"db_host": {
+						"type": "String",
+						"defaultValue": "MX01"
+					},
+					"db_schema": {
+						"type": "String",
+						"defaultValue": "MX_DATAMART"
+					},
+					"extraction_timestamp": {
+						"type": "String"
+					},
+					"refvalue": {
+						"type": "String"
+					},
+					"refvalueClosing": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/MX01_MXDM_Dynamic')]",
+				"[concat(variables('factoryId'), '/datasets/DataExtraction_Parquet')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SSISTestAmine')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ExecuteLocalIncrement",
+						"type": "ExecuteSSISPackage",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"packageLocation": {
+								"packagePath": "AmineTest/AzureSSISTest/LocalOperation.dtsx",
+								"type": "SSISDB"
+							},
+							"environmentPath": null,
+							"connectVia": {
+								"referenceName": "SSIS-IR",
+								"type": "IntegrationRuntimeReference"
+							},
+							"loggingLevel": "Basic",
+							"packageConnectionManagers": {
+								"mydptest001": {
+									"Password": {
+										"value": {
+											"type": "SecureString",
+											"value": "**********"
+										}
+									}
+								}
+							}
+						}
+					},
+					{
+						"name": "LoadCMDServersFromAWS",
+						"type": "ExecuteSSISPackage",
+						"dependsOn": [
+							{
+								"activity": "ExecuteLocalIncrement",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"packageLocation": {
+								"packagePath": "AmineTest/AzureSSISTest/GetServersFromAWS.dtsx",
+								"type": "SSISDB"
+							},
+							"environmentPath": null,
+							"connectVia": {
+								"referenceName": "SSIS-IR",
+								"type": "IntegrationRuntimeReference"
+							},
+							"loggingLevel": "Basic",
+							"packageConnectionManagers": {
+								"cmdb.cluster-cyiesepjpd3o.eu-central-1.rds.amazonaws.com.CMDB.ev_user": {
+									"Password": {
+										"value": {
+											"type": "SecureString",
+											"value": "**********"
+										}
+									}
+								},
+								"mydptest001": {
+									"Password": {
+										"value": {
+											"type": "SecureString",
+											"value": "**********"
+										}
+									}
+								}
+							}
+						}
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SourceMetadata')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup1",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "@concat(\n'SELECT \nCOLUMN_NAME\n, DATA_TYPE\n, DATA_TYPE_MOD\n, DATA_TYPE_OWNER\n, DATA_LENGTH\n, DATA_PRECISION\n, DATA_SCALE\n, NULLABLE\n, COLUMN_ID\n, DEFAULT_LENGTH\n, DATA_DEFAULT\n, CHARACTER_SET_NAME\n, CHAR_COL_DECL_LENGTH\n, QUALIFIED_COL_NAME\nFROM ALL_TAB_COLS\nWHERE TABLE_NAME =''',\npipeline().parameters.TableName\n, ''' '\n)",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "ESI13T_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"TableName": {
+										"value": "@pipeline().parameters.TableName",
+										"type": "Expression"
+									},
+									"SchemaName": "PS_ADMIN"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Anonymus",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "HTTP_Parse_Mapping",
+							"method": "POST",
+							"body": {
+								"value": "@activity('Lookup1').output",
+								"type": "Expression"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "ERSMetadataFunctionsAPP",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "FunctionLevel",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "HTTP_Snowflake_Statement_Parser",
+							"method": "POST",
+							"headers": {
+								"schema": "PS_ADMIN",
+								"host": "ESI13T",
+								"table": {
+									"value": "@pipeline().parameters.TableName",
+									"type": "Expression"
+								}
+							},
+							"body": {
+								"value": "@activity('Lookup1').output",
+								"type": "Expression"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "ERSMetadataFunctionsAPP",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Azure Function1",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "HTTP_Parse",
+							"method": "POST",
+							"headers": {
+								"schema": "PS_ADMIN",
+								"host": "ESI13T",
+								"table": {
+									"value": "@pipeline().parameters.TableName",
+									"type": "Expression"
+								}
+							},
+							"body": {
+								"value": "@activity('Lookup1').output",
+								"type": "Expression"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "ERSMetadataFunctionsAPP",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"parameters": {
+					"TableName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ERSMetadataFunctionsAPP')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SplitSingleParquetFile')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ParquetSplitParquet",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "ParquetSplitParquet",
+								"type": "DataFlowReference",
+								"datasetParameters": {
+									"ParquetSingleFile": {
+										"folder": "ParquetSingleFile"
+									},
+									"ParquetSplitted": {
+										"folder": {
+											"value": "@concat('ParquetSplit/',utcnow())",
+											"type": "Expression"
+										}
+									}
+								}
+							},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							}
+						}
+					}
+				],
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/ParquetSplitParquet')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TMPBlobCleanup')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "DeleteFiles",
+						"type": "Delete",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "TMP_DEL",
+								"type": "DatasetReference"
+							},
+							"logStorageSettings": {
+								"linkedServiceName": {
+									"referenceName": "AzureBlobStorageDataExtraction",
+									"type": "LinkedServiceReference"
+								}
+							},
+							"enableLogging": true,
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true
+							}
+						}
+					}
+				],
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/TMP_DEL')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AWS_S3_Datalake_BI_tst')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AWS_S3_Snowflake_ComplexDataTypes",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting/Source"
+				},
+				"annotations": [],
+				"type": "Avro",
+				"typeProperties": {
+					"location": {
+						"type": "AmazonS3Location",
+						"bucketName": "tst-alpiq-datalake-bi",
+						"folderPath": "ORACLE/MX01/MX_DATAMART/ALPIQ_DLT_EXP_HR_REP/2020-06-08 08-20-48"
+					},
+					"avroCompressionCodec": "snappy"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DataExtraction_Avro')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorageDataExtraction",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": [],
+				"type": "Avro",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "EXP_HR_S3",
+						"container": "data-extraction-poc"
+					},
+					"avroCompressionCodec": "snappy"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DataExtraction_Parquet')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorageDataExtraction",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"folder": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": {
+							"value": "@dataset().folder",
+							"type": "Expression"
+						},
+						"container": "data-extraction-poc"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MX01_MXDM_Dynamic')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "MX01_MX_DATAMART",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"db_schema": {
+						"type": "string"
+					},
+					"db_table": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting/Source"
+				},
+				"annotations": [],
+				"type": "OracleTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().db_schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().db_table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MySqlTable1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "MySQLCMDBServer",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "MySqlTable",
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PlainDump_Avro')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorageDataExtraction",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Folder": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting/Destination"
+				},
+				"annotations": [],
+				"type": "Avro",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "ET51Q",
+						"container": "data-extraction-poc"
+					},
+					"avroCompressionCodec": "snappy"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/S3_Copy')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorageDataExtraction",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting/Source"
+				},
+				"annotations": [],
+				"type": "Avro",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "S3-Copy",
+						"container": "data-extraction-poc"
+					},
+					"avroCompressionCodec": "snappy"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Staged_Parquet_ESI13T_SD_RECHNUNGSPOS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorageDataExtraction",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting/Source"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "ORACLE/ESI13T/PS_ADMIN/SD_RECHNUNGSPOS/2020-06-29 09-30-00",
+						"container": "data-extraction-poc"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "REP_BETRAG",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_FIBLFDNR_H",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_FIBLFDNR_S",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_ID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_KZ",
+						"type": "INT96"
+					},
+					{
+						"name": "REP_LDATE",
+						"type": "INT96"
+					},
+					{
+						"name": "REP_MANID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_MAS_DOWID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_MENGE",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_RABATT1",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_RECID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_SH",
+						"type": "UTF8"
+					},
+					{
+						"name": "REP_USEID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_ABLDAT",
+						"type": "INT96"
+					},
+					{
+						"name": "REP_ABLID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_ABRBIS",
+						"type": "INT96"
+					},
+					{
+						"name": "REP_ABRVON",
+						"type": "INT96"
+					},
+					{
+						"name": "REP_BEZ",
+						"type": "UTF8"
+					},
+					{
+						"name": "REP_AUF_DPCID_H",
+						"type": "UTF8"
+					},
+					{
+						"name": "REP_KST_DPCID_H",
+						"type": "UTF8"
+					},
+					{
+						"name": "REP_PC_DPCID_H",
+						"type": "UTF8"
+					},
+					{
+						"name": "REP_PSP_DPCID_H",
+						"type": "UTF8"
+					},
+					{
+						"name": "REP_AUF_DPCID_S",
+						"type": "UTF8"
+					},
+					{
+						"name": "REP_KST_DPCID_S",
+						"type": "UTF8"
+					},
+					{
+						"name": "REP_PC_DPCID_S",
+						"type": "UTF8"
+					},
+					{
+						"name": "REP_PSP_DPCID_S",
+						"type": "UTF8"
+					},
+					{
+						"name": "REP_EINGABEREQ",
+						"type": "UTF8"
+					},
+					{
+						"name": "REP_FIBLFDNR_H_MWST",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_FIBLFDNR_S_MWST",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_FIBU_PRSID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_FIXIERT",
+						"type": "UTF8"
+					},
+					{
+						"name": "REP_FREIVERBR",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_FREMD_BETRAG",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_FREMD_WAEID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_GERID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_KONSTANTE",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_MENGERECH",
+						"type": "UTF8"
+					},
+					{
+						"name": "REP_MULTIPLIKATOR",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_NORMFAKTOR",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_SORTNR",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_STAND",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_STORNOFLAG_OLD",
+						"type": "UTF8"
+					},
+					{
+						"name": "REP_TARID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_UEBID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_URMENGE",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_VABLDAT",
+						"type": "INT96"
+					},
+					{
+						"name": "REP_VKNID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_VSTAND",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_GRUPPEN_REPID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_NOFMAS_DOWID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_BIMID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_KTPID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_MECID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_TCOID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_PTYID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_FREMDNR",
+						"type": "UTF8"
+					},
+					{
+						"name": "REP_POSTYPE",
+						"type": "UTF8"
+					},
+					{
+						"name": "REP_CDEID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_VETID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_DET_INTID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_NETTO",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_FREMD_NETTO",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_UR_MAS_DOWID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_AMOUNTUNITCODE",
+						"type": "DECIMAL",
+						"precision": 38,
+						"scale": 18
+					},
+					{
+						"name": "REP_DURATION",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_DURATIONUNITCODE",
+						"type": "DECIMAL",
+						"precision": 38,
+						"scale": 18
+					},
+					{
+						"name": "REP_ARTID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REP_REFERENCE",
+						"type": "UTF8"
+					},
+					{
+						"name": "REP_TAPIDENTIFIER",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TMP_DEL')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorageDataExtraction",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting/Source"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "EXP_HR_S3",
+						"container": "data-extraction-poc"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "ACCOUNTTYPE",
+						"type": "UTF8"
+					},
+					{
+						"name": "INVOICETYPENO",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "ACCOUNTINGTYPE",
+						"type": "UTF8"
+					},
+					{
+						"name": "CANCELLATION",
+						"type": "UTF8"
+					},
+					{
+						"name": "INVOICETYPE",
+						"type": "UTF8"
+					},
+					{
+						"name": "POSTINGSYMBOLDEBIT",
+						"type": "UTF8"
+					},
+					{
+						"name": "POSTINGKEYDEBIT",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "POSTINGSYMBOLCREDIT",
+						"type": "UTF8"
+					},
+					{
+						"name": "POSTINGKEYCREDIT",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "REPLACETAXCODE",
+						"type": "UTF8"
+					},
+					{
+						"name": "CLIENT",
+						"type": "UTF8"
+					},
+					{
+						"name": "LMDATE",
+						"type": "INT96"
+					},
+					{
+						"name": "LMUSEID",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "EDATE",
+						"type": "INT96"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TMP_Parquet')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorageDataExtraction",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Folder": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting/Source"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": {
+							"value": "@dataset().Folder",
+							"type": "Expression"
+						},
+						"container": "data-extraction-poc"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureFunction1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureFunction",
+				"typeProperties": {
+					"functionAppUrl": "https://ersmetadataprocessingpoc.azurewebsites.net",
+					"functionKey": {
+						"type": "SecureString",
+						"value": "**********"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ERSMetadataFunctionsAPP')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureFunction",
+				"typeProperties": {
+					"functionAppUrl": "https://ersmetadataprocessingpoc.azurewebsites.net",
+					"functionKey": {
+						"type": "SecureString",
+						"value": "**********"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CombineAvroFiles')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DataExtraction_Avro",
+								"type": "DatasetReference"
+							},
+							"name": "S3Dump"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DataExtraction_Parquet",
+								"type": "DatasetReference"
+							},
+							"name": "ParquetGeneralization"
+						}
+					],
+					"transformations": [],
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\twildcardPaths:['EXP_HR_S3/*.avro'],\n\tpartitionBy('hash', 1)) ~> S3Dump\nS3Dump sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionFileNames:['ALPIQ_DLT_EXP_HR_REP_20200703181006.parquet'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ParquetGeneralization"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DataExtraction_Avro')]",
+				"[concat(variables('factoryId'), '/datasets/DataExtraction_Parquet')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ParquetSplitAvro')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "TMP_Parquet",
+								"type": "DatasetReference"
+							},
+							"name": "StagedParquet"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DataExtraction_Avro",
+								"type": "DatasetReference"
+							},
+							"name": "DataExtractionSinkAvro"
+						}
+					],
+					"transformations": [],
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> StagedParquet\nStagedParquet sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionBy('roundRobin', 10),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DataExtractionSinkAvro"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/TMP_Parquet')]",
+				"[concat(variables('factoryId'), '/datasets/DataExtraction_Avro')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ParquetSplitParquet')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DataExtraction_Parquet",
+								"type": "DatasetReference"
+							},
+							"name": "ParquetSingleFile"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DataExtraction_Parquet",
+								"type": "DatasetReference"
+							},
+							"name": "ParquetSplitted"
+						}
+					],
+					"transformations": [],
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpurgeFiles: true,\n\tformat: 'parquet') ~> ParquetSingleFile\nParquetSingleFile sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionBy('roundRobin', 25),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ParquetSplitted"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DataExtraction_Parquet')]"
+			]
+		}
+	]
+}
