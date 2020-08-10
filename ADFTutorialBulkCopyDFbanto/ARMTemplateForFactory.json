@@ -4436,7 +4436,7 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Started",
+				"runtimeState": "Stopped",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -4451,9 +4451,8 @@
 					"recurrence": {
 						"frequency": "Month",
 						"interval": 1,
-						"startTime": "2020-08-10T14:50:00.000Z",
-						"timeZone": "UTC",
-						"schedule": {}
+						"startTime": "2020-08-10T14:45:00.000Z",
+						"timeZone": "UTC"
 					}
 				}
 			},
