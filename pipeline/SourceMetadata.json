@@ -75,7 +75,7 @@
 				"type": "AzureFunctionActivity",
 				"dependsOn": [
 					{
-						"activity": "Lookup1",
+						"activity": "5 Seconds",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -111,11 +111,11 @@
 				}
 			},
 			{
-				"name": "Azure Function1",
+				"name": "HostLevel",
 				"type": "AzureFunctionActivity",
 				"dependsOn": [
 					{
-						"activity": "Lookup1",
+						"activity": "10 Seconds",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -148,6 +148,38 @@
 				"linkedServiceName": {
 					"referenceName": "ERSMetadataFunctionsAPP",
 					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "5 Seconds",
+				"type": "Wait",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 5
+				}
+			},
+			{
+				"name": "10 Seconds",
+				"type": "Wait",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 10
 				}
 			}
 		],

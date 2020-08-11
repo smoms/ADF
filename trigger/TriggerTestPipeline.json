@@ -1,0 +1,28 @@
+{
+	"name": "TriggerTestPipeline",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "SourceMetadata",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"TableName": "SDKLOVVALUES"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Hour",
+				"interval": 15,
+				"startTime": "2020-08-11T07:28:00.000Z",
+				"endTime": "2020-08-11T17:00:00.000Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}
