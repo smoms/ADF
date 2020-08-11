@@ -101,6 +101,10 @@
 		},
 		"SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"type": "secureString"
+		},
+		"TriggerTestPipeline_properties_SourceMetadata_parameters_TableName": {
+			"type": "string",
+			"defaultValue": "SDKLOVVALUES"
 		}
 	},
 	"variables": {
@@ -2508,7 +2512,7 @@
 						"type": "AzureFunctionActivity",
 						"dependsOn": [
 							{
-								"activity": "Lookup1",
+								"activity": "5 Seconds",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -2544,11 +2548,11 @@
 						}
 					},
 					{
-						"name": "Azure Function1",
+						"name": "HostLevel",
 						"type": "AzureFunctionActivity",
 						"dependsOn": [
 							{
-								"activity": "Lookup1",
+								"activity": "10 Seconds",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -2581,6 +2585,38 @@
 						"linkedServiceName": {
 							"referenceName": "ERSMetadataFunctionsAPP",
 							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "5 Seconds",
+						"type": "Wait",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"waitTimeInSeconds": 5
+						}
+					},
+					{
+						"name": "10 Seconds",
+						"type": "Wait",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"waitTimeInSeconds": 10
 						}
 					}
 				],
@@ -4715,6 +4751,39 @@
 				"[concat(variables('factoryId'), '/datasets/AzureSqlTableCustomer')]",
 				"[concat(variables('factoryId'), '/datasets/AzureSqlTableCustAddress')]",
 				"[concat(variables('factoryId'), '/datasets/AzureBlobDatasetWhereTest')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TriggerTestPipeline')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "SourceMetadata",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"TableName": "[parameters('TriggerTestPipeline_properties_SourceMetadata_parameters_TableName')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Hour",
+						"interval": 15,
+						"startTime": "2020-08-11T07:28:00.000Z",
+						"endTime": "2020-08-11T17:00:00.000Z",
+						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/SourceMetadata')]"
 			]
 		}
 	]

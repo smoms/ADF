@@ -102,6 +102,10 @@
 		"SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"type": "secureString"
 		},
+		"TriggerTestPipeline_properties_SourceMetadata_parameters_TableName": {
+			"type": "string",
+			"defaultValue": "SDKLOVVALUES"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -278,6 +282,9 @@
 					},
 					"Trigger_73c_properties_pipeline_parameters_windowStart": {
 						"value": "[parameters('Trigger_73c_properties_pipeline_parameters_windowStart')]"
+					},
+					"TriggerTestPipeline_properties_SourceMetadata_parameters_TableName": {
+						"value": "[parameters('TriggerTestPipeline_properties_SourceMetadata_parameters_TableName')]"
 					}
 				}
 			},

@@ -1,0 +1,248 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "ADFTutorialBulkCopyDFbanto"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/SourceMetadata')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup1",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "@concat(\n'SELECT \nCOLUMN_NAME\n, DATA_TYPE\n, DATA_TYPE_MOD\n, DATA_TYPE_OWNER\n, DATA_LENGTH\n, DATA_PRECISION\n, DATA_SCALE\n, NULLABLE\n, COLUMN_ID\n, DEFAULT_LENGTH\n, DATA_DEFAULT\n, CHARACTER_SET_NAME\n, CHAR_COL_DECL_LENGTH\n, QUALIFIED_COL_NAME\nFROM ALL_TAB_COLS\nWHERE TABLE_NAME =''',\npipeline().parameters.TableName\n, ''' '\n)",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "ESI13T_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"TableName": {
+										"value": "@pipeline().parameters.TableName",
+										"type": "Expression"
+									},
+									"SchemaName": "PS_ADMIN"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Anonymus",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "HTTP_Parse_Mapping",
+							"method": "POST",
+							"body": {
+								"value": "@activity('Lookup1').output",
+								"type": "Expression"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "ERSMetadataFunctionsAPP",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "FunctionLevel",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [
+							{
+								"activity": "5 Seconds",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "HTTP_Snowflake_Statement_Parser",
+							"method": "POST",
+							"headers": {
+								"schema": "PS_ADMIN",
+								"host": "ESI13T",
+								"table": {
+									"value": "@pipeline().parameters.TableName",
+									"type": "Expression"
+								}
+							},
+							"body": {
+								"value": "@activity('Lookup1').output",
+								"type": "Expression"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "ERSMetadataFunctionsAPP",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "HostLevel",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [
+							{
+								"activity": "10 Seconds",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "HTTP_Parse",
+							"method": "POST",
+							"headers": {
+								"schema": "PS_ADMIN",
+								"host": "ESI13T",
+								"table": {
+									"value": "@pipeline().parameters.TableName",
+									"type": "Expression"
+								}
+							},
+							"body": {
+								"value": "@activity('Lookup1').output",
+								"type": "Expression"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "ERSMetadataFunctionsAPP",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "5 Seconds",
+						"type": "Wait",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"waitTimeInSeconds": 5
+						}
+					},
+					{
+						"name": "10 Seconds",
+						"type": "Wait",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"waitTimeInSeconds": 10
+						}
+					}
+				],
+				"parameters": {
+					"TableName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TriggerTestPipeline')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "SourceMetadata",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"TableName": "SDKLOVVALUES"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Hour",
+						"interval": 15,
+						"startTime": "2020-08-11T07:28:00.000Z",
+						"endTime": "2020-08-11T17:00:00.000Z",
+						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/SourceMetadata')]"
+			]
+		}
+	]
+}

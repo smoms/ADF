@@ -77,6 +77,9 @@
 		"SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"value": ""
 		},
+		"TriggerTestPipeline_properties_SourceMetadata_parameters_TableName": {
+			"value": "SDKLOVVALUES"
+		},
 		"containerUri": {
 			"value": ""
 		},
