@@ -42,7 +42,7 @@
 				}
 			},
 			{
-				"name": "HTTP_Parse_Mapping",
+				"name": "HTTPmapper",
 				"type": "AzureFunctionActivity",
 				"dependsOn": [
 					{
@@ -61,7 +61,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"functionName": "HTTP_Parse_Mapping",
+					"functionName": "HTTPmapper",
 					"method": "POST",
 					"body": {
 						"value": "@activity('Lookup1').output",
@@ -74,7 +74,81 @@
 				}
 			},
 			{
-				"name": "HTTP_Snowflake_Statement_Parser",
+				"name": "Copy without column renaming",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"oracleReaderQuery": {
+							"value": "@concat('SELECT * FROM ',variables('schema'),'.',variables('table'), ' WHERE ROWNUM < 101')",
+							"type": "Expression"
+						},
+						"partitionOption": "None",
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ET51Q_Dynamic",
+						"type": "DatasetReference",
+						"parameters": {
+							"TableName": {
+								"value": "@variables('table')",
+								"type": "Expression"
+							},
+							"SchemaName": {
+								"value": "@variables('schema')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DataExtraction_Parquet",
+						"type": "DatasetReference",
+						"parameters": {
+							"folder": {
+								"value": "@concat('SpecialColTest/Plain/',formatDateTime(utcnow(),'yyyy-mm-dd HH-MM'))",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "VariableViewCreationChanged",
 				"type": "AzureFunctionActivity",
 				"dependsOn": [
 					{
@@ -93,11 +167,9 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"functionName": "HTTP_Snowflake_Statement_Parser",
+					"functionName": "VariableViewCreator",
 					"method": "POST",
 					"headers": {
-						"code": "ed3j7zQJWo/htwUaVYRGmxLHW4YIDlmp/Y5rqqZKZIsMicAQo0GRQg==",
-						"host": "ET51Q",
 						"schema": {
 							"value": "@variables('schema')",
 							"type": "Expression"
@@ -105,7 +177,123 @@
 						"table": {
 							"value": "@variables('table')",
 							"type": "Expression"
+						},
+						"host": "ET51Q",
+						"plain": "yes"
+					},
+					"body": {
+						"value": "@activity('Lookup1').output",
+						"type": "Expression"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ERSMetadataFunctionsAPP",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Copy with column renaming",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "HTTPmapper",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"oracleReaderQuery": {
+							"value": "@concat('SELECT * FROM ',variables('schema'),'.',variables('table'), ' WHERE ROWNUM < 101')",
+							"type": "Expression"
+						},
+						"partitionOption": "None",
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
 						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"value": "@activity('HTTPmapper').output.value",
+						"type": "Expression"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ET51Q_Dynamic",
+						"type": "DatasetReference",
+						"parameters": {
+							"TableName": {
+								"value": "@variables('table')",
+								"type": "Expression"
+							},
+							"SchemaName": {
+								"value": "@variables('schema')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DataExtraction_Parquet",
+						"type": "DatasetReference",
+						"parameters": {
+							"folder": {
+								"value": "@concat('SpecialColTest/Modified/',formatDateTime(utcnow(),'yyyy-mm-dd HH-MM'))",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "VariableViewCreationPlain",
+				"type": "AzureFunctionActivity",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"functionName": "VariableViewCreator",
+					"method": "POST",
+					"headers": {
+						"schema": {
+							"value": "@variables('schema')",
+							"type": "Expression"
+						},
+						"table": {
+							"value": "@variables('table')",
+							"type": "Expression"
+						},
+						"host": "ET51Q",
+						"plain": "yes"
 					},
 					"body": {
 						"value": "@activity('Lookup1').output",
