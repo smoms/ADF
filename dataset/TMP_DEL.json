@@ -13,7 +13,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"folderPath": "EXP_HR_S3",
+				"folderPath": "SpecialColTest",
 				"container": "data-extraction-poc"
 			},
 			"compressionCodec": "snappy"
