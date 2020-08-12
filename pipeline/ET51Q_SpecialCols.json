@@ -228,7 +228,7 @@
 					},
 					"enableStaging": false,
 					"translator": {
-						"value": "@activity('HTTPmapper').output.value",
+						"value": "@activity('HTTPmapper').output",
 						"type": "Expression"
 					}
 				},
