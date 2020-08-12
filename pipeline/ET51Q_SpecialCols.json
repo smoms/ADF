@@ -140,7 +140,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"folder": {
-								"value": "@concat('SpecialColTest/Plain/',formatDateTime(utcnow(),'yyyy-mm-dd HH-MM'))",
+								"value": "@concat('SpecialColTest/Plain/',formatDateTime(utcnow(),'yyyy-MM-dd HH-mm'))",
 								"type": "Expression"
 							}
 						}
@@ -254,7 +254,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"folder": {
-								"value": "@concat('SpecialColTest/Modified/',formatDateTime(utcnow(),'yyyy-mm-dd HH-MM'))",
+								"value": "@concat('SpecialColTest/Modified/',formatDateTime(utcnow(),'yyyy-MM-dd HH-mm'))",
 								"type": "Expression"
 							}
 						}
