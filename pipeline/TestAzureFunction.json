@@ -15,7 +15,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"functionName": "ADFTests",
+					"functionName": "HttpTrigger1",
 					"method": "GET"
 				},
 				"linkedServiceName": {
