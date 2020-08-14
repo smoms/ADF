@@ -16,7 +16,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"functionName": "HttpTrigger1",
-					"method": "GET"
+					"method": "POST",
+					"body": {
+						"message": "Hello Azure"
+					}
 				},
 				"linkedServiceName": {
 					"referenceName": "AzureFunction2",
