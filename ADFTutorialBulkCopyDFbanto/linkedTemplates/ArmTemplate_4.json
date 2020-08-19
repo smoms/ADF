@@ -21,6 +21,589 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/ESI13T_Stage_SD_RECHNUNGSPOS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy_SD_RECHNUNGSPOS_Parquet",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ESI13T_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"TableName": "SD_RECHNUNGSPOS",
+									"SchemaName": "PS_ADMIN"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DataExtraction_Parquet",
+								"type": "DatasetReference",
+								"parameters": {
+									"folder": {
+										"value": "@concat('CopyParquet/',utcnow())",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ET51Q_PARAMS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ET51Q",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": "select * from ET3000.PROGFP_ID\nwhere trunc(last_update) > to_date('2020-07-07 16-00-00', 'YYYY-MM-DD HH24-MI-SS') and trunc(last_update) <= to_date('2020-07-08 16-00-00', 'YYYY-MM-DD HH24-MI-SS')",
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"dataIntegrationUnits": 2,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false,
+									"culture": "en-us"
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ET51Q_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"TableName": "PROGFP_ID",
+									"SchemaName": "ET3000"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "TMP_Parquet",
+								"type": "DatasetReference",
+								"parameters": {
+									"Folder": "ET51Q"
+								}
+							}
+						]
+					}
+				],
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ET51Q_SpecialCols')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup1",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "@concat(\n'SELECT \nCOLUMN_NAME\n, DATA_TYPE\n, DATA_TYPE_MOD\n, DATA_TYPE_OWNER\n, DATA_LENGTH\n, DATA_PRECISION\n, DATA_SCALE\n, NULLABLE\n, COLUMN_ID\n, DEFAULT_LENGTH\n, DATA_DEFAULT\n, CHARACTER_SET_NAME\n, CHAR_COL_DECL_LENGTH\n, QUALIFIED_COL_NAME\nFROM ALL_TAB_COLS\nWHERE \nCOLUMN_NAME NOT LIKE(''','SYS_%',''') AND\nTABLE_NAME =''',\nvariables('table')\n, ''' '\n)",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "ET51Q_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"TableName": {
+										"value": "@variables('table')",
+										"type": "Expression"
+									},
+									"SchemaName": {
+										"value": "@variables('schema')",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "HTTPmapper",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "HTTPmapper",
+							"method": "POST",
+							"headers": {},
+							"body": {
+								"value": "@activity('Lookup1').output",
+								"type": "Expression"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "ERSMetadataFunctionsAPP",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Copy without column renaming",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "@concat('SELECT * FROM ',variables('schema'),'.',variables('table'), ' WHERE ROWNUM < 101')",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ET51Q_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"TableName": {
+										"value": "@variables('table')",
+										"type": "Expression"
+									},
+									"SchemaName": {
+										"value": "@variables('schema')",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DataExtraction_Parquet",
+								"type": "DatasetReference",
+								"parameters": {
+									"folder": {
+										"value": "@concat('SpecialColTest/Plain/',formatDateTime(utcnow(),'yyyy-MM-dd HH-mm'))",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "VariableViewCreationChanged",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "VariableViewCreator",
+							"method": "POST",
+							"headers": {
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"table": {
+									"value": "@variables('table')",
+									"type": "Expression"
+								},
+								"host": "ET51Q",
+								"plain": "yes"
+							},
+							"body": {
+								"value": "@activity('Lookup1').output",
+								"type": "Expression"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "ERSMetadataFunctionsAPP",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Copy with column renaming",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "HTTPmapper",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "@concat('SELECT * FROM ',variables('schema'),'.',variables('table'), ' WHERE ROWNUM < 101')",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"value": "@activity('HTTPmapper').output",
+								"type": "Expression"
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ET51Q_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"TableName": {
+										"value": "@variables('table')",
+										"type": "Expression"
+									},
+									"SchemaName": {
+										"value": "@variables('schema')",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DataExtraction_Parquet",
+								"type": "DatasetReference",
+								"parameters": {
+									"folder": {
+										"value": "@concat('SpecialColTest/Modified/',formatDateTime(utcnow(),'yyyy-MM-dd HH-mm'))",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "VariableViewCreationPlain",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "VariableViewCreator",
+							"method": "POST",
+							"headers": {
+								"schema": {
+									"value": "@variables('schema')",
+									"type": "Expression"
+								},
+								"table": {
+									"value": "@variables('table')",
+									"type": "Expression"
+								},
+								"host": "ET51Q",
+								"plain": "yes"
+							},
+							"body": {
+								"value": "@activity('Lookup1').output",
+								"type": "Expression"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "ERSMetadataFunctionsAPP",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"variables": {
+					"schema": {
+						"type": "String",
+						"defaultValue": "ET3000"
+					},
+					"table": {
+						"type": "String",
+						"defaultValue": "PROGFP_ID"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ExecuteDataFlow')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ParquetSplitAvro",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "ParquetSplitAvro",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"StagedParquet": {
+										"Folder": {
+											"value": "@concat('ParquetSplit/',utcnow())",
+											"type": "Expression"
+										}
+									},
+									"DataExtractionSinkAvro": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							}
+						}
+					}
+				],
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/GetTableListAndTriggerCopyData')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LookupTableList",
+						"description": "Retrieve the table list from Azure SQL database ",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "SELECT TABLE_SCHEMA, TABLE_NAME FROM information_schema.TABLES WHERE TABLE_TYPE = 'BASE TABLE' and TABLE_SCHEMA = 'SalesLT' and TABLE_NAME <> 'ProductModel'",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSqlDatabaseDataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "TriggerCopy",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "LookupTableList",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "IterateAndCopySQLTable",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": false,
+							"parameters": {
+								"tableList": {
+									"value": "@activity('LookupTableList').output.value",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/MX01_EXP_HR')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -149,7 +732,7 @@
 								"value": "@activity('GetGroupSCN').output.value",
 								"type": "Expression"
 							},
-							"batchCount": 8,
+							"batchCount": 16,
 							"activities": [
 								{
 									"name": "CopySCNGroup",
@@ -1067,7 +1650,9 @@
 					}
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/GetTableListAndTriggerCopyData')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/TestTrigger')]",

@@ -35,6 +35,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'functionKey' of 'AzureFunction1'"
 		},
+		"AzureFunction2_functionKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'functionKey' of 'AzureFunction2'"
+		},
 		"AzureSqlDatabaseLinkedService_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabaseLinkedService'"
@@ -83,9 +87,21 @@
 			"type": "string",
 			"defaultValue": "https://ersmetadataprocessingpoc.azurewebsites.net"
 		},
+		"AzureFunction2_properties_typeProperties_functionAppUrl": {
+			"type": "string",
+			"defaultValue": "https://adftests.azurewebsites.net"
+		},
 		"ERSMetadataFunctionsAPP_properties_typeProperties_functionAppUrl": {
 			"type": "string",
 			"defaultValue": "https://ersmetadataprocessingpoc.azurewebsites.net"
+		},
+		"Snowflake1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Snowflake1'"
+		},
+		"TriggerTestPipeline_properties_SourceMetadata_parameters_TableName": {
+			"type": "string",
+			"defaultValue": "SDKLOVVALUES"
 		},
 		"Trigger_73c_properties_pipeline_parameters_windowStart": {
 			"type": "string",
@@ -102,10 +118,6 @@
 		"SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"type": "secureString"
 		},
-		"TriggerTestPipeline_properties_SourceMetadata_parameters_TableName": {
-			"type": "string",
-			"defaultValue": "SDKLOVVALUES"
-		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -120,7 +132,7 @@
 	},
 	"resources": [
 		{
-			"name": "ArmTemplate_0",
+			"name": "ADFTutorialBulkCopyDFbanto_ArmTemplate_0",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "2018-02-01",
 			"properties": {
@@ -154,6 +166,9 @@
 					"AzureFunction1_functionKey": {
 						"value": "[parameters('AzureFunction1_functionKey')]"
 					},
+					"AzureFunction2_functionKey": {
+						"value": "[parameters('AzureFunction2_functionKey')]"
+					},
 					"AzureSqlDatabaseLinkedService_connectionString": {
 						"value": "[parameters('AzureSqlDatabaseLinkedService_connectionString')]"
 					},
@@ -175,8 +190,14 @@
 					"AzureFunction1_properties_typeProperties_functionAppUrl": {
 						"value": "[parameters('AzureFunction1_properties_typeProperties_functionAppUrl')]"
 					},
+					"AzureFunction2_properties_typeProperties_functionAppUrl": {
+						"value": "[parameters('AzureFunction2_properties_typeProperties_functionAppUrl')]"
+					},
 					"ERSMetadataFunctionsAPP_properties_typeProperties_functionAppUrl": {
 						"value": "[parameters('ERSMetadataFunctionsAPP_properties_typeProperties_functionAppUrl')]"
+					},
+					"Snowflake1_connectionString": {
+						"value": "[parameters('Snowflake1_connectionString')]"
 					},
 					"SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
 						"value": "[parameters('SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint')]"
@@ -192,7 +213,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "ArmTemplate_1",
+			"name": "ADFTutorialBulkCopyDFbanto_ArmTemplate_1",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "2018-02-01",
 			"properties": {
@@ -208,11 +229,11 @@
 				}
 			},
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_0')]"
+				"[resourceId('Microsoft.Resources/deployments', 'ADFTutorialBulkCopyDFbanto_ArmTemplate_0')]"
 			]
 		},
 		{
-			"name": "ArmTemplate_2",
+			"name": "ADFTutorialBulkCopyDFbanto_ArmTemplate_2",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "2018-02-01",
 			"properties": {
@@ -243,11 +264,11 @@
 				}
 			},
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_1')]"
+				"[resourceId('Microsoft.Resources/deployments', 'ADFTutorialBulkCopyDFbanto_ArmTemplate_1')]"
 			]
 		},
 		{
-			"name": "ArmTemplate_3",
+			"name": "ADFTutorialBulkCopyDFbanto_ArmTemplate_3",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "2018-02-01",
 			"properties": {
@@ -263,11 +284,11 @@
 				}
 			},
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_2')]"
+				"[resourceId('Microsoft.Resources/deployments', 'ADFTutorialBulkCopyDFbanto_ArmTemplate_2')]"
 			]
 		},
 		{
-			"name": "ArmTemplate_4",
+			"name": "ADFTutorialBulkCopyDFbanto_ArmTemplate_4",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "2018-02-01",
 			"properties": {
@@ -289,7 +310,7 @@
 				}
 			},
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_3')]"
+				"[resourceId('Microsoft.Resources/deployments', 'ADFTutorialBulkCopyDFbanto_ArmTemplate_3')]"
 			]
 		}
 	]

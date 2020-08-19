@@ -26,6 +26,9 @@
 		"AzureFunction1_functionKey": {
 			"value": ""
 		},
+		"AzureFunction2_functionKey": {
+			"value": ""
+		},
 		"AzureSqlDatabaseLinkedService_connectionString": {
 			"value": ""
 		},
@@ -62,8 +65,17 @@
 		"AzureFunction1_properties_typeProperties_functionAppUrl": {
 			"value": "https://ersmetadataprocessingpoc.azurewebsites.net"
 		},
+		"AzureFunction2_properties_typeProperties_functionAppUrl": {
+			"value": "https://adftests.azurewebsites.net"
+		},
 		"ERSMetadataFunctionsAPP_properties_typeProperties_functionAppUrl": {
 			"value": "https://ersmetadataprocessingpoc.azurewebsites.net"
+		},
+		"Snowflake1_connectionString": {
+			"value": ""
+		},
+		"TriggerTestPipeline_properties_SourceMetadata_parameters_TableName": {
+			"value": "SDKLOVVALUES"
 		},
 		"Trigger_73c_properties_pipeline_parameters_windowStart": {
 			"value": "@trigger().outputs.windowStartTime"
@@ -76,9 +88,6 @@
 		},
 		"SSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"value": ""
-		},
-		"TriggerTestPipeline_properties_SourceMetadata_parameters_TableName": {
-			"value": "SDKLOVVALUES"
 		}
 	}
 }
