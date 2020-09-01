@@ -67,8 +67,7 @@
 												"type": "AzureBlobStorageWriteSettings"
 											},
 											"formatSettings": {
-												"type": "AvroWriteSettings",
-												"quoteAllText": true
+												"type": "AvroWriteSettings"
 											}
 										},
 										"enableStaging": false,
@@ -595,8 +594,7 @@
 									"type": "AzureBlobStorageWriteSettings"
 								},
 								"formatSettings": {
-									"type": "AvroWriteSettings",
-									"quoteAllText": true
+									"type": "AvroWriteSettings"
 								}
 							},
 							"enableStaging": false,
@@ -806,8 +804,7 @@
 									"type": "AzureBlobStorageWriteSettings"
 								},
 								"formatSettings": {
-									"type": "AvroWriteSettings",
-									"quoteAllText": true
+									"type": "AvroWriteSettings"
 								}
 							},
 							"enableStaging": false,

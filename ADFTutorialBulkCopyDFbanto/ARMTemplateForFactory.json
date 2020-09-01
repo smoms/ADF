@@ -203,8 +203,7 @@
 									"type": "AzureBlobStorageWriteSettings"
 								},
 								"formatSettings": {
-									"type": "AvroWriteSettings",
-									"quoteAllText": true
+									"type": "AvroWriteSettings"
 								}
 							},
 							"enableStaging": false,
@@ -417,8 +416,7 @@
 									"type": "AzureBlobStorageWriteSettings"
 								},
 								"formatSettings": {
-									"type": "AvroWriteSettings",
-									"quoteAllText": true
+									"type": "AvroWriteSettings"
 								}
 							},
 							"enableStaging": false,
@@ -1668,8 +1666,7 @@
 												"type": "AzureBlobStorageWriteSettings"
 											},
 											"formatSettings": {
-												"type": "AvroWriteSettings",
-												"quoteAllText": true
+												"type": "AvroWriteSettings"
 											}
 										},
 										"enableStaging": false,
@@ -5117,6 +5114,38 @@
 				"[concat(variables('factoryId'), '/datasets/AzureSqlTableCustomer')]",
 				"[concat(variables('factoryId'), '/datasets/AzureSqlTableCustAddress')]",
 				"[concat(variables('factoryId'), '/datasets/AzureBlobDatasetWhereTest')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/One-Time_Test_MX01')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "MX01_EXP_HR",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-09-02T03:30:00.000Z",
+						"endTime": "2020-09-03T03:00:00.000Z",
+						"timeZone": "UTC",
+						"schedule": {}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/MX01_EXP_HR')]"
 			]
 		}
 	]
