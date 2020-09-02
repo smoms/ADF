@@ -2,7 +2,7 @@
 	"name": "One-Time_Test_MX01",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Started",
+		"runtimeState": "Stopped",
 		"pipelines": [
 			{
 				"pipelineReference": {
