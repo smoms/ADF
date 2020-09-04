@@ -732,7 +732,7 @@
 								"value": "@activity('GetGroupSCN').output.value",
 								"type": "Expression"
 							},
-							"batchCount": 16,
+							"batchCount": 8,
 							"activities": [
 								{
 									"name": "CopySCNGroup",
@@ -1624,6 +1624,37 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/One-Time_Test_MX01')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "MX01_EXP_HR",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2020-09-02T03:30:00.000Z",
+						"endTime": "2020-09-03T03:00:00.000Z",
+						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/MX01_EXP_HR')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Scheduler')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -1690,7 +1721,7 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Started",
+				"runtimeState": "Stopped",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -1718,7 +1749,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/One-Time_Test_MX01')]",
+			"name": "[concat(parameters('factoryName'), '/OneTimeSunday_8Processes')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -1736,12 +1767,16 @@
 				"type": "ScheduleTrigger",
 				"typeProperties": {
 					"recurrence": {
-						"frequency": "Day",
+						"frequency": "Week",
 						"interval": 1,
-						"startTime": "2020-09-02T03:30:00.000Z",
-						"endTime": "2020-09-03T03:00:00.000Z",
+						"startTime": "2020-09-06T10:00:00.000Z",
+						"endTime": "2020-09-09T11:53:00.000Z",
 						"timeZone": "UTC",
-						"schedule": {}
+						"schedule": {
+							"weekDays": [
+								"Sunday"
+							]
+						}
 					}
 				}
 			},
