@@ -13,6 +13,184 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/IncrementalCopyPipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LookupOldWaterMarkActivity",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "WatermarkTable",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "LookupNewWaterMarkActivity",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "select MAX(LastModifytime) as NewWatermarkvalue from data_source_table",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "SourceDataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LookupOldWaterMarkActivity",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "LookupNewWaterMarkActivity",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "select * from data_source_table where LastModifytime > '@{activity('LookupOldWaterMarkActivity').output.firstRow.WatermarkValue}' and LastModifytime <= '@{activity('LookupNewWaterMarkActivity').output.firstRow.NewWatermarkvalue}'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SourceDataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "SinkDataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "StoredProceduretoWriteWatermarkActivity",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "Copy data1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[usp_write_watermark]",
+							"storedProcedureParameters": {
+								"LastModifiedtime": {
+									"value": {
+										"value": "@{activity('LookupNewWaterMarkActivity').output.firstRow.NewWatermarkvalue}",
+										"type": "Expression"
+									},
+									"type": "DateTime"
+								},
+								"TableName": {
+									"value": {
+										"value": "@{activity('LookupOldWaterMarkActivity').output.firstRow.TableName}",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureSqlDatabaseLinkedService001",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/IterateAndCopySQLTable')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -296,6 +474,42 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/MX03_MXDM_Dynamic')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "MX03_MX_DATAMART",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"db_schema": {
+						"type": "string"
+					},
+					"db_table": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting/Source"
+				},
+				"annotations": [],
+				"type": "OracleTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().db_schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().db_table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/MurexDB_ComplexDataTypes')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -399,7 +613,7 @@
 						}
 					],
 					"transformations": [],
-					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\twildcardPaths:['EXP_HR_S3/*.avro'],\n\tpartitionBy('hash', 1)) ~> S3Dump\nS3Dump sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionFileNames:['ALPIQ_DLT_EXP_HR_REP_20200703181006.parquet'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ParquetGeneralization"
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\twildcardPaths:['EXP_HR_S3/*.avro'],\n\tpartitionBy('hash', 1)) ~> S3Dump\nS3Dump sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionFileNames:['ALPIQ_DLT_EXP_HR_REP_20200703181006.parquet'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ParquetGeneralization"
 				}
 			},
 			"dependsOn": []
@@ -433,7 +647,7 @@
 						}
 					],
 					"transformations": [],
-					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> StagedParquet\nStagedParquet sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionBy('roundRobin', 10),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DataExtractionSinkAvro"
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tformat: 'parquet') ~> StagedParquet\nStagedParquet sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionBy('roundRobin', 10),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DataExtractionSinkAvro"
 				}
 			},
 			"dependsOn": []
@@ -467,7 +681,7 @@
 						}
 					],
 					"transformations": [],
-					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpurgeFiles: true,\n\tformat: 'parquet') ~> ParquetSingleFile\nParquetSingleFile sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionBy('roundRobin', 25),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ParquetSplitted"
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tpurgeFiles: true,\n\tformat: 'parquet') ~> ParquetSingleFile\nParquetSingleFile sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionBy('roundRobin', 25),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ParquetSplitted"
 				}
 			},
 			"dependsOn": []
@@ -509,7 +723,7 @@
 							"name": "Join1"
 						}
 					],
-					"script": "source(output(\n\t\tid as integer,\n\t\tname as string,\n\t\tsurname as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> AzureSQLCustomer\nsource(output(\n\t\tcust_id as integer,\n\t\tstreet as string,\n\t\tnum as string,\n\t\tzip as integer,\n\t\tcity as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> AzureSQLCustAddr\nAzureSQLCustomer, AzureSQLCustAddr join(id == cust_id,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> Join1\nJoin1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SinkToBlob"
+					"script": "source(output(\n\t\tid as integer,\n\t\tname as string,\n\t\tsurname as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> AzureSQLCustomer\nsource(output(\n\t\tcust_id as integer,\n\t\tstreet as string,\n\t\tnum as string,\n\t\tzip as integer,\n\t\tcity as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> AzureSQLCustAddr\nAzureSQLCustomer, AzureSQLCustAddr join(id == cust_id,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> Join1\nJoin1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SinkToBlob"
 				}
 			},
 			"dependsOn": []
@@ -830,244 +1044,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/MurexDB_dev')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/CopyFromMurexDB_4')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "CopyBigTable",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "OracleSource",
-								"partitionOption": "DynamicRange",
-								"partitionSettings": {
-									"partitionColumnName": "M_HOUR",
-									"partitionUpperBound": "",
-									"partitionLowerBound": ""
-								},
-								"queryTimeout": "02:00:00"
-							},
-							"sink": {
-								"type": "ParquetSink",
-								"storeSettings": {
-									"type": "AzureBlobStorageWriteSettings"
-								}
-							},
-							"enableStaging": false,
-							"parallelCopies": 12
-						},
-						"inputs": [
-							{
-								"referenceName": "MurexDB_dev",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "Parquet1",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
-					}
-				],
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/MurexDB_dev')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ESI13T_Extraction')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "GetTableList",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "OracleSource",
-								"oracleReaderQuery": "Select OBJECT_NAME \nFROM ALL_OBJECTS \nWHERE OBJECT_NAME IN (\n'ATEL_ACCOUNTSELECTION'\n,'ATEL_BOOKSTRUCTURE'\n,'ATEL_POSTINGPARAMETER'\n,'SDKCLIENTS'\n,'SDKCURRENCIES'\n,'SDKDETAILSCOPES'\n,'SDKLOVS'\n,'SDKLOVVALUES'\n,'SDKMATURITYRULES'\n,'SDKSYSTEMPARAMETERS'\n,'SDKUNITS'\n,'SDKUSERLOVVALUES'\n,'SDKUSERS'\n,'SD_ANLAGEN'\n,'SD_ANLAGENTYPEN'\n,'SD_ANSCHRIFTEN'\n,'SD_BELEGTYPEN'\n,'SD_BILLMARKET'\n,'SD_BUSINESSAREAS'\n,'SD_DETAILPROPERTIES'\n,'SD_DETAILS'\n,'SD_DETAILTYPES'\n,'SD_DOMAINWERTE'\n,'SD_FIBU'\n,'SD_HOLIDAYS'\n,'SD_HOLIDAYZONE'\n,'SD_KONTAKTE'\n,'SD_KUNDEN'\n,'SD_LOVVALUE'\n,'SD_MANDANTEN'\n,'SD_PERSONEN'\n,'SD_POSTINGTYPE'\n,'SD_RECHNUNGEN'\n,'SD_RECHNUNGSPOS'\n,'SD_TAXCODE'\n,'SD_TRADECONTRACT'\n,'SD_TRADECONTRACTDET'\n,'SD_USER'\n,'SD_VERTRAEGE'\n,'SD_VERTRAGSGRUPPEN'\n,'SD_VERTRAGSTYPEN'\n,'SD_WAEHRUNGEN'\n,'ALPIQ_SCHEDULE_MAPPING'\n) \nAND OWNER = 'PS_ADMIN'",
-								"partitionOption": "None",
-								"queryTimeout": "02:00:00"
-							},
-							"dataset": {
-								"referenceName": "ESI13T_Dynamic",
-								"type": "DatasetReference",
-								"parameters": {
-									"TableName": "ALL_OBJECTS",
-									"SchemaName": "PUBLIC"
-								}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "ForEachTableInList",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "GetTableList",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@array(activity('GetTableList').output.value)",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "CopyTableToParquet_TEMP",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "OracleSource",
-											"oracleReaderQuery": {
-												"value": "@concat('Select * from ', item().OBJECT_NAME, ' where rownum < 5000')",
-												"type": "Expression"
-											},
-											"partitionOption": "None",
-											"queryTimeout": "02:00:00"
-										},
-										"sink": {
-											"type": "ParquetSink",
-											"storeSettings": {
-												"type": "AzureBlobStorageWriteSettings"
-											}
-										},
-										"enableStaging": false,
-										"parallelCopies": 1,
-										"dataIntegrationUnits": 2,
-										"translator": {
-											"type": "TabularTranslator",
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "ESI13T_Dynamic",
-											"type": "DatasetReference",
-											"parameters": {
-												"TableName": {
-													"value": "@item().OBJECT_NAME",
-													"type": "Expression"
-												},
-												"SchemaName": "PS_ADMIN"
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "TMP_Parquet",
-											"type": "DatasetReference",
-											"parameters": {
-												"Folder": "TMP"
-											}
-										}
-									]
-								},
-								{
-									"name": "ParquetSplitAvro",
-									"type": "ExecuteDataFlow",
-									"dependsOn": [
-										{
-											"activity": "CopyTableToParquet_TEMP",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"dataflow": {
-											"referenceName": "ParquetSplitAvro",
-											"type": "DataFlowReference",
-											"parameters": {},
-											"datasetParameters": {
-												"StagedParquet": {
-													"Folder": {
-														"value": "@concat('ParquetSplit/',utcnow())",
-														"type": "Expression"
-													}
-												},
-												"DataExtractionSinkAvro": {}
-											}
-										},
-										"staging": {},
-										"compute": {
-											"coreCount": 8,
-											"computeType": "General"
-										}
-									}
-								}
-							]
-						}
-					}
-				],
-				"parameters": {
-					"ExtractionTimestamp": {
-						"type": "string",
-						"defaultValue": "utcnow('yyyy-MM-dd HH-mm-ss')"
-					}
-				},
-				"folder": {
-					"name": "ERSExtractionJobTesting"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/ESI13T_Dynamic')]",
-				"[concat(variables('factoryId'), '/dataflows/ParquetSplitAvro')]"
 			]
 		}
 	]

@@ -21,6 +21,239 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/CopyFromMurexDB_4')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CopyBigTable",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"partitionOption": "DynamicRange",
+								"partitionSettings": {
+									"partitionColumnName": "M_HOUR",
+									"partitionUpperBound": "",
+									"partitionLowerBound": ""
+								},
+								"queryTimeout": "02:00:00"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"parallelCopies": 12
+						},
+						"inputs": [
+							{
+								"referenceName": "MurexDB_dev",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Parquet1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ESI13T_Extraction')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetTableList",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": "Select OBJECT_NAME \nFROM ALL_OBJECTS \nWHERE OBJECT_NAME IN (\n'ATEL_ACCOUNTSELECTION'\n,'ATEL_BOOKSTRUCTURE'\n,'ATEL_POSTINGPARAMETER'\n,'SDKCLIENTS'\n,'SDKCURRENCIES'\n,'SDKDETAILSCOPES'\n,'SDKLOVS'\n,'SDKLOVVALUES'\n,'SDKMATURITYRULES'\n,'SDKSYSTEMPARAMETERS'\n,'SDKUNITS'\n,'SDKUSERLOVVALUES'\n,'SDKUSERS'\n,'SD_ANLAGEN'\n,'SD_ANLAGENTYPEN'\n,'SD_ANSCHRIFTEN'\n,'SD_BELEGTYPEN'\n,'SD_BILLMARKET'\n,'SD_BUSINESSAREAS'\n,'SD_DETAILPROPERTIES'\n,'SD_DETAILS'\n,'SD_DETAILTYPES'\n,'SD_DOMAINWERTE'\n,'SD_FIBU'\n,'SD_HOLIDAYS'\n,'SD_HOLIDAYZONE'\n,'SD_KONTAKTE'\n,'SD_KUNDEN'\n,'SD_LOVVALUE'\n,'SD_MANDANTEN'\n,'SD_PERSONEN'\n,'SD_POSTINGTYPE'\n,'SD_RECHNUNGEN'\n,'SD_RECHNUNGSPOS'\n,'SD_TAXCODE'\n,'SD_TRADECONTRACT'\n,'SD_TRADECONTRACTDET'\n,'SD_USER'\n,'SD_VERTRAEGE'\n,'SD_VERTRAGSGRUPPEN'\n,'SD_VERTRAGSTYPEN'\n,'SD_WAEHRUNGEN'\n,'ALPIQ_SCHEDULE_MAPPING'\n) \nAND OWNER = 'PS_ADMIN'",
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "ESI13T_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"TableName": "ALL_OBJECTS",
+									"SchemaName": "PUBLIC"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEachTableInList",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "GetTableList",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@array(activity('GetTableList').output.value)",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "CopyTableToParquet_TEMP",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"oracleReaderQuery": {
+												"value": "@concat('Select * from ', item().OBJECT_NAME, ' where rownum < 5000')",
+												"type": "Expression"
+											},
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											}
+										},
+										"enableStaging": false,
+										"parallelCopies": 1,
+										"dataIntegrationUnits": 2,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "ESI13T_Dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"TableName": {
+													"value": "@item().OBJECT_NAME",
+													"type": "Expression"
+												},
+												"SchemaName": "PS_ADMIN"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "TMP_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"Folder": "TMP"
+											}
+										}
+									]
+								},
+								{
+									"name": "ParquetSplitAvro",
+									"type": "ExecuteDataFlow",
+									"dependsOn": [
+										{
+											"activity": "CopyTableToParquet_TEMP",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataflow": {
+											"referenceName": "ParquetSplitAvro",
+											"type": "DataFlowReference",
+											"parameters": {},
+											"datasetParameters": {
+												"StagedParquet": {
+													"Folder": {
+														"value": "@concat('ParquetSplit/',utcnow())",
+														"type": "Expression"
+													}
+												},
+												"DataExtractionSinkAvro": {}
+											}
+										},
+										"staging": {},
+										"compute": {
+											"coreCount": 8,
+											"computeType": "General"
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"ExtractionTimestamp": {
+						"type": "string",
+						"defaultValue": "utcnow('yyyy-MM-dd HH-mm-ss')"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ESI13T_Stage_SD_RECHNUNGSPOS')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -1302,6 +1535,231 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/MX03_EXP_HR')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetGroupCount",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "extractionTimestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "@concat('select ceil((select count(*) from ',variables('tableName'),')/8000000) as group_no from dual')",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX03_MXDM_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": "MX_DATAMART",
+									"db_table": "@variables('tableName')"
+								}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "NumberOfSCNGroups",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetGroupCount",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "numberOfGroups",
+							"value": {
+								"value": "@string(activity('GetGroupCount').output.firstRow.GROUP_NO)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "GetGroupSCN",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "NumberOfSCNGroups",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "@concat('select\nCASE\n  WHEN grp_nbr = 1\n  THEN min(ora_rowscn)\n  WHEN grp_nbr > 1\n  THEN min(ora_rowscn) +1\n  END as Starting_Value\n, max(ora_rowscn) as Ending_Value\n, count(*)        as Total_Records\n, grp_nbr         as Group_Nbr\nfrom (\nselect ora_rowscn,\nntile(',variables('numberOfGroups') ,') over (order by ora_rowscn) grp_nbr\nfrom ',variables('tableName') ,'\n)\ngroup by grp_nbr\nORDER BY grp_nbr ASC')",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX03_MXDM_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": "MX_DATAMART",
+									"db_table": "@variables('tableName')"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEachGroup",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "GetGroupSCN",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('GetGroupSCN').output.value",
+								"type": "Expression"
+							},
+							"batchCount": 8,
+							"activities": [
+								{
+									"name": "CopySCNGroup",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"oracleReaderQuery": {
+												"value": "@concat('SELECT /*+ NO_PARALLEL(\"', variables('tableName'),'\") */  * FROM ',variables('tableName'),' WHERE ORA_ROWSCN BETWEEN ', item().STARTING_VALUE, ' AND ',item().ENDING_VALUE)",
+												"type": "Expression"
+											},
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MX03_MXDM_Dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"db_schema": "MX_DATAMART",
+												"db_table": "@variables('tableName')"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataExtraction_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder": {
+													"value": "@concat('ORACLE/MX03/MX_DATAMART/',variables('tableName'),'/',variables('extractionTimestamp'))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "extractionTimestamp",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "extractionTimestamp",
+							"value": {
+								"value": "@formatDateTime(utcnow(),'yyyy-MM-dd HH-mm-ss')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"variables": {
+					"numberOfGroups": {
+						"type": "String"
+					},
+					"tableName": {
+						"type": "String",
+						"defaultValue": "ALPIQ_DLT_EXP_HR_REP"
+					},
+					"extractionTimestamp": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/MurexDB_ComplexWhereClause')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -1655,6 +2113,42 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/OneTimeSunday_8Processes')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "MX01_EXP_HR",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Week",
+						"interval": 1,
+						"startTime": "2020-09-06T10:00:00.000Z",
+						"endTime": "2020-09-09T11:53:00.000Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"weekDays": [
+								"Sunday"
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/MX01_EXP_HR')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Scheduler')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -1746,42 +2240,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/SourceMetadata')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/OneTimeSunday_8Processes')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "MX01_EXP_HR",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Week",
-						"interval": 1,
-						"startTime": "2020-09-06T10:00:00.000Z",
-						"endTime": "2020-09-09T11:53:00.000Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"weekDays": [
-								"Sunday"
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/MX01_EXP_HR')]"
 			]
 		}
 	]

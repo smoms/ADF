@@ -71,6 +71,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'MX01_MX_DATAMART'"
 		},
+		"MX03_MX_DATAMART_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'MX03_MX_DATAMART'"
+		},
 		"MySQLCMDBServer_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'MySQLCMDBServer'"
@@ -257,6 +261,9 @@
 					},
 					"MX01_MX_DATAMART_connectionString": {
 						"value": "[parameters('MX01_MX_DATAMART_connectionString')]"
+					},
+					"MX03_MX_DATAMART_connectionString": {
+						"value": "[parameters('MX03_MX_DATAMART_connectionString')]"
 					},
 					"Oracle1_connectionString": {
 						"value": "[parameters('Oracle1_connectionString')]"

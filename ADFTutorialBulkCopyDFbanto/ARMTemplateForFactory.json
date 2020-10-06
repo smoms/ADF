@@ -71,6 +71,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'MX01_MX_DATAMART'"
 		},
+		"MX03_MX_DATAMART_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'MX03_MX_DATAMART'"
+		},
 		"MySQLCMDBServer_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'MySQLCMDBServer'"
@@ -2408,6 +2412,234 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/MX03_EXP_HR')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetGroupCount",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "extractionTimestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "@concat('select ceil((select count(*) from ',variables('tableName'),')/8000000) as group_no from dual')",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX03_MXDM_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": "MX_DATAMART",
+									"db_table": "@variables('tableName')"
+								}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "NumberOfSCNGroups",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "GetGroupCount",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "numberOfGroups",
+							"value": {
+								"value": "@string(activity('GetGroupCount').output.firstRow.GROUP_NO)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "GetGroupSCN",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "NumberOfSCNGroups",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "@concat('select\nCASE\n  WHEN grp_nbr = 1\n  THEN min(ora_rowscn)\n  WHEN grp_nbr > 1\n  THEN min(ora_rowscn) +1\n  END as Starting_Value\n, max(ora_rowscn) as Ending_Value\n, count(*)        as Total_Records\n, grp_nbr         as Group_Nbr\nfrom (\nselect ora_rowscn,\nntile(',variables('numberOfGroups') ,') over (order by ora_rowscn) grp_nbr\nfrom ',variables('tableName') ,'\n)\ngroup by grp_nbr\nORDER BY grp_nbr ASC')",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX03_MXDM_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": "MX_DATAMART",
+									"db_table": "@variables('tableName')"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEachGroup",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "GetGroupSCN",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('GetGroupSCN').output.value",
+								"type": "Expression"
+							},
+							"batchCount": 8,
+							"activities": [
+								{
+									"name": "CopySCNGroup",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"oracleReaderQuery": {
+												"value": "@concat('SELECT /*+ NO_PARALLEL(\"', variables('tableName'),'\") */  * FROM ',variables('tableName'),' WHERE ORA_ROWSCN BETWEEN ', item().STARTING_VALUE, ' AND ',item().ENDING_VALUE)",
+												"type": "Expression"
+											},
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MX03_MXDM_Dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"db_schema": "MX_DATAMART",
+												"db_table": "@variables('tableName')"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataExtraction_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder": {
+													"value": "@concat('ORACLE/MX03/MX_DATAMART/',variables('tableName'),'/',variables('extractionTimestamp'))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "extractionTimestamp",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "extractionTimestamp",
+							"value": {
+								"value": "@formatDateTime(utcnow(),'yyyy-MM-dd HH-mm-ss')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"variables": {
+					"numberOfGroups": {
+						"type": "String"
+					},
+					"tableName": {
+						"type": "String",
+						"defaultValue": "ALPIQ_DLT_EXP_HR_REP"
+					},
+					"extractionTimestamp": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/MX03_MXDM_Dynamic')]",
+				"[concat(variables('factoryId'), '/datasets/DataExtraction_Parquet')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/MinuteDataProc')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -3569,6 +3801,44 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/MX03_MXDM_Dynamic')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "MX03_MX_DATAMART",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"db_schema": {
+						"type": "string"
+					},
+					"db_table": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting/Source"
+				},
+				"annotations": [],
+				"type": "OracleTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().db_schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().db_table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/MX03_MX_DATAMART')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/MurexDBBlobCsv')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -4650,6 +4920,25 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/MX03_MX_DATAMART')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "Oracle",
+				"typeProperties": {
+					"connectionString": "[parameters('MX03_MX_DATAMART_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "IR-Fujitsu",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/IR-Fujitsu')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/MySQLCMDBServer')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -4789,6 +5078,42 @@
 						"startTime": "2020-09-02T03:30:00.000Z",
 						"endTime": "2020-09-03T03:00:00.000Z",
 						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/MX01_EXP_HR')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OneTimeSunday_8Processes')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "MX01_EXP_HR",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Week",
+						"interval": 1,
+						"startTime": "2020-09-06T10:00:00.000Z",
+						"endTime": "2020-09-09T11:53:00.000Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"weekDays": [
+								"Sunday"
+							]
+						}
 					}
 				}
 			},
@@ -5020,7 +5345,7 @@
 						}
 					],
 					"transformations": [],
-					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\twildcardPaths:['EXP_HR_S3/*.avro'],\n\tpartitionBy('hash', 1)) ~> S3Dump\nS3Dump sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionFileNames:['ALPIQ_DLT_EXP_HR_REP_20200703181006.parquet'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ParquetGeneralization"
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\twildcardPaths:['EXP_HR_S3/*.avro'],\n\tpartitionBy('hash', 1)) ~> S3Dump\nS3Dump sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionFileNames:['ALPIQ_DLT_EXP_HR_REP_20200703181006.parquet'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ParquetGeneralization"
 				}
 			},
 			"dependsOn": [
@@ -5057,7 +5382,7 @@
 						}
 					],
 					"transformations": [],
-					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet') ~> StagedParquet\nStagedParquet sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionBy('roundRobin', 10),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DataExtractionSinkAvro"
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tformat: 'parquet') ~> StagedParquet\nStagedParquet sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionBy('roundRobin', 10),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DataExtractionSinkAvro"
 				}
 			},
 			"dependsOn": [
@@ -5094,7 +5419,7 @@
 						}
 					],
 					"transformations": [],
-					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpurgeFiles: true,\n\tformat: 'parquet') ~> ParquetSingleFile\nParquetSingleFile sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionBy('roundRobin', 25),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ParquetSplitted"
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tpurgeFiles: true,\n\tformat: 'parquet') ~> ParquetSingleFile\nParquetSingleFile sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionBy('roundRobin', 25),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ParquetSplitted"
 				}
 			},
 			"dependsOn": [
@@ -5138,49 +5463,13 @@
 							"name": "Join1"
 						}
 					],
-					"script": "source(output(\n\t\tid as integer,\n\t\tname as string,\n\t\tsurname as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> AzureSQLCustomer\nsource(output(\n\t\tcust_id as integer,\n\t\tstreet as string,\n\t\tnum as string,\n\t\tzip as integer,\n\t\tcity as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> AzureSQLCustAddr\nAzureSQLCustomer, AzureSQLCustAddr join(id == cust_id,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> Join1\nJoin1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SinkToBlob"
+					"script": "source(output(\n\t\tid as integer,\n\t\tname as string,\n\t\tsurname as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> AzureSQLCustomer\nsource(output(\n\t\tcust_id as integer,\n\t\tstreet as string,\n\t\tnum as string,\n\t\tzip as integer,\n\t\tcity as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> AzureSQLCustAddr\nAzureSQLCustomer, AzureSQLCustAddr join(id == cust_id,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> Join1\nJoin1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SinkToBlob"
 				}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/AzureSqlTableCustomer')]",
 				"[concat(variables('factoryId'), '/datasets/AzureSqlTableCustAddress')]",
 				"[concat(variables('factoryId'), '/datasets/AzureBlobDatasetWhereTest')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/OneTimeSunday_8Processes')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "MX01_EXP_HR",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Week",
-						"interval": 1,
-						"startTime": "2020-09-06T10:00:00.000Z",
-						"endTime": "2020-09-09T11:53:00.000Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"weekDays": [
-								"Sunday"
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/MX01_EXP_HR')]"
 			]
 		}
 	]

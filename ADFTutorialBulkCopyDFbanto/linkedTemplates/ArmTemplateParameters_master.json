@@ -53,6 +53,9 @@
 		"MX01_MX_DATAMART_connectionString": {
 			"value": ""
 		},
+		"MX03_MX_DATAMART_connectionString": {
+			"value": ""
+		},
 		"MySQLCMDBServer_connectionString": {
 			"value": ""
 		},
