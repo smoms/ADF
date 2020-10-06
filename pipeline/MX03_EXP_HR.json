@@ -178,7 +178,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"folder": {
-											"value": "@concat('ORACLE/MX01/MX_DATAMART/',variables('tableName'),'/',variables('extractionTimestamp'))",
+											"value": "@concat('ORACLE/MX03/MX_DATAMART/',variables('tableName'),'/',variables('extractionTimestamp'))",
 											"type": "Expression"
 										}
 									}
