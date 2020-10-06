@@ -147,6 +147,9 @@
 									"type": "ParquetSink",
 									"storeSettings": {
 										"type": "AzureBlobStorageWriteSettings"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
 									}
 								},
 								"enableStaging": false,
@@ -161,14 +164,11 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MX01_MXDM_Dynamic",
+									"referenceName": "MX03_MXDM_Dynamic",
 									"type": "DatasetReference",
 									"parameters": {
 										"db_schema": "MX_DATAMART",
-										"db_table": {
-											"value": "@variables('tableName')",
-											"type": "Expression"
-										}
+										"db_table": "@variables('tableName')"
 									}
 								}
 							],
