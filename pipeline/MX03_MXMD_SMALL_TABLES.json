@@ -29,13 +29,10 @@
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
-						"referenceName": "MX01_MXDM_Dynamic",
+						"referenceName": "MX03_MXDM_Dynamic",
 						"type": "DatasetReference",
 						"parameters": {
-							"db_schema": {
-								"value": "@variables('db_schema')",
-								"type": "Expression"
-							},
+							"db_schema": "@variables('db_schema')",
 							"db_table": "ALL_OBJECTS"
 						}
 					},
@@ -156,13 +153,10 @@
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
-						"referenceName": "MX01_MXDM_Dynamic",
+						"referenceName": "MX03_MXDM_Dynamic",
 						"type": "DatasetReference",
 						"parameters": {
-							"db_schema": {
-								"value": "@variables('db_schema')",
-								"type": "Expression"
-							},
+							"db_schema": "@variables('db_schema')",
 							"db_table": "ALL_OBJECTS"
 						}
 					},
@@ -317,13 +311,10 @@
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
-						"referenceName": "MX01_MXDM_Dynamic",
+						"referenceName": "MX03_MXDM_Dynamic",
 						"type": "DatasetReference",
 						"parameters": {
-							"db_schema": {
-								"value": "@variables('db_schema')",
-								"type": "Expression"
-							},
+							"db_schema": "@variables('db_schema')",
 							"db_table": "ALL_OBJECTS"
 						}
 					},
