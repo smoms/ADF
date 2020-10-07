@@ -367,6 +367,9 @@
 									"storeSettings": {
 										"type": "AzureBlobStorageWriteSettings",
 										"maxConcurrentConnections": 2
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
 									}
 								},
 								"enableStaging": false,
@@ -381,17 +384,11 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MX01_MXDM_Dynamic",
+									"referenceName": "MX03_MXDM_Dynamic",
 									"type": "DatasetReference",
 									"parameters": {
-										"db_schema": {
-											"value": "@variables('db_schema')",
-											"type": "Expression"
-										},
-										"db_table": {
-											"value": "@item().OBJECT_NAME",
-											"type": "Expression"
-										}
+										"db_schema": "@variables('db_schema')",
+										"db_table": "@item().OBJECT_NAME"
 									}
 								}
 							],
