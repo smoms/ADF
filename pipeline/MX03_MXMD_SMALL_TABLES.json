@@ -82,6 +82,9 @@
 									"storeSettings": {
 										"type": "AzureBlobStorageWriteSettings",
 										"maxConcurrentConnections": 2
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
 									}
 								},
 								"enableStaging": false,
@@ -96,17 +99,11 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MX01_MXDM_Dynamic",
+									"referenceName": "MX03_MXDM_Dynamic",
 									"type": "DatasetReference",
 									"parameters": {
-										"db_schema": {
-											"value": "@variables('db_schema')",
-											"type": "Expression"
-										},
-										"db_table": {
-											"value": "@item().OBJECT_NAME",
-											"type": "Expression"
-										}
+										"db_schema": "@variables('db_schema')",
+										"db_table": "@item().OBJECT_NAME"
 									}
 								}
 							],
@@ -181,7 +178,7 @@
 						"value": "@array(activity('Lookup - 15 Tables').output.value)",
 						"type": "Expression"
 					},
-					"batchCount": 2,
+					"batchCount": 3,
 					"activities": [
 						{
 							"name": "Copy2Parquet_whereTimestamp",
@@ -217,6 +214,9 @@
 									"storeSettings": {
 										"type": "AzureBlobStorageWriteSettings",
 										"maxConcurrentConnections": 2
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
 									}
 								},
 								"enableStaging": false,
@@ -231,17 +231,11 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MX01_MXDM_Dynamic",
+									"referenceName": "MX03_MXDM_Dynamic",
 									"type": "DatasetReference",
 									"parameters": {
-										"db_schema": {
-											"value": "@variables('db_schema')",
-											"type": "Expression"
-										},
-										"db_table": {
-											"value": "@item().OBJECT_NAME",
-											"type": "Expression"
-										}
+										"db_schema": "@variables('db_schema')",
+										"db_table": "@item().OBJECT_NAME"
 									}
 								}
 							],
