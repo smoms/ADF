@@ -24,17 +24,13 @@
 				"typeProperties": {
 					"source": {
 						"type": "OracleSource",
-						"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN(\n'ALPIQ_LOCATION_COUNTRY_VIEW'\n,'V_STRATEGY_TREE_DBF'\n,'V_TRN_FLAGS_DBF'\n)",
+						"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN(\n'ACT_PHYS_DBF'\n,'ALPIQ_CLOSING_DATE_VIEW'\n,'CAL_HOL_DBF'\n,'CM_LOCAT_DBF'\n,'CM_PROF_PB_DBF'\n,'CM_PROF_PH_DBF'\n,'CM_PROFH_DBF'\n,'CM_UNIT_DBF'\n,'CONTRACT_DBF'\n,'MX_PURGE_DET_DBF'\n,'PROFIT_HEADER'\n,'ROUTE_PHYS_DBF'\n,'TYPOLOGY_DBF'\n,'UDTB113_DBF'\n,'UDTH113_DBF'\n,'CM_LTYPE_DBF'\n)",
 						"partitionOption": "None",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
-						"referenceName": "MX03_MXDM_Dynamic",
-						"type": "DatasetReference",
-						"parameters": {
-							"db_schema": "@variables('db_schema')",
-							"db_table": "ALL_OBJECTS"
-						}
+						"referenceName": "MX03_MX_BO_Dynamic",
+						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
 				}
@@ -57,7 +53,7 @@
 						"type": "Expression"
 					},
 					"isSequential": false,
-					"batchCount": 2,
+					"batchCount": 4,
 					"activities": [
 						{
 							"name": "Copy2Parquet_plain",
@@ -99,7 +95,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MX03_MXDM_Dynamic",
+									"referenceName": "MX03_MX_BO_Dynamic",
 									"type": "DatasetReference",
 									"parameters": {
 										"db_schema": "@variables('db_schema')",
@@ -119,148 +115,6 @@
 									}
 								}
 							]
-						}
-					]
-				}
-			},
-			{
-				"name": "Lookup - 15 Tables",
-				"type": "Lookup",
-				"dependsOn": [
-					{
-						"activity": "Set Timestamp",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "OracleSource",
-						"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'ALPIQ_MASTER_AGR_REP'\n,'ALPIQ_SIM_PURGED_REP'\n,'ALPIQ_SIM_STOCK_REP'\n,'ATEL_CMAT_REP'\n,'ATEL_CS_ACTUALS_REP'\n,'ATEL_CS_FORECAST_REP'\n,'ATEL_MDL_FX_REP'\n,'ATEL_OPTIONS_REP'\n,'ATEL_SIM_OPT_GRK_REP'\n,'ATEL_SQL_CNTP_REP'\n,'ATEL_SQL_FEE_REP'\n,'ATEL_SQL_INDEX_REP'\n,'ATEL_SQL_PFTREE_REP'\n,'ATEL_SQL_PF_REP'\n,'ATEL_SQL_PR_IND_REP'\n)",
-						"partitionOption": "None",
-						"queryTimeout": "02:00:00"
-					},
-					"dataset": {
-						"referenceName": "MX03_MXDM_Dynamic",
-						"type": "DatasetReference",
-						"parameters": {
-							"db_schema": "@variables('db_schema')",
-							"db_table": "ALL_OBJECTS"
-						}
-					},
-					"firstRowOnly": false
-				}
-			},
-			{
-				"name": "ForEach2",
-				"description": "",
-				"type": "ForEach",
-				"dependsOn": [
-					{
-						"activity": "Lookup - 15 Tables",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"items": {
-						"value": "@array(activity('Lookup - 15 Tables').output.value)",
-						"type": "Expression"
-					},
-					"batchCount": 3,
-					"activities": [
-						{
-							"name": "Copy2Parquet_whereTimestamp",
-							"type": "Copy",
-							"dependsOn": [
-								{
-									"activity": "refvalue",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"source": {
-									"type": "OracleSource",
-									"oracleReaderQuery": {
-										"value": "@concat('SELECT * from ', variables('db_schema'), '.', item().OBJECT_NAME, ' where m_ref_data in (select d.m_ref_data from DYN_AUDIT_REP d, JOB_AUDIT_REP j where d.m_idjob=j.m_mx_ref_job and d.M_DELETED  = ''N'' and j.M_STATUS in  (''Done'',''Corrected'') and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') >', '''',variables('refvalue'),  '''', ' and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') <= ', '''', variables('extraction_timestamp'),''')')",
-										"type": "Expression"
-									},
-									"partitionOption": "None",
-									"queryTimeout": "02:00:00"
-								},
-								"sink": {
-									"type": "ParquetSink",
-									"storeSettings": {
-										"type": "AzureBlobStorageWriteSettings",
-										"maxConcurrentConnections": 2
-									},
-									"formatSettings": {
-										"type": "ParquetWriteSettings"
-									}
-								},
-								"enableStaging": false,
-								"translator": {
-									"type": "TabularTranslator",
-									"typeConversion": true,
-									"typeConversionSettings": {
-										"allowDataTruncation": true,
-										"treatBooleanAsNumber": false
-									}
-								}
-							},
-							"inputs": [
-								{
-									"referenceName": "MX03_MXDM_Dynamic",
-									"type": "DatasetReference",
-									"parameters": {
-										"db_schema": "@variables('db_schema')",
-										"db_table": "@item().OBJECT_NAME"
-									}
-								}
-							],
-							"outputs": [
-								{
-									"referenceName": "DataExtraction_Parquet",
-									"type": "DatasetReference",
-									"parameters": {
-										"folder": {
-											"value": "@concat('ORACLE/',variables('db_host'),'/',variables('db_schema'),'/',item().OBJECT_NAME,'/',variables('extraction_timestamp'))",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						},
-						{
-							"name": "refvalue",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "refvalue",
-								"value": "20200803 000000"
-							}
 						}
 					]
 				}
@@ -276,146 +130,6 @@
 						"value": "@formatDateTime(utcnow(),'yyyy-MM-dd HH-mm-ss')",
 						"type": "Expression"
 					}
-				}
-			},
-			{
-				"name": "Lookup - 1 Table",
-				"type": "Lookup",
-				"dependsOn": [
-					{
-						"activity": "Set Timestamp",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "OracleSource",
-						"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'ALPIQ_CMIP_EXPORT'\n)",
-						"partitionOption": "None",
-						"queryTimeout": "02:00:00"
-					},
-					"dataset": {
-						"referenceName": "MX03_MXDM_Dynamic",
-						"type": "DatasetReference",
-						"parameters": {
-							"db_schema": "@variables('db_schema')",
-							"db_table": "ALL_OBJECTS"
-						}
-					},
-					"firstRowOnly": false
-				}
-			},
-			{
-				"name": "ForEach3",
-				"type": "ForEach",
-				"dependsOn": [
-					{
-						"activity": "Lookup - 1 Table",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"items": {
-						"value": "@array(activity('Lookup - 1 Table').output.value)",
-						"type": "Expression"
-					},
-					"activities": [
-						{
-							"name": "Copy2Parquet_whereClosing",
-							"type": "Copy",
-							"dependsOn": [
-								{
-									"activity": "refvalue_closing",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"source": {
-									"type": "OracleSource",
-									"oracleReaderQuery": {
-										"value": "@concat('SELECT * from ', variables('db_schema'), '.', item().OBJECT_NAME, ' where closing_date > to_date(''', string(variables('refvalueClosing')),''',''DD.MM.YYYY'')')",
-										"type": "Expression"
-									},
-									"partitionOption": "None",
-									"queryTimeout": "02:00:00"
-								},
-								"sink": {
-									"type": "ParquetSink",
-									"storeSettings": {
-										"type": "AzureBlobStorageWriteSettings",
-										"maxConcurrentConnections": 2
-									},
-									"formatSettings": {
-										"type": "ParquetWriteSettings"
-									}
-								},
-								"enableStaging": false,
-								"translator": {
-									"type": "TabularTranslator",
-									"typeConversion": true,
-									"typeConversionSettings": {
-										"allowDataTruncation": true,
-										"treatBooleanAsNumber": false
-									}
-								}
-							},
-							"inputs": [
-								{
-									"referenceName": "MX03_MXDM_Dynamic",
-									"type": "DatasetReference",
-									"parameters": {
-										"db_schema": "@variables('db_schema')",
-										"db_table": "@item().OBJECT_NAME"
-									}
-								}
-							],
-							"outputs": [
-								{
-									"referenceName": "DataExtraction_Parquet",
-									"type": "DatasetReference",
-									"parameters": {
-										"folder": {
-											"value": "@concat('ORACLE/',variables('db_host'),'/',variables('db_schema'),'/',item().OBJECT_NAME,'/',variables('extraction_timestamp'))",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						},
-						{
-							"name": "refvalue_closing",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "refvalueClosing",
-								"value": "02.08.2020"
-							}
-						}
-					]
 				}
 			}
 		],
