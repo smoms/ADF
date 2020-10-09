@@ -1,0 +1,33 @@
+{
+	"name": "MX03_MX_BO_Dynamic",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MX03_MX_DATAMART",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"db_schema": {
+				"type": "string"
+			},
+			"db_table": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "ERSExtractionJobTesting/Source"
+		},
+		"annotations": [],
+		"type": "OracleTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().db_schema",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().db_table",
+				"type": "Expression"
+			}
+		}
+	}
+}
