@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Lookup - 3 Tables",
+				"name": "Lookup - 16 Tables",
 				"type": "Lookup",
 				"dependsOn": [
 					{
@@ -44,7 +44,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Lookup - 3 Tables",
+						"activity": "Lookup - 16 Tables",
 						"dependencyConditions": [
 							"Succeeded"
 						]
