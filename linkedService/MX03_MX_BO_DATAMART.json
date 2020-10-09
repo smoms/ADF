@@ -1,0 +1,16 @@
+{
+	"name": "MX03_MX_BO_DATAMART",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "Oracle",
+		"typeProperties": {
+			"connectionString": "host=alpmuxdbs1vt;port=1521;sid=MX03;user id=MX_BO_DATAMART",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI2OTRjN2I1MS1mOGYxLTQ3ZGUtODYzYy1mMjI2YjQ5OGI4YzEiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "IR-Fujitsu",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
