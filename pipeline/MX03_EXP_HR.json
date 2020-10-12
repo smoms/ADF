@@ -119,7 +119,7 @@
 						"value": "@activity('GetGroupSCN').output.value",
 						"type": "Expression"
 					},
-					"batchCount": 19,
+					"batchCount": 16,
 					"activities": [
 						{
 							"name": "CopySCNGroup",
