@@ -1,6 +1,240 @@
 {
 	"name": "MX03_FIN_POS",
 	"properties": {
+		"activities": [
+			{
+				"name": "Set extraction timestamp",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "extractionTimestamp",
+					"value": {
+						"value": "@formatDateTime(utcnow(),'yyyy-MM-dd HH-mm-ss')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Select last run information",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Set extraction timestamp",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SnowflakeSource",
+						"query": {
+							"value": "@concat('select \nLAST_RUN_TIMESTAMP,\nLAST_RUN_CLOSING\nfrom SHARED.EXTR_LAST_RUN_INFO\nWHERE JOB_NAME = ''',pipeline().Pipeline,'''')",
+							"type": "Expression"
+						},
+						"exportSettings": {
+							"type": "SnowflakeExportCopyCommand"
+						}
+					},
+					"dataset": {
+						"referenceName": "SnowflakeTable1",
+						"type": "DatasetReference",
+						"parameters": {
+							"table_name": "EXTR_LAST_RUN_INFO"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "set last run timestamp",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Select last run information",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "lastRunTimestamp",
+					"value": {
+						"value": "@if(\nequals(activity('Select last run information').output.value[0].LAST_RUN_TIMESTAMP,NULL)\n,NULL\n,formatDateTime(activity('Select last run information').output.value[0].LAST_RUN_TIMESTAMP,'yyyy-MM-dd HH-mm-ss'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "set last run closing",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "set last run timestamp",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "lastRunClosing",
+					"value": {
+						"value": "@if(\nequals(activity('Select last run information').output.value[0].LAST_RUN_CLOSING,NULL)\n,NULL\n,formatDateTime(activity('Select last run information').output.value[0].LAST_RUN_CLOSING,'yyyy-MM-dd'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Get Tables of the Job",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "set last run closing",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'ALPIQ_FIN_POS_REP')",
+						"partitionOption": "None",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "MX03_MXDM_Dynamic",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_table": "ALL_OBJECTS"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Copy data for each table",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Tables of the Job",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@array(activity('Get Tables of the Job').output.value)",
+						"type": "Expression"
+					},
+					"batchCount": 4,
+					"activities": [
+						{
+							"name": "Extract data to Parquet in BLOB Storage",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "OracleSource",
+									"partitionOption": "None",
+									"queryTimeout": "02:00:00"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "MX03_MXDM_Dynamic",
+									"type": "DatasetReference",
+									"parameters": {
+										"db_schema": {
+											"value": "@variables('dbSchema')",
+											"type": "Expression"
+										},
+										"db_table": {
+											"value": "@item().OBJECT_NAME",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DataExtraction_Parquet",
+									"type": "DatasetReference",
+									"parameters": {
+										"folder": {
+											"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('db_schema'),'/',item().OBJECT_NAME,'/',variables('extractionTimestamp'))",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"extractionTimestamp": {
+				"type": "String"
+			},
+			"lastRunTimestamp": {
+				"type": "String"
+			},
+			"lastRunClosing": {
+				"type": "String"
+			},
+			"dbSchema": {
+				"type": "String",
+				"defaultValue": "MX_DATAMART"
+			}
+		},
 		"folder": {
 			"name": "ERSExtractionJobTesting/MX03_Full"
 		},
