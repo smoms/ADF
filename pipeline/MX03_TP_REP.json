@@ -170,12 +170,7 @@
 										"value": "@concat(\n'select * from ', \nitem().OBJECT_NAME, \n' where m_ref_data in (select d.m_ref_data from DYN_AUDIT_REP d, JOB_AUDIT_REP j where d.m_idjob=j.m_mx_ref_job and d.M_DELETED  = ''N'' and j.M_STATUS in  (''Done'',''Corrected'') and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_'' || TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') >''',\nvariables('lastRunTimestamp'), \n''' and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') <= ''', formatDateTime(variables('extractionTimestamp'), 'yyyy-MM-dd HH-mm-ss'), ''')'\n)",
 										"type": "Expression"
 									},
-									"partitionOption": "DynamicRange",
-									"partitionSettings": {
-										"partitionColumnName": "M_REF_DATA",
-										"partitionUpperBound": "",
-										"partitionLowerBound": ""
-									},
+									"partitionOption": "None",
 									"queryTimeout": "02:00:00"
 								},
 								"sink": {
@@ -187,10 +182,7 @@
 									"formatSettings": {
 										"type": "ParquetWriteSettings",
 										"maxRowsPerFile": 2000000,
-										"fileNamePrefix": {
-											"value": "@concat(item().OBJECT_NAME, '_', variables('fileTimestamp'))",
-											"type": "Expression"
-										}
+										"fileNamePrefix": "@concat(item().OBJECT_NAME, '_', variables('fileTimestamp'))"
 									}
 								},
 								"enableStaging": false,
