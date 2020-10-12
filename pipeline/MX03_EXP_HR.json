@@ -119,7 +119,7 @@
 						"value": "@activity('GetGroupSCN').output.value",
 						"type": "Expression"
 					},
-					"batchCount": 8,
+					"batchCount": 16,
 					"activities": [
 						{
 							"name": "CopySCNGroup",
@@ -215,7 +215,7 @@
 			}
 		},
 		"folder": {
-			"name": "ERSExtractionJobTesting"
+			"name": "ERSExtractionJobTesting/MX03_Full"
 		},
 		"annotations": []
 	}
