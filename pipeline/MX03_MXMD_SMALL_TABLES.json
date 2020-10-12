@@ -419,6 +419,11 @@
 				}
 			}
 		],
+		"parameters": {
+			"jobName": {
+				"type": "string"
+			}
+		},
 		"variables": {
 			"db_host": {
 				"type": "String",
@@ -439,7 +444,7 @@
 			}
 		},
 		"folder": {
-			"name": "ERSExtractionJobTesting"
+			"name": "ERSExtractionJobTesting/MX03_Full"
 		},
 		"annotations": []
 	}
