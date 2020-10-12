@@ -1,5 +1,5 @@
 {
-	"name": "MX03_FIN_POS",
+	"name": "MX03_MEDUIM_TABLES",
 	"properties": {
 		"activities": [
 			{
@@ -10,7 +10,7 @@
 				"typeProperties": {
 					"variableName": "extractionTimestamp",
 					"value": {
-						"value": "@formatDateTime(utcnow(),'yyyy-MM-dd HH-mm-ss')",
+						"value": "@utcnow()",
 						"type": "Expression"
 					}
 				}
@@ -20,7 +20,7 @@
 				"type": "Lookup",
 				"dependsOn": [
 					{
-						"activity": "Set extraction timestamp",
+						"activity": "Set timestamp for file",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -117,7 +117,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "OracleSource",
-						"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'ALPIQ_FIN_POS_REP')",
+						"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'ALPIQ_ACT_LSWAP_REP'\n,'ALPIQ_DELTA_EXPO_REP'\n,'ALPIQ_DLT_EXP_FX_REP'\n,'ALPIQ_MTM_LSWAP_VW'\n,'ATEL_CMAT_REP'\n,'ATEL_CS_ACT_PROV_REP'\n,'ATEL_SQL_TP_REP'\n,'CS_ACTUALS_CER_REP')\nAND OWNER = 'MX_DATAMART'\nAND OBJECT_TYPE = 'TABLE'",
 						"partitionOption": "None",
 						"queryTimeout": "02:00:00"
 					},
@@ -125,6 +125,7 @@
 						"referenceName": "MX03_MXDM_Dynamic",
 						"type": "DatasetReference",
 						"parameters": {
+							"db_schema": "MX_DATAMART",
 							"db_table": "ALL_OBJECTS"
 						}
 					},
@@ -165,6 +166,10 @@
 							"typeProperties": {
 								"source": {
 									"type": "OracleSource",
+									"oracleReaderQuery": {
+										"value": "@concat(\n'select * from ', \nitem().OBJECT_NAME, \n' where m_ref_data in (select d.m_ref_data from DYN_AUDIT_REP d, JOB_AUDIT_REP j where d.m_idjob=j.m_mx_ref_job and d.M_DELETED  = ''N'' and j.M_STATUS in  (''Done'',''Corrected'') and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_'' || TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') >''',\nvariables('lastRunTimestamp'), \n''' and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') <= ''', formatDateTime(variables('extractionTimestamp'), 'yyyy-MM-dd HH-mm-ss'), ''')'\n)",
+										"type": "Expression"
+									},
 									"partitionOption": "None",
 									"queryTimeout": "02:00:00"
 								},
@@ -174,7 +179,12 @@
 										"type": "AzureBlobStorageWriteSettings"
 									},
 									"formatSettings": {
-										"type": "ParquetWriteSettings"
+										"type": "ParquetWriteSettings",
+										"maxRowsPerFile": 2000000,
+										"fileNamePrefix": {
+											"value": "@concat(item().OBJECT_NAME, '_', variables('fileTimestamp'))",
+											"type": "Expression"
+										}
 									}
 								},
 								"enableStaging": false,
@@ -209,7 +219,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"folder": {
-											"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('db_schema'),'/',item().OBJECT_NAME,'/',variables('extractionTimestamp'))",
+											"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/',item().OBJECT_NAME,'/',variables('folderTimestamp'))",
 											"type": "Expression"
 										}
 									}
@@ -217,6 +227,46 @@
 							]
 						}
 					]
+				}
+			},
+			{
+				"name": "Set timestamp for folder",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set extraction timestamp",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "folderTimestamp",
+					"value": {
+						"value": "@formatDateTime(variables('extractionTimestamp'),'yyyy-MM-dd HH-mm-ss')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set timestamp for file",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set timestamp for folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "fileTimestamp",
+					"value": {
+						"value": "@formatDateTime(variables('extractionTimestamp'),'yyyyMMddHHmmss')",
+						"type": "Expression"
+					}
 				}
 			}
 		],
@@ -233,6 +283,16 @@
 			"dbSchema": {
 				"type": "String",
 				"defaultValue": "MX_DATAMART"
+			},
+			"dbHost": {
+				"type": "String",
+				"defaultValue": "MX03"
+			},
+			"folderTimestamp": {
+				"type": "String"
+			},
+			"fileTimestamp": {
+				"type": "String"
 			}
 		},
 		"folder": {
