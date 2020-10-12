@@ -1,5 +1,5 @@
 {
-	"name": "MX03_MXDM_Dynamic_copy1",
+	"name": "MX02_MXDM_Dynamic",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "MX02_MX_DATAMART",
