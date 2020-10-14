@@ -208,7 +208,7 @@
 			},
 			"tableName": {
 				"type": "String",
-				"defaultValue": "ALPIQ_DLT_EXP_HR_REP"
+				"defaultValue": "ALPIQ_FIN_POS_REP"
 			},
 			"extractionTimestamp": {
 				"type": "String"
