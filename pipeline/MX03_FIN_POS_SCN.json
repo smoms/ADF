@@ -1,0 +1,222 @@
+{
+	"name": "MX03_FIN_POS_SCN",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetGroupCount",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "extractionTimestamp",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"oracleReaderQuery": {
+							"value": "@concat('select ceil((select count(*) from ',variables('tableName'),')/8000000) as group_no from dual')",
+							"type": "Expression"
+						},
+						"partitionOption": "None",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "MX03_MXDM_Dynamic",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_schema": "MX_DATAMART",
+							"db_table": "@variables('tableName')"
+						}
+					},
+					"firstRowOnly": true
+				}
+			},
+			{
+				"name": "NumberOfSCNGroups",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "GetGroupCount",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "numberOfGroups",
+					"value": {
+						"value": "@string(activity('GetGroupCount').output.firstRow.GROUP_NO)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "GetGroupSCN",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "NumberOfSCNGroups",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"oracleReaderQuery": {
+							"value": "@concat('select\nCASE\n  WHEN grp_nbr = 1\n  THEN min(ora_rowscn)\n  WHEN grp_nbr > 1\n  THEN min(ora_rowscn) +1\n  END as Starting_Value\n, max(ora_rowscn) as Ending_Value\n, count(*)        as Total_Records\n, grp_nbr         as Group_Nbr\nfrom (\nselect ora_rowscn,\nntile(',variables('numberOfGroups') ,') over (order by ora_rowscn) grp_nbr\nfrom ',variables('tableName') ,'\n)\ngroup by grp_nbr\nORDER BY grp_nbr ASC')",
+							"type": "Expression"
+						},
+						"partitionOption": "None",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "MX03_MXDM_Dynamic",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_schema": "MX_DATAMART",
+							"db_table": "@variables('tableName')"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEachGroup",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "GetGroupSCN",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GetGroupSCN').output.value",
+						"type": "Expression"
+					},
+					"batchCount": 16,
+					"activities": [
+						{
+							"name": "CopySCNGroup",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "OracleSource",
+									"oracleReaderQuery": {
+										"value": "@concat('SELECT /*+ NO_PARALLEL(\"', variables('tableName'),'\") */  * FROM ',variables('tableName'),' WHERE ORA_ROWSCN BETWEEN ', item().STARTING_VALUE, ' AND ',item().ENDING_VALUE)",
+										"type": "Expression"
+									},
+									"partitionOption": "None",
+									"queryTimeout": "02:00:00"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "MX03_MXDM_Dynamic",
+									"type": "DatasetReference",
+									"parameters": {
+										"db_schema": "MX_DATAMART",
+										"db_table": "@variables('tableName')"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DataExtraction_Parquet",
+									"type": "DatasetReference",
+									"parameters": {
+										"folder": {
+											"value": "@concat('ORACLE/MX03/MX_DATAMART/',variables('tableName'),'/',variables('extractionTimestamp'))",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "extractionTimestamp",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "extractionTimestamp",
+					"value": {
+						"value": "@formatDateTime(utcnow(),'yyyy-MM-dd HH-mm-ss')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"numberOfGroups": {
+				"type": "String"
+			},
+			"tableName": {
+				"type": "String",
+				"defaultValue": "ALPIQ_DLT_EXP_HR_REP"
+			},
+			"extractionTimestamp": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "ERSExtractionJobTesting/MX03_Full"
+		},
+		"annotations": []
+	}
+}
