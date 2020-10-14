@@ -117,7 +117,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "OracleSource",
-						"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'ATEL_TP_REP')\nAND OWNER = 'MX_DATAMART'\nAND OBJECT_TYPE = 'TABLE'",
+						"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'ALPIQ_FIN_POS_REP')\nAND OWNER = 'MX_DATAMART'\nAND OBJECT_TYPE = 'TABLE'",
 						"partitionOption": "None",
 						"queryTimeout": "02:00:00"
 					},
