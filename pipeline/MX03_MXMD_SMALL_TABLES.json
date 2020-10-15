@@ -5,14 +5,7 @@
 			{
 				"name": "Lookup - 3 Tables",
 				"type": "Lookup",
-				"dependsOn": [
-					{
-						"activity": "Set Timestamp",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -57,7 +50,7 @@
 						"type": "Expression"
 					},
 					"isSequential": false,
-					"batchCount": 2,
+					"batchCount": 1,
 					"activities": [
 						{
 							"name": "Copy2Parquet_plain",
@@ -126,14 +119,7 @@
 			{
 				"name": "Lookup - 15 Tables",
 				"type": "Lookup",
-				"dependsOn": [
-					{
-						"activity": "Set Timestamp",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -178,7 +164,7 @@
 						"value": "@array(activity('Lookup - 15 Tables').output.value)",
 						"type": "Expression"
 					},
-					"batchCount": 3,
+					"batchCount": 2,
 					"activities": [
 						{
 							"name": "Copy2Parquet_whereTimestamp",
@@ -266,29 +252,9 @@
 				}
 			},
 			{
-				"name": "Set Timestamp",
-				"type": "SetVariable",
-				"dependsOn": [],
-				"userProperties": [],
-				"typeProperties": {
-					"variableName": "extraction_timestamp",
-					"value": {
-						"value": "@formatDateTime(utcnow(),'yyyy-MM-dd HH-mm-ss')",
-						"type": "Expression"
-					}
-				}
-			},
-			{
 				"name": "Lookup - 1 Table",
 				"type": "Lookup",
-				"dependsOn": [
-					{
-						"activity": "Set Timestamp",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -332,6 +298,7 @@
 						"value": "@array(activity('Lookup - 1 Table').output.value)",
 						"type": "Expression"
 					},
+					"batchCount": 1,
 					"activities": [
 						{
 							"name": "Copy2Parquet_whereClosing",
@@ -416,6 +383,139 @@
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "Set extraction timestamp",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "extractionTimestamp",
+					"value": {
+						"value": "@utcnow()",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Select last run information",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Set extraction timestamp",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SnowflakeSource",
+						"query": {
+							"value": "@concat('select \nLAST_RUN_TIMESTAMP,\nLAST_RUN_CLOSING\nfrom SHARED.EXTR_LAST_RUN_INFO\nWHERE JOB_NAME = ''',pipeline().Pipeline,'''')",
+							"type": "Expression"
+						},
+						"exportSettings": {
+							"type": "SnowflakeExportCopyCommand"
+						}
+					},
+					"dataset": {
+						"referenceName": "SnowflakeTable1",
+						"type": "DatasetReference",
+						"parameters": {
+							"table_name": "EXTR_LAST_RUN_INFO"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "set last run timestamp",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Select last run information",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "lastRunTimestamp",
+					"value": {
+						"value": "@if(\nequals(activity('Select last run information').output.value[0].LAST_RUN_TIMESTAMP,NULL)\n,NULL\n,formatDateTime(activity('Select last run information').output.value[0].LAST_RUN_TIMESTAMP,'yyyy-MM-dd HH-mm-ss'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "set last run closing",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "set last run timestamp",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "lastRunClosing",
+					"value": {
+						"value": "@if(\nequals(activity('Select last run information').output.value[0].LAST_RUN_CLOSING,NULL)\n,NULL\n,formatDateTime(activity('Select last run information').output.value[0].LAST_RUN_CLOSING,'yyyy-MM-dd'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set timestamp for folder",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "set last run closing",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "folderTimestamp",
+					"value": {
+						"value": "@formatDateTime(variables('extractionTimestamp'),'yyyy-MM-dd HH-mm-ss')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set timestamp for file",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set timestamp for folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "fileTimestamp",
+					"value": {
+						"value": "@formatDateTime(variables('extractionTimestamp'),'yyyyMMddHHmmss')",
+						"type": "Expression"
+					}
 				}
 			}
 		],
