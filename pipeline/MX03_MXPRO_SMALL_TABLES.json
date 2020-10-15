@@ -20,7 +20,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "GetGroupSCN",
+						"activity": "Look up Tables",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -153,7 +153,7 @@
 				}
 			},
 			{
-				"name": "GetGroupSCN",
+				"name": "Look up Tables",
 				"type": "Lookup",
 				"dependsOn": [
 					{
@@ -175,18 +175,18 @@
 					"source": {
 						"type": "OracleSource",
 						"oracleReaderQuery": {
-							"value": "@concat('select\nCASE\n  WHEN grp_nbr = 1\n  THEN min(ora_rowscn)\n  WHEN grp_nbr > 1\n  THEN min(ora_rowscn) +1\n  END as Starting_Value\n, max(ora_rowscn) as Ending_Value\n, count(*)        as Total_Records\n, grp_nbr         as Group_Nbr\nfrom (\nselect ora_rowscn,\nntile(8) over (order by ora_rowscn) grp_nbr\nfrom ',variables('tableName') ,'\n)\ngroup by grp_nbr\nORDER BY grp_nbr ASC')",
+							"value": "@concat('select\nselect OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'ACT_PHYS_DBF'\n,'ALPIQ_CLOSING_DATE_VIEW'\n,'CAL_HOL_DBF'\n,'CM_LOCAT_DBF'\n,'CM_PROF_PB_DBF'\n,'CM_PROF_PH_DBF'\n,'CM_PROFH_DBF'\n,'CM_UNIT_DBF'\n,'CONTRACT_DBF'\n,'MX_PURGE_DET_DBF'\n,'PROFIT_HEADER'\n,'ROUTE_PHYS_DBF'\n,'TYPOLOGY_DBF'\n,'UDTB113_DBF'\n,'UDTH113_DBF'\n,'CM_LTYPE_DBF'\n)",
 							"type": "Expression"
 						},
 						"partitionOption": "None",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
-						"referenceName": "MX03_MXDM_Dynamic",
+						"referenceName": "MX03_MX_BO_Dynamic",
 						"type": "DatasetReference",
 						"parameters": {
-							"db_schema": "MX_DATAMART",
-							"db_table": "@variables('tableName')"
+							"db_schema": "@variables('db_schema')",
+							"db_table": "ALL_OBJECTS"
 						}
 					},
 					"firstRowOnly": false
@@ -205,7 +205,7 @@
 			},
 			"dbSchema": {
 				"type": "String",
-				"defaultValue": "MX_DATAMART"
+				"defaultValue": "MX_BO_DATAMART"
 			},
 			"dbHost": {
 				"type": "String",
