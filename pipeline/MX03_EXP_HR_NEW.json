@@ -97,7 +97,7 @@
 											"type": "Expression"
 										},
 										"db_table": {
-											"value": "@item().OBJECT_NAME",
+											"value": "@variables('tableName')",
 											"type": "Expression"
 										}
 									}
