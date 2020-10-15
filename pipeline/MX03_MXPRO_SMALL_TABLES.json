@@ -49,17 +49,14 @@
 							"typeProperties": {
 								"source": {
 									"type": "OracleSource",
-									"oracleReaderQuery": {
-										"value": "@concat('SELECT /*+ NO_PARALLEL(\"', variables('tableName'),'\") */  * FROM ',variables('tableName'),' WHERE ORA_ROWSCN BETWEEN ', item().STARTING_VALUE, ' AND ',item().ENDING_VALUE)",
-										"type": "Expression"
-									},
 									"partitionOption": "None",
 									"queryTimeout": "02:00:00"
 								},
 								"sink": {
 									"type": "ParquetSink",
 									"storeSettings": {
-										"type": "AzureBlobStorageWriteSettings"
+										"type": "AzureBlobStorageWriteSettings",
+										"maxConcurrentConnections": 4
 									},
 									"formatSettings": {
 										"type": "ParquetWriteSettings",
@@ -82,17 +79,11 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MX03_MXDM_Dynamic",
+									"referenceName": "MX03_MX_BO_Dynamic",
 									"type": "DatasetReference",
 									"parameters": {
-										"db_schema": {
-											"value": "@variables('dbSchema')",
-											"type": "Expression"
-										},
-										"db_table": {
-											"value": "@variables('tableName')",
-											"type": "Expression"
-										}
+										"db_schema": "@variables('db_schema')",
+										"db_table": "@item().OBJECT_NAME"
 									}
 								}
 							],
