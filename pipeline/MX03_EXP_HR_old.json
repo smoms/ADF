@@ -1,5 +1,5 @@
 {
-	"name": "MX03_EXP_HR",
+	"name": "MX03_EXP_HR_old",
 	"properties": {
 		"activities": [
 			{
@@ -215,7 +215,7 @@
 			}
 		},
 		"folder": {
-			"name": "ERSExtractionJobTesting/MX03_Full"
+			"name": "ERSExtractionJobTesting"
 		},
 		"annotations": []
 	}
