@@ -124,7 +124,7 @@
 							"typeProperties": {
 								"variableName": "processCount",
 								"value": {
-									"value": "@item().GROUP_NBR",
+									"value": "@string(item().GROUP_NBR)",
 									"type": "Expression"
 								}
 							}
