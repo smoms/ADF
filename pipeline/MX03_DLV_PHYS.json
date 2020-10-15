@@ -99,6 +99,72 @@
 									}
 								}
 							]
+						},
+						{
+							"name": "Extract data to Parquet in BLOB Storage_copy1",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "OracleSource",
+									"partitionOption": "None",
+									"queryTimeout": "02:00:00"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"maxConcurrentConnections": 2
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings",
+										"maxRowsPerFile": 8000000,
+										"fileNamePrefix": {
+											"value": "@concat(variables('tableName'), '_', variables('fileTimestamp'),'_',string(item().GROUP_NBR),'_')",
+											"type": "Expression"
+										}
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "MX03_MX_BO_Dynamic",
+									"type": "DatasetReference",
+									"parameters": {
+										"db_schema": "@variables('db_schema')",
+										"db_table": "@item().OBJECT_NAME"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DataExtraction_Parquet",
+									"type": "DatasetReference",
+									"parameters": {
+										"folder": {
+											"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/',variables('tableName'),'/',variables('folderTimestamp'))",
+											"type": "Expression"
+										}
+									}
+								}
+							]
 						}
 					]
 				}
