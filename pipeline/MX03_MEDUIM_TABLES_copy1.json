@@ -474,7 +474,12 @@
 										"type": "AzureBlobStorageWriteSettings"
 									},
 									"formatSettings": {
-										"type": "ParquetWriteSettings"
+										"type": "ParquetWriteSettings",
+										"maxRowsPerFile": 8000000,
+										"fileNamePrefix": {
+											"value": "@concat(item().OBJECT_NAME, '_', variables('fileTimestamp'),'_')",
+											"type": "Expression"
+										}
 									}
 								},
 								"enableStaging": false,
