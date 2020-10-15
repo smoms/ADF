@@ -321,14 +321,7 @@
 						{
 							"name": "Copy2Parquet_whereTimestamp",
 							"type": "Copy",
-							"dependsOn": [
-								{
-									"activity": "refvalue",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
+							"dependsOn": [],
 							"policy": {
 								"timeout": "7.00:00:00",
 								"retry": 0,
@@ -341,7 +334,7 @@
 								"source": {
 									"type": "OracleSource",
 									"oracleReaderQuery": {
-										"value": "@concat('SELECT * from ', variables('db_schema'), '.', item().OBJECT_NAME, ' where m_ref_data in (select d.m_ref_data from DYN_AUDIT_REP d, JOB_AUDIT_REP j where d.m_idjob=j.m_mx_ref_job and d.M_DELETED  = ''N'' and j.M_STATUS in  (''Done'',''Corrected'') and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') >', '''',variables('refvalue'),  '''', ' and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') <= ', '''', variables('extraction_timestamp'),''')')",
+										"value": "@concat('SELECT * from ', variables('dbSchema'), '.', item().OBJECT_NAME, ' where m_ref_data in (select d.m_ref_data from DYN_AUDIT_REP d, JOB_AUDIT_REP j where d.m_idjob=j.m_mx_ref_job and d.M_DELETED  = ''N'' and j.M_STATUS in  (''Done'',''Corrected'') and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') >', '''',variables('lastRunTimestamp'),  '''', ' and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') <= ', '''',variables('folderTimestamp'),''')')",
 										"type": "Expression"
 									},
 									"partitionOption": "None",
@@ -350,11 +343,15 @@
 								"sink": {
 									"type": "ParquetSink",
 									"storeSettings": {
-										"type": "AzureBlobStorageWriteSettings",
-										"maxConcurrentConnections": 2
+										"type": "AzureBlobStorageWriteSettings"
 									},
 									"formatSettings": {
-										"type": "ParquetWriteSettings"
+										"type": "ParquetWriteSettings",
+										"maxRowsPerFile": 8000000,
+										"fileNamePrefix": {
+											"value": "@concat(item().OBJECT_NAME, '_', variables('fileTimestamp'),'_')",
+											"type": "Expression"
+										}
 									}
 								},
 								"enableStaging": false,
@@ -372,7 +369,7 @@
 									"referenceName": "MX03_MXDM_Dynamic",
 									"type": "DatasetReference",
 									"parameters": {
-										"db_schema": "@variables('db_schema')",
+										"db_schema": "@variables('dbSchema')",
 										"db_table": "@item().OBJECT_NAME"
 									}
 								}
@@ -383,22 +380,12 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"folder": {
-											"value": "@concat('ORACLE/',variables('db_host'),'/',variables('db_schema'),'/',item().OBJECT_NAME,'/',variables('extraction_timestamp'))",
+											"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/',item().OBJECT_NAME,'/',variables('folderTimestamp'))",
 											"type": "Expression"
 										}
 									}
 								}
 							]
-						},
-						{
-							"name": "refvalue",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "refvalue",
-								"value": "20200803 000000"
-							}
 						}
 					]
 				}
