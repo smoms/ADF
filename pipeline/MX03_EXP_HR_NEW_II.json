@@ -1,6 +1,7 @@
 {
 	"name": "MX03_EXP_HR_NEW_II",
 	"properties": {
+		"description": "Not an option - too slow",
 		"activities": [
 			{
 				"name": "Set extraction timestamp",
@@ -93,14 +94,11 @@
 						},
 						"formatSettings": {
 							"type": "ParquetWriteSettings",
-							"maxRowsPerFile": 8000000,
-							"fileNamePrefix": {
-								"value": "@concat(variables('tableName'), '_', variables('fileTimestamp'),'_')",
-								"type": "Expression"
-							}
+							"maxRowsPerFile": 8000000
 						}
 					},
 					"enableStaging": false,
+					"parallelCopies": 8,
 					"translator": {
 						"type": "TabularTranslator",
 						"typeConversion": true,
