@@ -37,14 +37,7 @@
 						{
 							"name": "Extract data to Parquet in BLOB Storage",
 							"type": "Copy",
-							"dependsOn": [
-								{
-									"activity": "Set Process Number based on group",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
+							"dependsOn": [],
 							"policy": {
 								"timeout": "7.00:00:00",
 								"retry": 0,
@@ -72,7 +65,7 @@
 										"type": "ParquetWriteSettings",
 										"maxRowsPerFile": 8000000,
 										"fileNamePrefix": {
-											"value": "@concat(variables('tableName'), '_', variables('fileTimestamp'),'_',variables('processCount'),'_')",
+											"value": "@concat(variables('tableName'), '_', variables('fileTimestamp'),'_',string(item().GROUP_NBR),'_')",
 											"type": "Expression"
 										}
 									}
@@ -115,19 +108,6 @@
 									}
 								}
 							]
-						},
-						{
-							"name": "Set Process Number based on group",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "processCount",
-								"value": {
-									"value": "@string(item().GROUP_NBR)",
-									"type": "Expression"
-								}
-							}
 						}
 					]
 				}
