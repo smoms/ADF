@@ -149,7 +149,7 @@
 						"value": "@array(activity('Get Tables of the Job').output.value)",
 						"type": "Expression"
 					},
-					"batchCount": 4,
+					"batchCount": 8,
 					"activities": [
 						{
 							"name": "Extract data to Parquet in BLOB Storage",
