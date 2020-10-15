@@ -32,7 +32,7 @@
 						"value": "@activity('Look up Tables').output.value",
 						"type": "Expression"
 					},
-					"batchCount": 4,
+					"batchCount": 1,
 					"activities": [
 						{
 							"name": "Extract data to Parquet in BLOB Storage",
@@ -56,7 +56,7 @@
 									"type": "ParquetSink",
 									"storeSettings": {
 										"type": "AzureBlobStorageWriteSettings",
-										"maxConcurrentConnections": 4
+										"maxConcurrentConnections": 1
 									},
 									"formatSettings": {
 										"type": "ParquetWriteSettings",
@@ -166,7 +166,7 @@
 					"source": {
 						"type": "OracleSource",
 						"oracleReaderQuery": {
-							"value": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'ACT_PHYS_DBF'\n,'ALPIQ_CLOSING_DATE_VIEW'\n,'CAL_HOL_DBF'\n,'CM_LOCAT_DBF'\n,'CM_PROF_PB_DBF'\n,'CM_PROF_PH_DBF'\n,'CM_PROFH_DBF'\n,'CM_UNIT_DBF'\n,'CONTRACT_DBF'\n,'MX_PURGE_DET_DBF'\n,'PROFIT_HEADER'\n,'ROUTE_PHYS_DBF'\n,'TYPOLOGY_DBF'\n,'UDTB113_DBF'\n,'UDTH113_DBF'\n,'CM_LTYPE_DBF'\n)",
+							"value": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'MXPRO.MX_HDR_DBF'\n)",
 							"type": "Expression"
 						},
 						"partitionOption": "None",
