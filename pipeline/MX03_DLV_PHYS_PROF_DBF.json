@@ -32,7 +32,7 @@
 						"value": "@activity('Look up Tables').output.value",
 						"type": "Expression"
 					},
-					"batchCount": 2,
+					"batchCount": 1,
 					"activities": [
 						{
 							"name": "Extract data to Parquet in BLOB Storage",
@@ -56,7 +56,7 @@
 									"type": "ParquetSink",
 									"storeSettings": {
 										"type": "AzureBlobStorageWriteSettings",
-										"maxConcurrentConnections": 2
+										"maxConcurrentConnections": 1
 									},
 									"formatSettings": {
 										"type": "ParquetWriteSettings",
@@ -166,7 +166,7 @@
 					"source": {
 						"type": "OracleSource",
 						"oracleReaderQuery": {
-							"value": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'MXPRO.DLV_PHYS_JOIN_LOCATION_VW'\n,'MXPRO.DLV_PHYS_JOIN_PFOLIO_VW'\n,'MXPRO.DLV_PHYS_PROF_KEY_DBF'\n)",
+							"value": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'MXPRO.DLV_PHYS_PROF_DBF'\n)",
 							"type": "Expression"
 						},
 						"partitionOption": "None",
