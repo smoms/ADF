@@ -29,10 +29,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('GetGroupSCN').output.value",
+						"value": "@activity('Look up Tables').output.value",
 						"type": "Expression"
 					},
-					"batchCount": 8,
+					"batchCount": 4,
 					"activities": [
 						{
 							"name": "Extract data to Parquet in BLOB Storage",
