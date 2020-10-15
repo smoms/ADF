@@ -1,0 +1,181 @@
+{
+	"name": "MX03_EXP_HR_NEW_II",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set extraction timestamp",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "extractionTimestamp",
+					"value": {
+						"value": "@utcnow()",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set timestamp for folder",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set extraction timestamp",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "folderTimestamp",
+					"value": {
+						"value": "@formatDateTime(variables('extractionTimestamp'),'yyyy-MM-dd HH-mm-ss')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set timestamp for file",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set timestamp for folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "fileTimestamp",
+					"value": {
+						"value": "@formatDateTime(variables('extractionTimestamp'),'yyyyMMddHHmmss')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Extract data to Parquet in BLOB Storage",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Set timestamp for file",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"partitionOption": "DynamicRange",
+						"partitionSettings": {
+							"partitionColumnName": "M_HOUR",
+							"partitionUpperBound": "",
+							"partitionLowerBound": ""
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings",
+							"maxConcurrentConnections": 8
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings",
+							"maxRowsPerFile": 8000000,
+							"fileNamePrefix": {
+								"value": "@concat(variables('tableName'), '_', variables('fileTimestamp'),'_')",
+								"type": "Expression"
+							}
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MX03_MXDM_Dynamic",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_schema": {
+								"value": "@variables('dbSchema')",
+								"type": "Expression"
+							},
+							"db_table": {
+								"value": "@variables('tableName')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DataExtraction_Parquet",
+						"type": "DatasetReference",
+						"parameters": {
+							"folder": {
+								"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/',variables('tableName'),'/',variables('folderTimestamp'))",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"variables": {
+			"extractionTimestamp": {
+				"type": "String"
+			},
+			"lastRunTimestamp": {
+				"type": "String"
+			},
+			"lastRunClosing": {
+				"type": "String"
+			},
+			"dbSchema": {
+				"type": "String",
+				"defaultValue": "MX_DATAMART"
+			},
+			"dbHost": {
+				"type": "String",
+				"defaultValue": "MX03"
+			},
+			"folderTimestamp": {
+				"type": "String"
+			},
+			"fileTimestamp": {
+				"type": "String"
+			},
+			"tableName": {
+				"type": "String",
+				"defaultValue": "ALPIQ_DLT_EXP_HR_REP"
+			},
+			"processCount": {
+				"type": "String",
+				"defaultValue": "0"
+			}
+		},
+		"folder": {
+			"name": "ERSExtractionJobTesting/MX03_Full"
+		},
+		"annotations": []
+	}
+}
