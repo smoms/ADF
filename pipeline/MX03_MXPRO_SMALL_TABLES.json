@@ -82,7 +82,10 @@
 									"referenceName": "MX03_MX_BO_Dynamic",
 									"type": "DatasetReference",
 									"parameters": {
-										"db_schema": "@variables('dbSchema')",
+										"db_schema": {
+											"value": "@variables('dbSchema')",
+											"type": "Expression"
+										},
 										"db_table": "@item().OBJECT_NAME"
 									}
 								}
@@ -176,7 +179,10 @@
 						"referenceName": "MX03_MX_BO_Dynamic",
 						"type": "DatasetReference",
 						"parameters": {
-							"db_schema": "@variables('dbSchema')",
+							"db_schema": {
+								"value": "@variables('dbSchema')",
+								"type": "Expression"
+							},
 							"db_table": "ALL_OBJECTS"
 						}
 					},
@@ -196,7 +202,7 @@
 			},
 			"dbSchema": {
 				"type": "String",
-				"defaultValue": "MXPRO"
+				"defaultValue": "MX_BO_DATAMART"
 			},
 			"dbHost": {
 				"type": "String",
