@@ -1,0 +1,9 @@
+{
+	"name": "MX03_FULL_EXTRACTION",
+	"properties": {
+		"folder": {
+			"name": "ERSExtractionJobTesting/MX03_Full"
+		},
+		"annotations": []
+	}
+}
