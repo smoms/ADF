@@ -166,7 +166,7 @@
 					"source": {
 						"type": "OracleSource",
 						"oracleReaderQuery": {
-							"value": "select DISTINCT(OBJECT_NAME) from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'DLV_PHYS_JOIN_LOCATION_VW'\n,'DLV_PHYS_JOIN_PFOLIO_VW'\n,'DLV_PHYS_PROF_KEY_DBF'\n)",
+							"value": "select DISTINCT(OBJECT_NAME)\nfrom ALL_OBJECTS \nWHERE OBJECT_NAME \nIN (\n'DLV_PHYS_JOIN_LOCATION_VW'\n,'DLV_PHYS_JOIN_PFOLIO_VW'\n,'DLV_PHYS_PROF_KEY_DBF'\n)",
 							"type": "Expression"
 						},
 						"partitionOption": "None",
@@ -196,7 +196,7 @@
 			},
 			"dbSchema": {
 				"type": "String",
-				"defaultValue": "MX_BO_DATAMART"
+				"defaultValue": "MXPRO"
 			},
 			"dbHost": {
 				"type": "String",
@@ -207,14 +207,6 @@
 			},
 			"fileTimestamp": {
 				"type": "String"
-			},
-			"tableName": {
-				"type": "String",
-				"defaultValue": "ALPIQ_DLT_EXP_HR_REP"
-			},
-			"processCount": {
-				"type": "String",
-				"defaultValue": "0"
 			}
 		},
 		"folder": {
