@@ -16,7 +16,7 @@
 				}
 			},
 			{
-				"name": "Copy data for each SCN group",
+				"name": "Copy data for each table in lookup",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -32,7 +32,7 @@
 						"value": "@activity('Look up Tables').output.value",
 						"type": "Expression"
 					},
-					"batchCount": 2,
+					"batchCount": 3,
 					"activities": [
 						{
 							"name": "Extract data to Parquet in BLOB Storage",
@@ -62,7 +62,7 @@
 										"type": "ParquetWriteSettings",
 										"maxRowsPerFile": 8000000,
 										"fileNamePrefix": {
-											"value": "@concat(variables('tableName'), '_', variables('fileTimestamp'),'_',string(item().GROUP_NBR),'_')",
+											"value": "@concat(item().OBJECT_NAME, '_', variables('fileTimestamp'),'_')",
 											"type": "Expression"
 										}
 									}
@@ -166,7 +166,7 @@
 					"source": {
 						"type": "OracleSource",
 						"oracleReaderQuery": {
-							"value": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'MXPRO.DLV_PHYS_JOIN_LOCATION_VW'\n,'MXPRO.DLV_PHYS_JOIN_PFOLIO_VW'\n,'MXPRO.DLV_PHYS_PROF_KEY_DBF'\n)",
+							"value": "select DISTINCT(OBJECT_NAME) from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'DLV_PHYS_JOIN_LOCATION_VW'\n,'DLV_PHYS_JOIN_PFOLIO_VW'\n,'DLV_PHYS_PROF_KEY_DBF'\n)",
 							"type": "Expression"
 						},
 						"partitionOption": "None",
