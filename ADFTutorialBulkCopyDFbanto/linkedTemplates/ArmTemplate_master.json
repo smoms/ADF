@@ -67,9 +67,21 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ET51Q_BUSINESSOBJECTS'"
 		},
+		"MX01_MX_BO_DATAMART_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'MX01_MX_BO_DATAMART'"
+		},
 		"MX01_MX_DATAMART_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'MX01_MX_DATAMART'"
+		},
+		"MX02_MX_DATAMART_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'MX02_MX_DATAMART'"
+		},
+		"MX03_MX_BO_DATAMART_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'MX03_MX_BO_DATAMART'"
 		},
 		"MX03_MX_DATAMART_connectionString": {
 			"type": "secureString",
@@ -259,14 +271,20 @@
 					"ET51Q_BUSINESSOBJECTS_connectionString": {
 						"value": "[parameters('ET51Q_BUSINESSOBJECTS_connectionString')]"
 					},
+					"MX01_MX_BO_DATAMART_connectionString": {
+						"value": "[parameters('MX01_MX_BO_DATAMART_connectionString')]"
+					},
 					"MX01_MX_DATAMART_connectionString": {
 						"value": "[parameters('MX01_MX_DATAMART_connectionString')]"
 					},
+					"MX02_MX_DATAMART_connectionString": {
+						"value": "[parameters('MX02_MX_DATAMART_connectionString')]"
+					},
+					"MX03_MX_BO_DATAMART_connectionString": {
+						"value": "[parameters('MX03_MX_BO_DATAMART_connectionString')]"
+					},
 					"MX03_MX_DATAMART_connectionString": {
 						"value": "[parameters('MX03_MX_DATAMART_connectionString')]"
-					},
-					"Oracle1_connectionString": {
-						"value": "[parameters('Oracle1_connectionString')]"
 					}
 				}
 			},
@@ -287,6 +305,9 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"Oracle1_connectionString": {
+						"value": "[parameters('Oracle1_connectionString')]"
 					}
 				}
 			},
@@ -307,9 +328,49 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ADFTutorialBulkCopyDFbanto_ArmTemplate_3')]"
+			]
+		},
+		{
+			"name": "ADFTutorialBulkCopyDFbanto_ArmTemplate_5",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_5.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
 					},
 					"Trigger_73c_properties_pipeline_parameters_windowStart": {
 						"value": "[parameters('Trigger_73c_properties_pipeline_parameters_windowStart')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ADFTutorialBulkCopyDFbanto_ArmTemplate_4')]"
+			]
+		},
+		{
+			"name": "ADFTutorialBulkCopyDFbanto_ArmTemplate_6",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_6.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
 					},
 					"TriggerTestPipeline_properties_SourceMetadata_parameters_TableName": {
 						"value": "[parameters('TriggerTestPipeline_properties_SourceMetadata_parameters_TableName')]"
@@ -317,7 +378,7 @@
 				}
 			},
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'ADFTutorialBulkCopyDFbanto_ArmTemplate_3')]"
+				"[resourceId('Microsoft.Resources/deployments', 'ADFTutorialBulkCopyDFbanto_ArmTemplate_5')]"
 			]
 		}
 	]

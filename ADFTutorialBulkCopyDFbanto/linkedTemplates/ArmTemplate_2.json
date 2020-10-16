@@ -19,17 +19,25 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ET51Q_BUSINESSOBJECTS'"
 		},
+		"MX01_MX_BO_DATAMART_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'MX01_MX_BO_DATAMART'"
+		},
 		"MX01_MX_DATAMART_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'MX01_MX_DATAMART'"
 		},
+		"MX02_MX_DATAMART_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'MX02_MX_DATAMART'"
+		},
+		"MX03_MX_BO_DATAMART_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'MX03_MX_BO_DATAMART'"
+		},
 		"MX03_MX_DATAMART_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'MX03_MX_DATAMART'"
-		},
-		"Oracle1_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'Oracle1'"
 		}
 	},
 	"variables": {
@@ -201,12 +209,20 @@
 					"referenceName": "Snowflake1",
 					"type": "LinkedServiceReference"
 				},
+				"parameters": {
+					"table_name": {
+						"type": "string"
+					}
+				},
 				"annotations": [],
 				"type": "SnowflakeTable",
 				"schema": [],
 				"typeProperties": {
 					"schema": "SHARED",
-					"table": "TEST"
+					"table": {
+						"value": "@dataset().table_name",
+						"type": "Expression"
+					}
 				}
 			},
 			"dependsOn": []
@@ -599,7 +615,7 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobStorageLocation",
-						"folderPath": "SpecialColTest",
+						"folderPath": "ORACLE/MX03",
 						"container": "data-extraction-poc"
 					},
 					"compressionCodec": "snappy"
@@ -783,6 +799,23 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/MX01_MX_BO_DATAMART')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "Oracle",
+				"typeProperties": {
+					"connectionString": "[parameters('MX01_MX_BO_DATAMART_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "IR-Fujitsu",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/MX01_MX_DATAMART')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -791,6 +824,40 @@
 				"type": "Oracle",
 				"typeProperties": {
 					"connectionString": "[parameters('MX01_MX_DATAMART_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "IR-Fujitsu",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MX02_MX_DATAMART')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "Oracle",
+				"typeProperties": {
+					"connectionString": "[parameters('MX02_MX_DATAMART_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "IR-Fujitsu",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MX03_MX_BO_DATAMART')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "Oracle",
+				"typeProperties": {
+					"connectionString": "[parameters('MX03_MX_BO_DATAMART_connectionString')]"
 				},
 				"connectVia": {
 					"referenceName": "IR-Fujitsu",
@@ -815,135 +882,6 @@
 				}
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Oracle1')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "Oracle",
-				"typeProperties": {
-					"connectionString": "[parameters('Oracle1_connectionString')]"
-				},
-				"connectVia": {
-					"referenceName": "IR-Fujitsu",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/MinLogsTrigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipeline": {
-					"pipelineReference": {
-						"referenceName": "MinuteLogsProc",
-						"type": "PipelineReference"
-					},
-					"parameters": {}
-				},
-				"type": "TumblingWindowTrigger",
-				"typeProperties": {
-					"frequency": "Minute",
-					"interval": 5,
-					"startTime": "2020-05-22T10:36:00Z",
-					"delay": "00:00:00",
-					"maxConcurrency": 50,
-					"retryPolicy": {
-						"intervalInSeconds": 30
-					},
-					"dependsOn": []
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DeltaCopyFromBlobPipeline')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy_73c",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [
-							{
-								"name": "Source",
-								"value": "source/@{formatDateTime(pipeline().parameters.windowStart,'yy')}/@{formatDateTime(pipeline().parameters.windowStart,'MM')}/@{formatDateTime(pipeline().parameters.windowStart,'dd')}/@{formatDateTime(pipeline().parameters.windowStart,'HH')}/"
-							},
-							{
-								"name": "Destination",
-								"value": "destination/@{formatDateTime(pipeline().parameters.windowStart,'yy')}/@{formatDateTime(pipeline().parameters.windowStart,'MM')}/@{formatDateTime(pipeline().parameters.windowStart,'dd')}/@{formatDateTime(pipeline().parameters.windowStart,'HH')}/"
-							}
-						],
-						"typeProperties": {
-							"source": {
-								"type": "BinarySource",
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": true,
-									"wildcardFileName": "*"
-								},
-								"formatSettings": {
-									"type": "BinaryReadSettings"
-								}
-							},
-							"sink": {
-								"type": "BinarySink",
-								"storeSettings": {
-									"type": "AzureBlobStorageWriteSettings"
-								}
-							},
-							"enableStaging": false,
-							"enableSkipIncompatibleRow": false,
-							"skipErrorFile": {
-								"fileMissing": true
-							},
-							"validateDataConsistency": false
-						},
-						"inputs": [
-							{
-								"referenceName": "SourceDataset_73c",
-								"type": "DatasetReference",
-								"parameters": {
-									"cw_folderPath": "@{formatDateTime(pipeline().parameters.windowStart,'yyyy')}/@{formatDateTime(pipeline().parameters.windowStart,'MM')}/@{formatDateTime(pipeline().parameters.windowStart,'dd')}/@{formatDateTime(pipeline().parameters.windowStart,'HH')}"
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "DestinationDataset_73c",
-								"type": "DatasetReference",
-								"parameters": {
-									"cw_folderPath": "@{formatDateTime(pipeline().parameters.windowStart,'yyyy')}/@{formatDateTime(pipeline().parameters.windowStart,'MM')}/@{formatDateTime(pipeline().parameters.windowStart,'dd')}/@{formatDateTime(pipeline().parameters.windowStart,'HH')}"
-								}
-							}
-						]
-					}
-				],
-				"parameters": {
-					"windowStart": {
-						"type": "String"
-					}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/SourceDataset_73c')]"
-			]
 		}
 	]
 }

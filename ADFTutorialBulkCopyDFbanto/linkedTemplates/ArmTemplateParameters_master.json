@@ -50,7 +50,16 @@
 		"ET51Q_BUSINESSOBJECTS_connectionString": {
 			"value": ""
 		},
+		"MX01_MX_BO_DATAMART_connectionString": {
+			"value": ""
+		},
 		"MX01_MX_DATAMART_connectionString": {
+			"value": ""
+		},
+		"MX02_MX_DATAMART_connectionString": {
+			"value": ""
+		},
+		"MX03_MX_BO_DATAMART_connectionString": {
 			"value": ""
 		},
 		"MX03_MX_DATAMART_connectionString": {
