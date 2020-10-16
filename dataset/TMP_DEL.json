@@ -13,7 +13,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"folderPath": "SpecialColTest",
+				"folderPath": "ORACLE/MX03",
 				"container": "data-extraction-poc"
 			},
 			"compressionCodec": "snappy"
