@@ -1,0 +1,239 @@
+{
+	"name": "MX01_FULL_EXTRACTION",
+	"properties": {
+		"activities": [
+			{
+				"name": "MTM_RAW_VW",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "MX01_MTM_RAW_VW",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": false
+				}
+			},
+			{
+				"name": "MXDM_SMALL_TABLES",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "MX01_MXDM_SMALL_TABLES",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": false
+				}
+			},
+			{
+				"name": "HDR_DBF",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "MX01_HDR_DBF",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": false
+				}
+			},
+			{
+				"name": "DLV_PHYS",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "MX01_DLV_PHYS",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": false
+				}
+			},
+			{
+				"name": "TP_REP",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Wait 5 minutes",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "MX01_TP_REP",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": false
+				}
+			},
+			{
+				"name": "MXPRO_SMALL_TABLES",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Wait 5 minutes",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "MX01_MXPRO_SMALL_TABLES",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": false
+				}
+			},
+			{
+				"name": "MEDIUM_TABLES",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Wait 10 minutes",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "MX01_MEDIUM_TABLES",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "DLV_PHYS_PROF_DBF",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "MEDIUM_TABLES",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "MX01_DLV_PHYS_PROF_DBF",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "FIN_POS",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "DLV_PHYS_PROF_DBF",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "MX01_FIN_POS",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "EXP_HR",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "FIN_POS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "MX01_EXP_HR",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Wait 5 minutes",
+				"type": "Wait",
+				"dependsOn": [
+					{
+						"activity": "HDR_DBF",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "MTM_RAW_VW",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "MXDM_SMALL_TABLES",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "DLV_PHYS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 300
+				}
+			},
+			{
+				"name": "Wait 10 minutes",
+				"type": "Wait",
+				"dependsOn": [
+					{
+						"activity": "TP_REP",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "MXPRO_SMALL_TABLES",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 600
+				}
+			}
+		],
+		"folder": {
+			"name": "ERSExtractionJobTesting/MX01_Full"
+		},
+		"annotations": []
+	}
+}
