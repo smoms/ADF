@@ -212,14 +212,6 @@
 			},
 			"fileTimestamp": {
 				"type": "String"
-			},
-			"tableName": {
-				"type": "String",
-				"defaultValue": "ALPIQ_DLT_EXP_HR_REP"
-			},
-			"processCount": {
-				"type": "String",
-				"defaultValue": "0"
 			}
 		},
 		"folder": {
