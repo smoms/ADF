@@ -375,10 +375,13 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MX03_MXDM_Dynamic",
+									"referenceName": "MX01_MXDM_Dynamic",
 									"type": "DatasetReference",
 									"parameters": {
-										"db_schema": "@variables('dbSchema')",
+										"db_schema": {
+											"value": "@variables('dbSchema')",
+											"type": "Expression"
+										},
 										"db_table": "@item().OBJECT_NAME"
 									}
 								}
