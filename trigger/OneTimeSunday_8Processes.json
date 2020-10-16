@@ -6,7 +6,7 @@
 		"pipelines": [
 			{
 				"pipelineReference": {
-					"referenceName": "MX01_EXP_HR",
+					"referenceName": "MX01_EXP_HR_V1",
 					"type": "PipelineReference"
 				}
 			}
