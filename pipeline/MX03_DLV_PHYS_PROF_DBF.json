@@ -211,7 +211,7 @@
 			},
 			"dbSchema": {
 				"type": "String",
-				"defaultValue": "MX_BO_DATAMART"
+				"defaultValue": "MXPRO"
 			},
 			"dbHost": {
 				"type": "String",
