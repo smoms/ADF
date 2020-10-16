@@ -16,7 +16,7 @@
 				}
 			},
 			{
-				"name": "Copy data for each SCN group",
+				"name": "Copy data for each table in lookup",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -62,7 +62,7 @@
 										"type": "ParquetWriteSettings",
 										"maxRowsPerFile": 8000000,
 										"fileNamePrefix": {
-											"value": "@concat(variables('tableName'), '_', variables('fileTimestamp'),'_',string(item().GROUP_NBR),'_')",
+											"value": "@concat(item().OBJECT_NAME, '_', variables('fileTimestamp'),'_')",
 											"type": "Expression"
 										}
 									}
@@ -166,7 +166,7 @@
 					"source": {
 						"type": "OracleSource",
 						"oracleReaderQuery": {
-							"value": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'MXPRO.MX_HDR_DBF'\n)",
+							"value": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'MX_HDR_DBF'\n)",
 							"type": "Expression"
 						},
 						"partitionOption": "None",
