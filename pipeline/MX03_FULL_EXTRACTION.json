@@ -57,7 +57,14 @@
 			{
 				"name": "TP_REP",
 				"type": "ExecutePipeline",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Wait 5 minutes",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
@@ -70,7 +77,14 @@
 			{
 				"name": "MXPRO_SMALL_TABLES",
 				"type": "ExecutePipeline",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Wait 5 minutes",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
@@ -83,53 +97,137 @@
 			{
 				"name": "MEDIUM_TABLES",
 				"type": "ExecutePipeline",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Wait 10 minutes",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
 						"referenceName": "MX03_MEDIUM_TABLES",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": false
+					"waitOnCompletion": true
 				}
 			},
 			{
 				"name": "DLV_PHYS_PROF_DBF",
 				"type": "ExecutePipeline",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "MEDIUM_TABLES",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
 						"referenceName": "MX03_DLV_PHYS_PROF_DBF",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": false
+					"waitOnCompletion": true
 				}
 			},
 			{
 				"name": "FIN_POS",
 				"type": "ExecutePipeline",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "DLV_PHYS_PROF_DBF",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
 						"referenceName": "MX03_FIN_POS",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": false
+					"waitOnCompletion": true
 				}
 			},
 			{
 				"name": "EXP_HR",
 				"type": "ExecutePipeline",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "FIN_POS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
 						"referenceName": "MX03_EXP_HR",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": false
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Wait 5 minutes",
+				"type": "Wait",
+				"dependsOn": [
+					{
+						"activity": "HDR_DBF",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "MTM_RAW_VW",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "MXDM_SMALL_TABLES",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "DLV_PHYS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 300
+				}
+			},
+			{
+				"name": "Wait 10 minutes",
+				"type": "Wait",
+				"dependsOn": [
+					{
+						"activity": "TP_REP",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "MXPRO_SMALL_TABLES",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 600
 				}
 			}
 		],
