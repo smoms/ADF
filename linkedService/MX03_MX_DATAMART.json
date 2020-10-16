@@ -5,8 +5,8 @@
 		"annotations": [],
 		"type": "Oracle",
 		"typeProperties": {
-			"connectionString": "host=alpmuxdbs1vt;port=1521;sid=MX03;user id=MX_DATAMART",
-			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJkYTkzZjljNS02ZDhmLTQ2NGQtODYxOS1jYWQ3MjFiOWYyYmUiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+			"connectionString": "host=alpmuxdbs1vt;port=1521;sid=MX03;user id=MX_BO_DATAMART",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJiYzE0MjhkMS0wM2E2LTQ4YzMtOTEyYS1kOGU2ODIxNWZmMjYiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
 		},
 		"connectVia": {
 			"referenceName": "IR-Fujitsu",
