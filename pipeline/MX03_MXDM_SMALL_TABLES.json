@@ -157,7 +157,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "OracleSource",
-						"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN(\n'ALPIQ_LOCATION_COUNTRY_VIEW'\n,'V_STRATEGY_TREE_DBF'\n,'V_TRN_FLAGS_DBF'\n)",
+						"oracleReaderQuery": "select DISTINCT(OBJECT_NAME) from ALL_OBJECTS WHERE OBJECT_NAME IN(\n'ALPIQ_LOCATION_COUNTRY_VIEW'\n,'V_STRATEGY_TREE_DBF'\n,'V_TRN_FLAGS_DBF'\n)",
 						"partitionOption": "None",
 						"queryTimeout": "02:00:00"
 					},
@@ -165,7 +165,7 @@
 						"referenceName": "MX03_MXDM_Dynamic",
 						"type": "DatasetReference",
 						"parameters": {
-							"db_schema": "@variables('db_schema')",
+							"db_schema": "@variables('dbSchema')",
 							"db_table": "ALL_OBJECTS"
 						}
 					},
@@ -283,7 +283,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "OracleSource",
-						"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'ALPIQ_MASTER_AGR_REP'\n,'ALPIQ_SIM_PURGED_REP'\n,'ALPIQ_SIM_STOCK_REP'\n,'ATEL_CMAT_REP'\n,'ATEL_CS_ACTUALS_REP'\n,'ATEL_CS_FORECAST_REP'\n,'ATEL_MDL_FX_REP'\n,'ATEL_OPTIONS_REP'\n,'ATEL_SIM_OPT_GRK_REP'\n,'ATEL_SQL_CNTP_REP'\n,'ATEL_SQL_FEE_REP'\n,'ATEL_SQL_INDEX_REP'\n,'ATEL_SQL_PFTREE_REP'\n,'ATEL_SQL_PF_REP'\n,'ATEL_SQL_PR_IND_REP'\n)",
+						"oracleReaderQuery": "select DISTINCT(OBJECT_NAME) from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'ALPIQ_MASTER_AGR_REP'\n,'ALPIQ_SIM_PURGED_REP'\n,'ALPIQ_SIM_STOCK_REP'\n,'ATEL_CMAT_REP'\n,'ATEL_CS_ACTUALS_REP'\n,'ATEL_CS_FORECAST_REP'\n,'ATEL_MDL_FX_REP'\n,'ATEL_OPTIONS_REP'\n,'ATEL_SIM_OPT_GRK_REP'\n,'ATEL_SQL_CNTP_REP'\n,'ATEL_SQL_FEE_REP'\n,'ATEL_SQL_INDEX_REP'\n,'ATEL_SQL_PFTREE_REP'\n,'ATEL_SQL_PF_REP'\n,'ATEL_SQL_PR_IND_REP'\n)",
 						"partitionOption": "None",
 						"queryTimeout": "02:00:00"
 					},
@@ -291,7 +291,7 @@
 						"referenceName": "MX03_MXDM_Dynamic",
 						"type": "DatasetReference",
 						"parameters": {
-							"db_schema": "@variables('db_schema')",
+							"db_schema": "@variables('dbSchema')",
 							"db_table": "ALL_OBJECTS"
 						}
 					},
@@ -420,7 +420,7 @@
 						"referenceName": "MX03_MXDM_Dynamic",
 						"type": "DatasetReference",
 						"parameters": {
-							"db_schema": "@variables('db_schema')",
+							"db_schema": "@variables('dbSchema')",
 							"db_table": "ALL_OBJECTS"
 						}
 					},
@@ -497,7 +497,7 @@
 									"referenceName": "MX03_MXDM_Dynamic",
 									"type": "DatasetReference",
 									"parameters": {
-										"db_schema": "@variables('db_schema')",
+										"db_schema": "@variables('dbSchema')",
 										"db_table": "@item().OBJECT_NAME"
 									}
 								}
