@@ -78,11 +78,17 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MX03_MX_BO_Dynamic",
+									"referenceName": "MX01_MX_BO_Dynamic",
 									"type": "DatasetReference",
 									"parameters": {
-										"db_schema": "@variables('dbSchema')",
-										"db_table": "@item().OBJECT_NAME"
+										"db_schema": {
+											"value": "@variables('dbSchema')",
+											"type": "Expression"
+										},
+										"db_table": {
+											"value": "@item().OBJECT_NAME",
+											"type": "Expression"
+										}
 									}
 								}
 							],
@@ -172,10 +178,13 @@
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
-						"referenceName": "MX03_MX_BO_Dynamic",
+						"referenceName": "MX01_MX_BO_Dynamic",
 						"type": "DatasetReference",
 						"parameters": {
-							"db_schema": "@variables('dbSchema')",
+							"db_schema": {
+								"value": "@variables('dbSchema')",
+								"type": "Expression"
+							},
 							"db_table": "ALL_OBJECTS"
 						}
 					},
