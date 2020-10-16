@@ -55,8 +55,7 @@
 								"sink": {
 									"type": "ParquetSink",
 									"storeSettings": {
-										"type": "AzureBlobStorageWriteSettings",
-										"maxConcurrentConnections": 2
+										"type": "AzureBlobStorageWriteSettings"
 									},
 									"formatSettings": {
 										"type": "ParquetWriteSettings",
@@ -82,7 +81,7 @@
 									"referenceName": "MX03_MX_BO_Dynamic",
 									"type": "DatasetReference",
 									"parameters": {
-										"db_schema": "@variables('db_schema')",
+										"db_schema": "@variables('dbSchema')",
 										"db_table": "@item().OBJECT_NAME"
 									}
 								}
