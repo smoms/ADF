@@ -240,7 +240,7 @@
 									"referenceName": "MX03_MXDM_Dynamic",
 									"type": "DatasetReference",
 									"parameters": {
-										"db_schema": "@variables('db_schema')",
+										"db_schema": "@variables('dbSchema')",
 										"db_table": "@item().OBJECT_NAME"
 									}
 								}
