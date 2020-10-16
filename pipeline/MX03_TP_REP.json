@@ -96,43 +96,6 @@
 				}
 			},
 			{
-				"name": "Get Tables of the Job",
-				"type": "Lookup",
-				"dependsOn": [
-					{
-						"activity": "set last run closing",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "OracleSource",
-						"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'ATEL_TP_REP')\nAND OWNER = 'MX_DATAMART'\nAND OBJECT_TYPE = 'TABLE'",
-						"partitionOption": "None",
-						"queryTimeout": "02:00:00"
-					},
-					"dataset": {
-						"referenceName": "MX03_MXDM_Dynamic",
-						"type": "DatasetReference",
-						"parameters": {
-							"db_schema": "MX_DATAMART",
-							"db_table": "ALL_OBJECTS"
-						}
-					},
-					"firstRowOnly": false
-				}
-			},
-			{
 				"name": "Copy data for each table",
 				"type": "ForEach",
 				"dependsOn": [
@@ -146,7 +109,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@array(activity('Get Tables of the Job').output.value)",
+						"value": "@activity('GetGroupSCN').output.value",
 						"type": "Expression"
 					},
 					"batchCount": 4,
@@ -167,7 +130,7 @@
 								"source": {
 									"type": "OracleSource",
 									"oracleReaderQuery": {
-										"value": "@concat('SELECT /*+ NO_PARALLEL(\"', item().OBJECT_NAME,'\") */  * FROM ',item().OBJECT_NAME,' WHERE ORA_ROWSCN BETWEEN ', item().STARTING_VALUE, ' AND ',item().ENDING_VALUE, ' AND m_ref_data in (select d.m_ref_data from DYN_AUDIT_REP d, JOB_AUDIT_REP j where d.m_idjob=j.m_mx_ref_job and d.M_DELETED  = ''N'' and j.M_STATUS in  (''Done'',''Corrected'') and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_'' || TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') >''',\nvariables('lastRunTimestamp'), \n''' and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') <= ''', formatDateTime(variables('extractionTimestamp'), 'yyyy-MM-dd HH-mm-ss'), ''')')",
+										"value": "@concat('SELECT /*+ NO_PARALLEL(\"', variables('table'),'\") */  * FROM ',variables('table'),' WHERE ORA_ROWSCN BETWEEN ', item().STARTING_VALUE, ' AND ',item().ENDING_VALUE, ' AND m_ref_data in (select d.m_ref_data from DYN_AUDIT_REP d, JOB_AUDIT_REP j where d.m_idjob=j.m_mx_ref_job and d.M_DELETED  = ''N'' and j.M_STATUS in  (''Done'',''Corrected'') and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_'' || TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') >''',\nvariables('lastRunTimestamp'), \n''' and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') <= ''', formatDateTime(variables('extractionTimestamp'), 'yyyy-MM-dd HH-mm-ss'), ''')')",
 										"type": "Expression"
 									},
 									"partitionOption": "None",
@@ -176,8 +139,7 @@
 								"sink": {
 									"type": "ParquetSink",
 									"storeSettings": {
-										"type": "AzureBlobStorageWriteSettings",
-										"maxConcurrentConnections": 8
+										"type": "AzureBlobStorageWriteSettings"
 									},
 									"formatSettings": {
 										"type": "ParquetWriteSettings",
@@ -189,7 +151,6 @@
 									}
 								},
 								"enableStaging": false,
-								"parallelCopies": 8,
 								"translator": {
 									"type": "TabularTranslator",
 									"typeConversion": true,
@@ -209,7 +170,7 @@
 											"type": "Expression"
 										},
 										"db_table": {
-											"value": "@item().OBJECT_NAME",
+											"value": "@variables('table')",
 											"type": "Expression"
 										}
 									}
@@ -221,7 +182,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"folder": {
-											"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/',item().OBJECT_NAME,'/',variables('folderTimestamp'))",
+											"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/',variables('table'),'/',variables('folderTimestamp'))",
 											"type": "Expression"
 										}
 									}
@@ -276,7 +237,7 @@
 				"type": "Lookup",
 				"dependsOn": [
 					{
-						"activity": "Get Tables of the Job",
+						"activity": "set last run closing",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -294,7 +255,7 @@
 					"source": {
 						"type": "OracleSource",
 						"oracleReaderQuery": {
-							"value": "select\nCASE\nWHEN grp_nbr = 1\nTHEN min(ora_rowscn)\nWHEN grp_nbr > 1\nTHEN min(ora_rowscn) +1\nEND as Starting_Value\n,   max(ora_rowscn) as Ending_Value\n,   count(*)        as Total_Records\n,   grp_nbr         as Group_Nbr\nfrom (\nselect ora_rowscn,\nntile(4) over (order by ora_rowscn) grp_nbr\nfrom  + table +   \nwhere_clause\n)\ngroup by grp_nbr\nORDER BY grp_nbr ASC\n\n@concat(\n'select\nCASE\nWHEN grp_nbr = 1\nTHEN min(ora_rowscn)\nWHEN grp_nbr > 1\nTHEN min(ora_rowscn) +1\nEND as Starting_Value\n,   max(ora_rowscn) as Ending_Value\n,   count(*)        as Total_Records\n,   grp_nbr         as Group_Nbr\nfrom (\nselect ora_rowscn,\nntile(4) over (order by ora_rowscn) grp_nbr\nfrom ', \nitem().OBJECT_NAME, \n' where m_ref_data in (select d.m_ref_data from DYN_AUDIT_REP d, JOB_AUDIT_REP j where d.m_idjob=j.m_mx_ref_job and d.M_DELETED  = ''N'' and j.M_STATUS in  (''Done'',''Corrected'') and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_'' || TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') >''',\nvariables('lastRunTimestamp'), \n''' and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') <= ''', formatDateTime(variables('extractionTimestamp'), 'yyyy-MM-dd HH-mm-ss'), ''')\n)\ngroup by grp_nbr\nORDER BY grp_nbr ASC'\n)",
+							"value": "@concat(\n'select\nCASE\nWHEN grp_nbr = 1\nTHEN min(ora_rowscn)\nWHEN grp_nbr > 1\nTHEN min(ora_rowscn) +1\nEND as Starting_Value\n,   max(ora_rowscn) as Ending_Value\n,   count(*)        as Total_Records\n,   grp_nbr         as Group_Nbr\nfrom (\nselect ora_rowscn,\nntile(4) over (order by ora_rowscn) grp_nbr\nfrom ', \nvariables('table'), \n' where m_ref_data in (select d.m_ref_data from DYN_AUDIT_REP d, JOB_AUDIT_REP j where d.m_idjob=j.m_mx_ref_job and d.M_DELETED  = ''N'' and j.M_STATUS in  (''Done'',''Corrected'') and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_'' || TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') >''',\nvariables('lastRunTimestamp'), \n''' and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') <= ''', formatDateTime(variables('extractionTimestamp'), 'yyyy-MM-dd HH-mm-ss'), ''')\n)\ngroup by grp_nbr\nORDER BY grp_nbr ASC'\n)\n",
 							"type": "Expression"
 						},
 						"partitionOption": "None",
@@ -305,7 +266,10 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"db_schema": "MX_DATAMART",
-							"db_table": "@variables('tableName')"
+							"db_table": {
+								"value": "@variables('table')",
+								"type": "Expression"
+							}
 						}
 					},
 					"firstRowOnly": false
@@ -335,6 +299,10 @@
 			},
 			"fileTimestamp": {
 				"type": "String"
+			},
+			"table": {
+				"type": "String",
+				"defaultValue": "ATEL_TP_REP"
 			}
 		},
 		"folder": {
