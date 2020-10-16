@@ -2,7 +2,7 @@
 	"name": "MX03_MX_BO_Dynamic",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "MX03_MX_DATAMART",
+			"referenceName": "MX03_MX_BO_DATAMART",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
