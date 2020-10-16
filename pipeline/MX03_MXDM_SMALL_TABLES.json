@@ -90,7 +90,7 @@
 				"typeProperties": {
 					"variableName": "lastRunClosing",
 					"value": {
-						"value": "@if(\nequals(activity('Select last run information').output.value[0].LAST_RUN_CLOSING,NULL)\n,NULL\n,formatDateTime(activity('Select last run information').output.value[0].LAST_RUN_CLOSING,'yyyy-MM-dd'))",
+						"value": "@if(\nequals(activity('Select last run information').output.value[0].LAST_RUN_CLOSING,NULL)\n,NULL\n,formatDateTime(activity('Select last run information').output.value[0].LAST_RUN_CLOSING,'dd.MM.yyyy'))",
 						"type": "Expression"
 					}
 				}
