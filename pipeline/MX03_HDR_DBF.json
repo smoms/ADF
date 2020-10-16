@@ -82,73 +82,10 @@
 									"referenceName": "MX03_MX_BO_Dynamic",
 									"type": "DatasetReference",
 									"parameters": {
-										"db_schema": "@variables('dbSchema')",
-										"db_table": "@item().OBJECT_NAME"
-									}
-								}
-							],
-							"outputs": [
-								{
-									"referenceName": "DataExtraction_Parquet",
-									"type": "DatasetReference",
-									"parameters": {
-										"folder": {
-											"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/',item().OBJECT_NAME,'/',variables('folderTimestamp'))",
+										"db_schema": {
+											"value": "@variables('dbSchema')",
 											"type": "Expression"
-										}
-									}
-								}
-							]
-						},
-						{
-							"name": "Extract data to Parquet in BLOB Storage_copy1",
-							"type": "Copy",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"source": {
-									"type": "OracleSource",
-									"partitionOption": "None",
-									"queryTimeout": "02:00:00"
-								},
-								"sink": {
-									"type": "ParquetSink",
-									"storeSettings": {
-										"type": "AzureBlobStorageWriteSettings",
-										"maxConcurrentConnections": 1
-									},
-									"formatSettings": {
-										"type": "ParquetWriteSettings",
-										"maxRowsPerFile": 8000000,
-										"fileNamePrefix": {
-											"value": "@concat(item().OBJECT_NAME, '_', variables('fileTimestamp'),'_')",
-											"type": "Expression"
-										}
-									}
-								},
-								"enableStaging": false,
-								"translator": {
-									"type": "TabularTranslator",
-									"typeConversion": true,
-									"typeConversionSettings": {
-										"allowDataTruncation": true,
-										"treatBooleanAsNumber": false
-									}
-								}
-							},
-							"inputs": [
-								{
-									"referenceName": "MX03_MX_BO_Dynamic",
-									"type": "DatasetReference",
-									"parameters": {
-										"db_schema": "@variables('dbSchema')",
+										},
 										"db_table": "@item().OBJECT_NAME"
 									}
 								}
@@ -242,7 +179,10 @@
 						"referenceName": "MX03_MX_BO_Dynamic",
 						"type": "DatasetReference",
 						"parameters": {
-							"db_schema": "@variables('dbSchema')",
+							"db_schema": {
+								"value": "@variables('dbSchema')",
+								"type": "Expression"
+							},
 							"db_table": "ALL_OBJECTS"
 						}
 					},
@@ -262,7 +202,7 @@
 			},
 			"dbSchema": {
 				"type": "String",
-				"defaultValue": "MXPRO"
+				"defaultValue": "MX_BO_DATAMART"
 			},
 			"dbHost": {
 				"type": "String",
