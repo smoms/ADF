@@ -117,7 +117,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "OracleSource",
-						"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'ALPIQ_ACT_LSWAP_REP'\n,'ALPIQ_DELTA_EXPO_REP'\n,'ALPIQ_DLT_EXP_FX_REP'\n,'ALPIQ_MTM_LSWAP_VW'\n,'ATEL_CMAT_REP'\n,'ATEL_CS_ACT_PROV_REP'\n,'ATEL_SQL_TP_REP'\n,'CS_ACTUALS_CER_REP')\nAND OWNER = 'MX_DATAMART'\nAND OBJECT_TYPE = 'TABLE'",
+						"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'JOB_AUDIT_REP')\nAND OWNER = 'MX_DATAMART'\nAND OBJECT_TYPE = 'TABLE'",
 						"partitionOption": "None",
 						"queryTimeout": "02:00:00"
 					},
