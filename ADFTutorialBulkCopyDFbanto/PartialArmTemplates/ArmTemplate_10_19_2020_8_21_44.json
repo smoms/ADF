@@ -1,0 +1,3056 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "ADFTutorialBulkCopyDFbanto"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/MX01_DLV_PHYS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Set extraction timestamp",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "extractionTimestamp",
+							"value": {
+								"value": "@utcnow()",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Copy data for each table in lookup",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Look up Tables",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Look up Tables').output.value",
+								"type": "Expression"
+							},
+							"batchCount": 3,
+							"activities": [
+								{
+									"name": "Extract data to Parquet in BLOB Storage",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings",
+												"maxRowsPerFile": 8000000,
+												"fileNamePrefix": {
+													"value": "@concat(item().OBJECT_NAME, '_', variables('fileTimestamp'),'_')",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MX01_MX_BO_Dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"db_schema": {
+													"value": "@variables('dbSchema')",
+													"type": "Expression"
+												},
+												"db_table": {
+													"value": "@item().OBJECT_NAME",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataExtraction_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder": {
+													"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/',item().OBJECT_NAME,'/',variables('folderTimestamp'))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Set timestamp for folder",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set extraction timestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "folderTimestamp",
+							"value": {
+								"value": "@formatDateTime(variables('extractionTimestamp'),'yyyy-MM-dd HH-mm-ss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set timestamp for file",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set timestamp for folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "fileTimestamp",
+							"value": {
+								"value": "@formatDateTime(variables('extractionTimestamp'),'yyyyMMddHHmmss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Look up Tables",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Set timestamp for file",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "select DISTINCT(OBJECT_NAME)\nfrom ALL_OBJECTS \nWHERE OBJECT_NAME \nIN (\n'DLV_PHYS_JOIN_LOCATION_VW'\n,'DLV_PHYS_JOIN_PFOLIO_VW'\n,'DLV_PHYS_PROF_KEY_DBF'\n)",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX01_MX_BO_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": {
+										"value": "@variables('dbSchema')",
+										"type": "Expression"
+									},
+									"db_table": "ALL_OBJECTS"
+								}
+							},
+							"firstRowOnly": false
+						}
+					}
+				],
+				"variables": {
+					"extractionTimestamp": {
+						"type": "String"
+					},
+					"lastRunTimestamp": {
+						"type": "String"
+					},
+					"lastRunClosing": {
+						"type": "String"
+					},
+					"dbSchema": {
+						"type": "String",
+						"defaultValue": "MXPRO"
+					},
+					"dbHost": {
+						"type": "String",
+						"defaultValue": "MX01"
+					},
+					"folderTimestamp": {
+						"type": "String"
+					},
+					"fileTimestamp": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting/MX01_Full"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MX01_DLV_PHYS_PROF_DBF')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Set extraction timestamp",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "extractionTimestamp",
+							"value": {
+								"value": "@utcnow()",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Copy data for each SCN group",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "GetGroupSCN",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('GetGroupSCN').output.value",
+								"type": "Expression"
+							},
+							"batchCount": 8,
+							"activities": [
+								{
+									"name": "Extract data to Parquet in BLOB Storage",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"oracleReaderQuery": {
+												"value": "@concat('SELECT /*+ NO_PARALLEL(\"', variables('tableName'),'\") */  * FROM ',variables('tableName'),' WHERE ORA_ROWSCN BETWEEN ', item().STARTING_VALUE, ' AND ',item().ENDING_VALUE)",
+												"type": "Expression"
+											},
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings",
+												"maxRowsPerFile": 8000000,
+												"fileNamePrefix": {
+													"value": "@concat(variables('tableName'), '_', variables('fileTimestamp'),'_',string(item().GROUP_NBR),'_')",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MX01_MX_BO_Dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"db_schema": {
+													"value": "@variables('dbSchema')",
+													"type": "Expression"
+												},
+												"db_table": {
+													"value": "@variables('tableName')",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataExtraction_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder": {
+													"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/',variables('tableName'),'/',variables('folderTimestamp'))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Set timestamp for folder",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set extraction timestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "folderTimestamp",
+							"value": {
+								"value": "@formatDateTime(variables('extractionTimestamp'),'yyyy-MM-dd HH-mm-ss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set timestamp for file",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set timestamp for folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "fileTimestamp",
+							"value": {
+								"value": "@formatDateTime(variables('extractionTimestamp'),'yyyyMMddHHmmss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "GetGroupSCN",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Set timestamp for file",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "@concat('select\nCASE\n  WHEN grp_nbr = 1\n  THEN min(ora_rowscn)\n  WHEN grp_nbr > 1\n  THEN min(ora_rowscn) +1\n  END as Starting_Value\n, max(ora_rowscn) as Ending_Value\n, count(*)        as Total_Records\n, grp_nbr         as Group_Nbr\nfrom (\nselect ora_rowscn,\nntile(8) over (order by ora_rowscn) grp_nbr\nfrom ',variables('tableName') ,'\n)\ngroup by grp_nbr\nORDER BY grp_nbr ASC')",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX01_MX_BO_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": {
+										"value": "@variables('dbSchema')",
+										"type": "Expression"
+									},
+									"db_table": {
+										"value": "@variables('tableName')",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					}
+				],
+				"variables": {
+					"extractionTimestamp": {
+						"type": "String"
+					},
+					"lastRunTimestamp": {
+						"type": "String"
+					},
+					"lastRunClosing": {
+						"type": "String"
+					},
+					"dbSchema": {
+						"type": "String",
+						"defaultValue": "MXPRO"
+					},
+					"dbHost": {
+						"type": "String",
+						"defaultValue": "MX01"
+					},
+					"folderTimestamp": {
+						"type": "String"
+					},
+					"fileTimestamp": {
+						"type": "String"
+					},
+					"tableName": {
+						"type": "String",
+						"defaultValue": "DLV_PHYS_PROF_DBF"
+					},
+					"processCount": {
+						"type": "String",
+						"defaultValue": "0"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting/MX01_Full"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MX01_EXP_HR')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Set extraction timestamp",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "extractionTimestamp",
+							"value": {
+								"value": "@utcnow()",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Copy data for each SCN group",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "GetGroupSCN",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('GetGroupSCN').output.value",
+								"type": "Expression"
+							},
+							"batchCount": 8,
+							"activities": [
+								{
+									"name": "Extract data to Parquet in BLOB Storage",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"oracleReaderQuery": {
+												"value": "@concat('SELECT /*+ NO_PARALLEL(\"', variables('tableName'),'\") */  * FROM ',variables('tableName'),' WHERE ORA_ROWSCN BETWEEN ', item().STARTING_VALUE, ' AND ',item().ENDING_VALUE)",
+												"type": "Expression"
+											},
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings",
+												"maxRowsPerFile": 8000000,
+												"fileNamePrefix": {
+													"value": "@concat(variables('tableName'), '_', variables('fileTimestamp'),'_',string(item().GROUP_NBR),'_')",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MX01_MXDM_Dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"db_schema": {
+													"value": "@variables('dbSchema')",
+													"type": "Expression"
+												},
+												"db_table": {
+													"value": "@variables('tableName')",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataExtraction_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder": {
+													"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/',variables('tableName'),'/',variables('folderTimestamp'))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Set timestamp for folder",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set extraction timestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "folderTimestamp",
+							"value": {
+								"value": "@formatDateTime(variables('extractionTimestamp'),'yyyy-MM-dd HH-mm-ss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set timestamp for file",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set timestamp for folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "fileTimestamp",
+							"value": {
+								"value": "@formatDateTime(variables('extractionTimestamp'),'yyyyMMddHHmmss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "GetGroupSCN",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Set timestamp for file",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "@concat('select\nCASE\n  WHEN grp_nbr = 1\n  THEN min(ora_rowscn)\n  WHEN grp_nbr > 1\n  THEN min(ora_rowscn) +1\n  END as Starting_Value\n, max(ora_rowscn) as Ending_Value\n, count(*)        as Total_Records\n, grp_nbr         as Group_Nbr\nfrom (\nselect ora_rowscn,\nntile(8) over (order by ora_rowscn) grp_nbr\nfrom ',variables('tableName') ,'\n)\ngroup by grp_nbr\nORDER BY grp_nbr ASC')",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX01_MXDM_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": {
+										"value": "@variables('dbSchema')",
+										"type": "Expression"
+									},
+									"db_table": {
+										"value": "@variables('tableName')",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					}
+				],
+				"variables": {
+					"extractionTimestamp": {
+						"type": "String"
+					},
+					"lastRunTimestamp": {
+						"type": "String"
+					},
+					"lastRunClosing": {
+						"type": "String"
+					},
+					"dbSchema": {
+						"type": "String",
+						"defaultValue": "MX_DATAMART"
+					},
+					"dbHost": {
+						"type": "String",
+						"defaultValue": "MX01"
+					},
+					"folderTimestamp": {
+						"type": "String"
+					},
+					"fileTimestamp": {
+						"type": "String"
+					},
+					"tableName": {
+						"type": "String",
+						"defaultValue": "ALPIQ_DLT_EXP_HR_REP"
+					},
+					"processCount": {
+						"type": "String",
+						"defaultValue": "0"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting/MX01_Full"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MX01_FIN_POS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Set extraction timestamp",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "extractionTimestamp",
+							"value": {
+								"value": "@utcnow()",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Select last run information",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Set timestamp for file",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SnowflakeSource",
+								"query": {
+									"value": "@concat('select \nLAST_RUN_TIMESTAMP,\nLAST_RUN_CLOSING\nfrom SHARED.EXTR_LAST_RUN_INFO\nWHERE JOB_NAME = ''',pipeline().Pipeline,'''')",
+									"type": "Expression"
+								},
+								"exportSettings": {
+									"type": "SnowflakeExportCopyCommand"
+								}
+							},
+							"dataset": {
+								"referenceName": "SnowflakeTable1",
+								"type": "DatasetReference",
+								"parameters": {
+									"table_name": "EXTR_LAST_RUN_INFO"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "set last run timestamp",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Select last run information",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "lastRunTimestamp",
+							"value": {
+								"value": "@if(\nequals(activity('Select last run information').output.value[0].LAST_RUN_TIMESTAMP,NULL)\n,NULL\n,formatDateTime(activity('Select last run information').output.value[0].LAST_RUN_TIMESTAMP,'yyyy-MM-dd HH-mm-ss'))",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "set last run closing",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "set last run timestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "lastRunClosing",
+							"value": {
+								"value": "@if(\nequals(activity('Select last run information').output.value[0].LAST_RUN_CLOSING,NULL)\n,NULL\n,formatDateTime(activity('Select last run information').output.value[0].LAST_RUN_CLOSING,'yyyy-MM-dd'))",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Copy data for each SCN group",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "GetGroupSCN",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('GetGroupSCN').output.value",
+								"type": "Expression"
+							},
+							"batchCount": 8,
+							"activities": [
+								{
+									"name": "Extract data to Parquet in BLOB Storage",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"oracleReaderQuery": {
+												"value": "@concat('SELECT /*+ NO_PARALLEL(\"', variables('table'),'\") */  * FROM ',variables('table'),' WHERE ORA_ROWSCN BETWEEN ', item().STARTING_VALUE, ' AND ',item().ENDING_VALUE, ' AND m_ref_data in (select d.m_ref_data from DYN_AUDIT_REP d, JOB_AUDIT_REP j where d.m_idjob=j.m_mx_ref_job and d.M_DELETED  = ''N'' and j.M_STATUS in  (''Done'',''Corrected'') and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_'' || TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') >''',\nvariables('lastRunTimestamp'), \n''' and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') <= ''', formatDateTime(variables('extractionTimestamp'), 'yyyy-MM-dd HH-mm-ss'), ''')')",
+												"type": "Expression"
+											},
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings",
+												"maxRowsPerFile": 8000000,
+												"fileNamePrefix": {
+													"value": "@concat(variables('table'), '_', variables('fileTimestamp'),'_',string(item().GROUP_NBR),'_')",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MX01_MXDM_Dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"db_schema": {
+													"value": "@variables('dbSchema')",
+													"type": "Expression"
+												},
+												"db_table": {
+													"value": "@variables('table')",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataExtraction_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder": {
+													"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/',variables('table'),'/',variables('folderTimestamp'))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Set timestamp for folder",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set extraction timestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "folderTimestamp",
+							"value": {
+								"value": "@formatDateTime(variables('extractionTimestamp'),'yyyy-MM-dd HH-mm-ss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set timestamp for file",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set timestamp for folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "fileTimestamp",
+							"value": {
+								"value": "@formatDateTime(variables('extractionTimestamp'),'yyyyMMddHHmmss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "GetGroupSCN",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "set last run closing",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "@concat(\n'select\nCASE\nWHEN grp_nbr = 1\nTHEN min(ora_rowscn)\nWHEN grp_nbr > 1\nTHEN min(ora_rowscn) +1\nEND as Starting_Value\n,   max(ora_rowscn) as Ending_Value\n,   count(*)        as Total_Records\n,   grp_nbr         as Group_Nbr\nfrom (\nselect ora_rowscn,\nntile(8) over (order by ora_rowscn) grp_nbr\nfrom ', \nvariables('table'), \n' where m_ref_data in (select d.m_ref_data from DYN_AUDIT_REP d, JOB_AUDIT_REP j where d.m_idjob=j.m_mx_ref_job and d.M_DELETED  = ''N'' and j.M_STATUS in  (''Done'',''Corrected'') and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_'' || TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') >''',\nvariables('lastRunTimestamp'), \n''' and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') <= ''', formatDateTime(variables('extractionTimestamp'), 'yyyy-MM-dd HH-mm-ss'), ''')\n)\ngroup by grp_nbr\nORDER BY grp_nbr ASC'\n)\n",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX01_MXDM_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": {
+										"value": "@variables('dbSchema')",
+										"type": "Expression"
+									},
+									"db_table": {
+										"value": "@variables('table')",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					}
+				],
+				"variables": {
+					"extractionTimestamp": {
+						"type": "String"
+					},
+					"lastRunTimestamp": {
+						"type": "String"
+					},
+					"lastRunClosing": {
+						"type": "String"
+					},
+					"dbSchema": {
+						"type": "String",
+						"defaultValue": "MX_DATAMART"
+					},
+					"dbHost": {
+						"type": "String",
+						"defaultValue": "MX01"
+					},
+					"folderTimestamp": {
+						"type": "String"
+					},
+					"fileTimestamp": {
+						"type": "String"
+					},
+					"table": {
+						"type": "String",
+						"defaultValue": "ALPIQ_FIN_POS_REP"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting/MX01_Full"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MX01_HDR_DBF')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Set extraction timestamp",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "extractionTimestamp",
+							"value": {
+								"value": "@utcnow()",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Copy data for each table in lookup",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Look up Tables",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Look up Tables').output.value",
+								"type": "Expression"
+							},
+							"batchCount": 1,
+							"activities": [
+								{
+									"name": "Extract data to Parquet in BLOB Storage",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings",
+												"maxRowsPerFile": 8000000,
+												"fileNamePrefix": {
+													"value": "@concat(item().OBJECT_NAME, '_', variables('fileTimestamp'),'_')",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MX01_MX_BO_Dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"db_schema": {
+													"value": "@variables('dbSchema')",
+													"type": "Expression"
+												},
+												"db_table": "@item().OBJECT_NAME"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataExtraction_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder": {
+													"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/',item().OBJECT_NAME,'/',variables('folderTimestamp'))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Set timestamp for folder",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set extraction timestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "folderTimestamp",
+							"value": {
+								"value": "@formatDateTime(variables('extractionTimestamp'),'yyyy-MM-dd HH-mm-ss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set timestamp for file",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set timestamp for folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "fileTimestamp",
+							"value": {
+								"value": "@formatDateTime(variables('extractionTimestamp'),'yyyyMMddHHmmss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Look up Tables",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Set timestamp for file",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'MX_HDR_DBF'\n)",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX01_MX_BO_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": {
+										"value": "@variables('dbSchema')",
+										"type": "Expression"
+									},
+									"db_table": "ALL_OBJECTS"
+								}
+							},
+							"firstRowOnly": false
+						}
+					}
+				],
+				"variables": {
+					"extractionTimestamp": {
+						"type": "String"
+					},
+					"lastRunTimestamp": {
+						"type": "String"
+					},
+					"lastRunClosing": {
+						"type": "String"
+					},
+					"dbSchema": {
+						"type": "String",
+						"defaultValue": "MXPRO"
+					},
+					"dbHost": {
+						"type": "String",
+						"defaultValue": "MX01"
+					},
+					"folderTimestamp": {
+						"type": "String"
+					},
+					"fileTimestamp": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting/MX01_Full"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MX01_MEDIUM_TABLES')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Set extraction timestamp",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "extractionTimestamp",
+							"value": {
+								"value": "@utcnow()",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Select last run information",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Set timestamp for file",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SnowflakeSource",
+								"query": {
+									"value": "@concat('select \nLAST_RUN_TIMESTAMP,\nLAST_RUN_CLOSING\nfrom SHARED.EXTR_LAST_RUN_INFO\nWHERE JOB_NAME = ''',pipeline().Pipeline,'''')",
+									"type": "Expression"
+								},
+								"exportSettings": {
+									"type": "SnowflakeExportCopyCommand"
+								}
+							},
+							"dataset": {
+								"referenceName": "SnowflakeTable1",
+								"type": "DatasetReference",
+								"parameters": {
+									"table_name": "EXTR_LAST_RUN_INFO"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "set last run timestamp",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Select last run information",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "lastRunTimestamp",
+							"value": {
+								"value": "@if(\nequals(activity('Select last run information').output.value[0].LAST_RUN_TIMESTAMP,NULL)\n,NULL\n,formatDateTime(activity('Select last run information').output.value[0].LAST_RUN_TIMESTAMP,'yyyy-MM-dd HH-mm-ss'))",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "set last run closing",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "set last run timestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "lastRunClosing",
+							"value": {
+								"value": "@if(\nequals(activity('Select last run information').output.value[0].LAST_RUN_CLOSING,NULL)\n,NULL\n,formatDateTime(activity('Select last run information').output.value[0].LAST_RUN_CLOSING,'yyyy-MM-dd'))",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Get Tables of the Job",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "set last run closing",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'ALPIQ_ACT_LSWAP_REP'\n,'ALPIQ_DELTA_EXPO_REP'\n,'ALPIQ_DLT_EXP_FX_REP'\n,'ALPIQ_MTM_LSWAP_VW'\n,'ATEL_CMAT_REP'\n,'ATEL_CS_ACT_PROV_REP'\n,'ATEL_SQL_TP_REP'\n,'CS_ACTUALS_CER_REP')\nAND OWNER = 'MX_DATAMART'\nAND OBJECT_TYPE = 'TABLE'",
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX01_MXDM_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": {
+										"value": "@variables('dbSchema')",
+										"type": "Expression"
+									},
+									"db_table": "ALL_OBJECTS"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Copy data for each table",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Tables of the Job",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@array(activity('Get Tables of the Job').output.value)",
+								"type": "Expression"
+							},
+							"batchCount": 8,
+							"activities": [
+								{
+									"name": "Extract data to Parquet in BLOB Storage",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"oracleReaderQuery": {
+												"value": "@concat(\n'select * from ', \nitem().OBJECT_NAME, \n' where m_ref_data in (select d.m_ref_data from DYN_AUDIT_REP d, JOB_AUDIT_REP j where d.m_idjob=j.m_mx_ref_job and d.M_DELETED  = ''N'' and j.M_STATUS in  (''Done'',''Corrected'') and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_'' || TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') >''',\nvariables('lastRunTimestamp'), \n''' and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') <= ''', formatDateTime(variables('extractionTimestamp'), 'yyyy-MM-dd HH-mm-ss'), ''')'\n)",
+												"type": "Expression"
+											},
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings",
+												"maxRowsPerFile": 8000000,
+												"fileNamePrefix": {
+													"value": "@concat(item().OBJECT_NAME, '_', variables('fileTimestamp'),'_')",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MX01_MXDM_Dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"db_schema": {
+													"value": "@variables('dbSchema')",
+													"type": "Expression"
+												},
+												"db_table": {
+													"value": "@item().OBJECT_NAME",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataExtraction_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder": {
+													"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/',item().OBJECT_NAME,'/',variables('folderTimestamp'))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Set timestamp for folder",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set extraction timestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "folderTimestamp",
+							"value": {
+								"value": "@formatDateTime(variables('extractionTimestamp'),'yyyy-MM-dd HH-mm-ss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set timestamp for file",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set timestamp for folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "fileTimestamp",
+							"value": {
+								"value": "@formatDateTime(variables('extractionTimestamp'),'yyyyMMddHHmmss')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"variables": {
+					"extractionTimestamp": {
+						"type": "String"
+					},
+					"lastRunTimestamp": {
+						"type": "String"
+					},
+					"lastRunClosing": {
+						"type": "String"
+					},
+					"dbSchema": {
+						"type": "String",
+						"defaultValue": "MX_DATAMART"
+					},
+					"dbHost": {
+						"type": "String",
+						"defaultValue": "MX01"
+					},
+					"folderTimestamp": {
+						"type": "String"
+					},
+					"fileTimestamp": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting/MX01_Full"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MX01_MTM_RAW_VW')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Set extraction timestamp",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "extractionTimestamp",
+							"value": {
+								"value": "@utcnow()",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Select last run information",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Set timestamp for file",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SnowflakeSource",
+								"query": {
+									"value": "@concat('select \nLAST_RUN_TIMESTAMP,\nLAST_RUN_CLOSING\nfrom SHARED.EXTR_LAST_RUN_INFO\nWHERE JOB_NAME = ''',pipeline().Pipeline,'''')",
+									"type": "Expression"
+								},
+								"exportSettings": {
+									"type": "SnowflakeExportCopyCommand"
+								}
+							},
+							"dataset": {
+								"referenceName": "SnowflakeTable1",
+								"type": "DatasetReference",
+								"parameters": {
+									"table_name": "EXTR_LAST_RUN_INFO"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "set last run timestamp",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Select last run information",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "lastRunTimestamp",
+							"value": {
+								"value": "@if(\nequals(activity('Select last run information').output.value[0].LAST_RUN_TIMESTAMP,NULL)\n,NULL\n,formatDateTime(activity('Select last run information').output.value[0].LAST_RUN_TIMESTAMP,'yyyy-MM-dd HH-mm-ss'))",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "set last run closing",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "set last run timestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "lastRunClosing",
+							"value": {
+								"value": "@if(\nequals(activity('Select last run information').output.value[0].LAST_RUN_CLOSING,NULL)\n,NULL\n,formatDateTime(activity('Select last run information').output.value[0].LAST_RUN_CLOSING,'yyyy-MM-dd'))",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Get Tables of the Job",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "set last run closing",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'ALPIQ_MTM_RAW_VW')\nAND OWNER = 'MX_DATAMART'",
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX01_MXDM_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": {
+										"value": "@variables('dbSchema')",
+										"type": "Expression"
+									},
+									"db_table": "ALL_OBJECTS"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Copy data for each table",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Tables of the Job",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@array(activity('Get Tables of the Job').output.value)",
+								"type": "Expression"
+							},
+							"batchCount": 4,
+							"activities": [
+								{
+									"name": "Extract data to Parquet in BLOB Storage",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"oracleReaderQuery": {
+												"value": "@concat(\n'select * from ', \nitem().OBJECT_NAME, \n' where m_ref_data in (select d.m_ref_data from DYN_AUDIT_REP d, JOB_AUDIT_REP j where d.m_idjob=j.m_mx_ref_job and d.M_DELETED  = ''N'' and j.M_STATUS in  (''Done'',''Corrected'') and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_'' || TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') >''',\nvariables('lastRunTimestamp'), \n''' and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') <= ''', formatDateTime(variables('extractionTimestamp'), 'yyyy-MM-dd HH-mm-ss'), ''')'\n)",
+												"type": "Expression"
+											},
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings",
+												"maxRowsPerFile": 8000000,
+												"fileNamePrefix": {
+													"value": "@concat(item().OBJECT_NAME, '_', variables('fileTimestamp'),'_')",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MX01_MXDM_Dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"db_schema": {
+													"value": "@variables('dbSchema')",
+													"type": "Expression"
+												},
+												"db_table": {
+													"value": "@item().OBJECT_NAME",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataExtraction_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder": {
+													"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/',item().OBJECT_NAME,'/',variables('folderTimestamp'))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Set timestamp for folder",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set extraction timestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "folderTimestamp",
+							"value": {
+								"value": "@formatDateTime(variables('extractionTimestamp'),'yyyy-MM-dd HH-mm-ss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set timestamp for file",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set timestamp for folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "fileTimestamp",
+							"value": {
+								"value": "@formatDateTime(variables('extractionTimestamp'),'yyyyMMddHHmmss')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"variables": {
+					"extractionTimestamp": {
+						"type": "String"
+					},
+					"lastRunTimestamp": {
+						"type": "String"
+					},
+					"lastRunClosing": {
+						"type": "String"
+					},
+					"dbSchema": {
+						"type": "String",
+						"defaultValue": "MX_DATAMART"
+					},
+					"dbHost": {
+						"type": "String",
+						"defaultValue": "MX01"
+					},
+					"folderTimestamp": {
+						"type": "String"
+					},
+					"fileTimestamp": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting/MX01_Full"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MX01_MXDM_SMALL_TABLES')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Set extraction timestamp",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "extractionTimestamp",
+							"value": {
+								"value": "@utcnow()",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Select last run information",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Set timestamp for file",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SnowflakeSource",
+								"query": {
+									"value": "@concat('select \nLAST_RUN_TIMESTAMP,\nLAST_RUN_CLOSING\nfrom SHARED.EXTR_LAST_RUN_INFO\nWHERE JOB_NAME = ''',pipeline().Pipeline,'''')",
+									"type": "Expression"
+								},
+								"exportSettings": {
+									"type": "SnowflakeExportCopyCommand"
+								}
+							},
+							"dataset": {
+								"referenceName": "SnowflakeTable1",
+								"type": "DatasetReference",
+								"parameters": {
+									"table_name": "EXTR_LAST_RUN_INFO"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "set last run timestamp",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Select last run information",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "lastRunTimestamp",
+							"value": {
+								"value": "@if(\nequals(activity('Select last run information').output.value[0].LAST_RUN_TIMESTAMP,NULL)\n,NULL\n,formatDateTime(activity('Select last run information').output.value[0].LAST_RUN_TIMESTAMP,'yyyy-MM-dd HH-mm-ss'))",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "set last run closing",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "set last run timestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "lastRunClosing",
+							"value": {
+								"value": "@if(\nequals(activity('Select last run information').output.value[0].LAST_RUN_CLOSING,NULL)\n,NULL\n,formatDateTime(activity('Select last run information').output.value[0].LAST_RUN_CLOSING,'dd.MM.yyyy'))",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set timestamp for folder",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set extraction timestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "folderTimestamp",
+							"value": {
+								"value": "@formatDateTime(variables('extractionTimestamp'),'yyyy-MM-dd HH-mm-ss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set timestamp for file",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set timestamp for folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "fileTimestamp",
+							"value": {
+								"value": "@formatDateTime(variables('extractionTimestamp'),'yyyyMMddHHmmss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Lookup - 3 Tables",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "set last run closing",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": "select DISTINCT(OBJECT_NAME) from ALL_OBJECTS WHERE OBJECT_NAME IN(\n'ALPIQ_LOCATION_COUNTRY_VIEW'\n,'V_STRATEGY_TREE_DBF'\n,'V_TRN_FLAGS_DBF'\n)",
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX01_MXDM_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": {
+										"value": "@variables('dbSchema')",
+										"type": "Expression"
+									},
+									"db_table": "ALL_OBJECTS"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup - 3 Tables",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@array(activity('Lookup - 3 Tables').output.value)",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 1,
+							"activities": [
+								{
+									"name": "Copy2Parquet_plain",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings",
+												"maxConcurrentConnections": 0
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings",
+												"maxRowsPerFile": 8000000,
+												"fileNamePrefix": {
+													"value": "@concat(item().OBJECT_NAME, '_', variables('fileTimestamp'),'_')",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MX01_MXDM_Dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"db_schema": {
+													"value": "@variables('dbSchema')",
+													"type": "Expression"
+												},
+												"db_table": "@item().OBJECT_NAME"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataExtraction_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder": {
+													"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/',item().OBJECT_NAME,'/',variables('folderTimestamp'))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Lookup - 15 Tables",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "set last run closing",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": "select DISTINCT(OBJECT_NAME) from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'ALPIQ_MASTER_AGR_REP'\n,'ALPIQ_SIM_PURGED_REP'\n,'ALPIQ_SIM_STOCK_REP'\n,'ATEL_CMAT_REP'\n,'ATEL_CS_ACTUALS_REP'\n,'ATEL_CS_FORECAST_REP'\n,'ATEL_MDL_FX_REP'\n,'ATEL_OPTIONS_REP'\n,'ATEL_SIM_OPT_GRK_REP'\n,'ATEL_SQL_CNTP_REP'\n,'ATEL_SQL_FEE_REP'\n,'ATEL_SQL_INDEX_REP'\n,'ATEL_SQL_PFTREE_REP'\n,'ATEL_SQL_PF_REP'\n,'ATEL_SQL_PR_IND_REP'\n)",
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX01_MXDM_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": {
+										"value": "@variables('dbSchema')",
+										"type": "Expression"
+									},
+									"db_table": "ALL_OBJECTS"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach2",
+						"description": "",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup - 15 Tables",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@array(activity('Lookup - 15 Tables').output.value)",
+								"type": "Expression"
+							},
+							"batchCount": 2,
+							"activities": [
+								{
+									"name": "Copy2Parquet_whereTimestamp",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"oracleReaderQuery": {
+												"value": "@concat('SELECT * from ', variables('dbSchema'), '.', item().OBJECT_NAME, ' where m_ref_data in (select d.m_ref_data from DYN_AUDIT_REP d, JOB_AUDIT_REP j where d.m_idjob=j.m_mx_ref_job and d.M_DELETED  = ''N'' and j.M_STATUS in  (''Done'',''Corrected'') and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') >', '''',variables('lastRunTimestamp'),  '''', ' and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') <= ', '''',variables('folderTimestamp'),''')')",
+												"type": "Expression"
+											},
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings",
+												"maxRowsPerFile": 8000000,
+												"fileNamePrefix": {
+													"value": "@concat(item().OBJECT_NAME, '_', variables('fileTimestamp'),'_')",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MX01_MXDM_Dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"db_schema": {
+													"value": "@variables('dbSchema')",
+													"type": "Expression"
+												},
+												"db_table": "@item().OBJECT_NAME"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataExtraction_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder": {
+													"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/',item().OBJECT_NAME,'/',variables('folderTimestamp'))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Lookup - 1 Table",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "set last run closing",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'ALPIQ_CMIP_EXPORT'\n)",
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX01_MXDM_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": {
+										"value": "@variables('dbSchema')",
+										"type": "Expression"
+									},
+									"db_table": "ALL_OBJECTS"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach3",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup - 1 Table",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@array(activity('Lookup - 1 Table').output.value)",
+								"type": "Expression"
+							},
+							"batchCount": 1,
+							"activities": [
+								{
+									"name": "Copy2Parquet_whereClosing",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"oracleReaderQuery": {
+												"value": "@concat('SELECT * from ', variables('dbSchema'), '.', item().OBJECT_NAME, ' where closing_date > to_date(''', string(variables('lastRunClosing')),''',''DD.MM.YYYY'')')",
+												"type": "Expression"
+											},
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings",
+												"maxRowsPerFile": 8000000,
+												"fileNamePrefix": {
+													"value": "@concat(item().OBJECT_NAME, '_', variables('fileTimestamp'),'_')",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MX03_MXDM_Dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"db_schema": "@variables('dbSchema')",
+												"db_table": "@item().OBJECT_NAME"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataExtraction_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder": {
+													"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/',item().OBJECT_NAME,'/',variables('folderTimestamp'))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"variables": {
+					"extractionTimestamp": {
+						"type": "String"
+					},
+					"lastRunTimestamp": {
+						"type": "String"
+					},
+					"lastRunClosing": {
+						"type": "String"
+					},
+					"dbSchema": {
+						"type": "String",
+						"defaultValue": "MX_DATAMART"
+					},
+					"dbHost": {
+						"type": "String",
+						"defaultValue": "MX01"
+					},
+					"folderTimestamp": {
+						"type": "String"
+					},
+					"fileTimestamp": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting/MX01_Full"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MX01_MXPRO_SMALL_TABLES')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Set extraction timestamp",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "extractionTimestamp",
+							"value": {
+								"value": "@utcnow()",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Copy data for each table in Lookup",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Look up Tables",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Look up Tables').output.value",
+								"type": "Expression"
+							},
+							"batchCount": 4,
+							"activities": [
+								{
+									"name": "Extract data to Parquet in BLOB Storage",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings",
+												"maxConcurrentConnections": 4
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings",
+												"maxRowsPerFile": 8000000,
+												"fileNamePrefix": {
+													"value": "@concat(item().OBJECT_NAME, '_', variables('fileTimestamp'),'_')",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MX01_MX_BO_Dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"db_schema": {
+													"value": "@variables('dbSchema')",
+													"type": "Expression"
+												},
+												"db_table": {
+													"value": "@item().OBJECT_NAME",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataExtraction_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder": {
+													"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/',item().OBJECT_NAME,'/',variables('folderTimestamp'))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Set timestamp for folder",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set extraction timestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "folderTimestamp",
+							"value": {
+								"value": "@formatDateTime(variables('extractionTimestamp'),'yyyy-MM-dd HH-mm-ss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set timestamp for file",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set timestamp for folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "fileTimestamp",
+							"value": {
+								"value": "@formatDateTime(variables('extractionTimestamp'),'yyyyMMddHHmmss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Look up Tables",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Set timestamp for file",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "select DISTINCT(OBJECT_NAME) from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'ACT_PHYS_DBF'\n,'ALPIQ_CLOSING_DATE_VIEW'\n,'CAL_HOL_DBF'\n,'CM_LOCAT_DBF'\n,'CM_PROF_PB_DBF'\n,'CM_PROF_PH_DBF'\n,'CM_PROFH_DBF'\n,'CM_UNIT_DBF'\n,'CONTRACT_DBF'\n,'MX_PURGE_DET_DBF'\n,'PROFIT_HEADER'\n,'ROUTE_PHYS_DBF'\n,'TYPOLOGY_DBF'\n,'UDTB113_DBF'\n,'UDTH113_DBF'\n,'CM_LTYPE_DBF'\n)",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX01_MX_BO_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": {
+										"value": "@variables('dbSchema')",
+										"type": "Expression"
+									},
+									"db_table": "ALL_OBJECTS"
+								}
+							},
+							"firstRowOnly": false
+						}
+					}
+				],
+				"variables": {
+					"extractionTimestamp": {
+						"type": "String"
+					},
+					"lastRunTimestamp": {
+						"type": "String"
+					},
+					"lastRunClosing": {
+						"type": "String"
+					},
+					"dbSchema": {
+						"type": "String",
+						"defaultValue": "MXPRO"
+					},
+					"dbHost": {
+						"type": "String",
+						"defaultValue": "MX01"
+					},
+					"folderTimestamp": {
+						"type": "String"
+					},
+					"fileTimestamp": {
+						"type": "String"
+					},
+					"tableName": {
+						"type": "String",
+						"defaultValue": "ALPIQ_DLT_EXP_HR_REP"
+					},
+					"processCount": {
+						"type": "String",
+						"defaultValue": "0"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting/MX01_Full"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MX01_TP_REP')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Set extraction timestamp",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "extractionTimestamp",
+							"value": {
+								"value": "@utcnow()",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Select last run information",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Set timestamp for file",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SnowflakeSource",
+								"query": {
+									"value": "@concat('select \nLAST_RUN_TIMESTAMP,\nLAST_RUN_CLOSING\nfrom SHARED.EXTR_LAST_RUN_INFO\nWHERE JOB_NAME = ''',pipeline().Pipeline,'''')",
+									"type": "Expression"
+								},
+								"exportSettings": {
+									"type": "SnowflakeExportCopyCommand"
+								}
+							},
+							"dataset": {
+								"referenceName": "SnowflakeTable1",
+								"type": "DatasetReference",
+								"parameters": {
+									"table_name": "EXTR_LAST_RUN_INFO"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "set last run timestamp",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Select last run information",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "lastRunTimestamp",
+							"value": {
+								"value": "@if(\nequals(activity('Select last run information').output.value[0].LAST_RUN_TIMESTAMP,NULL)\n,NULL\n,formatDateTime(activity('Select last run information').output.value[0].LAST_RUN_TIMESTAMP,'yyyy-MM-dd HH-mm-ss'))",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "set last run closing",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "set last run timestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "lastRunClosing",
+							"value": {
+								"value": "@if(\nequals(activity('Select last run information').output.value[0].LAST_RUN_CLOSING,NULL)\n,NULL\n,formatDateTime(activity('Select last run information').output.value[0].LAST_RUN_CLOSING,'yyyy-MM-dd'))",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Copy data for each table",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "GetGroupSCN",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('GetGroupSCN').output.value",
+								"type": "Expression"
+							},
+							"batchCount": 4,
+							"activities": [
+								{
+									"name": "Extract data to Parquet in BLOB Storage",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "OracleSource",
+											"oracleReaderQuery": {
+												"value": "@concat('SELECT /*+ NO_PARALLEL(\"', variables('table'),'\") */  * FROM ',variables('table'),' WHERE ORA_ROWSCN BETWEEN ', item().STARTING_VALUE, ' AND ',item().ENDING_VALUE, ' AND m_ref_data in (select d.m_ref_data from DYN_AUDIT_REP d, JOB_AUDIT_REP j where d.m_idjob=j.m_mx_ref_job and d.M_DELETED  = ''N'' and j.M_STATUS in  (''Done'',''Corrected'') and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_'' || TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') >''',\nvariables('lastRunTimestamp'), \n''' and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') <= ''', formatDateTime(variables('extractionTimestamp'), 'yyyy-MM-dd HH-mm-ss'), ''')')",
+												"type": "Expression"
+											},
+											"partitionOption": "None",
+											"queryTimeout": "02:00:00"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings",
+												"maxRowsPerFile": 2000000,
+												"fileNamePrefix": {
+													"value": "@concat(variables('table'), '_', variables('fileTimestamp'),'_',string(item().GROUP_NBR),'_')",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MX01_MXDM_Dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"db_schema": {
+													"value": "@variables('dbSchema')",
+													"type": "Expression"
+												},
+												"db_table": {
+													"value": "@variables('table')",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataExtraction_Parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder": {
+													"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/',variables('table'),'/',variables('folderTimestamp'))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Set timestamp for folder",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set extraction timestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "folderTimestamp",
+							"value": {
+								"value": "@formatDateTime(variables('extractionTimestamp'),'yyyy-MM-dd HH-mm-ss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set timestamp for file",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set timestamp for folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "fileTimestamp",
+							"value": {
+								"value": "@formatDateTime(variables('extractionTimestamp'),'yyyyMMddHHmmss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "GetGroupSCN",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "set last run closing",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "@concat(\n'select\nCASE\nWHEN grp_nbr = 1\nTHEN min(ora_rowscn)\nWHEN grp_nbr > 1\nTHEN min(ora_rowscn) +1\nEND as Starting_Value\n,   max(ora_rowscn) as Ending_Value\n,   count(*)        as Total_Records\n,   grp_nbr         as Group_Nbr\nfrom (\nselect ora_rowscn,\nntile(4) over (order by ora_rowscn) grp_nbr\nfrom ', \nvariables('table'), \n' where m_ref_data in (select d.m_ref_data from DYN_AUDIT_REP d, JOB_AUDIT_REP j where d.m_idjob=j.m_mx_ref_job and d.M_DELETED  = ''N'' and j.M_STATUS in  (''Done'',''Corrected'') and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_'' || TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') >''',\nvariables('lastRunTimestamp'), \n''' and  to_char(to_date(TO_CHAR (d.M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (d.M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') <= ''', formatDateTime(variables('extractionTimestamp'), 'yyyy-MM-dd HH-mm-ss'), ''')\n)\ngroup by grp_nbr\nORDER BY grp_nbr ASC'\n)\n",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "MX01_MXDM_Dynamic",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_schema": {
+										"value": "@variables('dbSchema')",
+										"type": "Expression"
+									},
+									"db_table": {
+										"value": "@variables('table')",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					}
+				],
+				"variables": {
+					"extractionTimestamp": {
+						"type": "String"
+					},
+					"lastRunTimestamp": {
+						"type": "String"
+					},
+					"lastRunClosing": {
+						"type": "String"
+					},
+					"dbSchema": {
+						"type": "String",
+						"defaultValue": "MX_DATAMART"
+					},
+					"dbHost": {
+						"type": "String",
+						"defaultValue": "MX01"
+					},
+					"folderTimestamp": {
+						"type": "String"
+					},
+					"fileTimestamp": {
+						"type": "String"
+					},
+					"table": {
+						"type": "String",
+						"defaultValue": "ATEL_TP_REP"
+					}
+				},
+				"folder": {
+					"name": "ERSExtractionJobTesting/MX01_Full"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TMPBlobCleanup')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "DeleteFiles",
+						"type": "Delete",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "TMP_DEL",
+								"type": "DatasetReference"
+							},
+							"enableLogging": false,
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true
+							}
+						}
+					}
+				],
+				"folder": {
+					"name": "ERSExtractionJobTesting"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		}
+	]
+}
