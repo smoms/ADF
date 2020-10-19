@@ -550,7 +550,7 @@
 			},
 			"dbHost": {
 				"type": "String",
-				"defaultValue": "MX03"
+				"defaultValue": "MX01"
 			},
 			"folderTimestamp": {
 				"type": "String"
