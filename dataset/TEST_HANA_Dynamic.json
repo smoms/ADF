@@ -6,10 +6,10 @@
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"@dataset().db_schema": {
+			"db_schema": {
 				"type": "string"
 			},
-			"@dataset().db_table": {
+			"db_table": {
 				"type": "string"
 			}
 		},
