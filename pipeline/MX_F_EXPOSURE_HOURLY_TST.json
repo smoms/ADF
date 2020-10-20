@@ -80,15 +80,53 @@
 						"packetSize": 102400,
 						"partitionOption": "None"
 					},
-					"enableStaging": false
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings",
+							"maxConcurrentConnections": 1
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings",
+							"maxRowsPerFile": 8000000,
+							"fileNamePrefix": {
+								"value": "@concat('MX_F_EXPOSURE_POSITIONS_HOURLY', '_', variables('fileTimestamp'),'_')",
+								"type": "Expression"
+							}
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
 				},
 				"inputs": [
 					{
 						"referenceName": "TEST_HANA_Dynamic",
 						"type": "DatasetReference",
 						"parameters": {
-							"db_schema": "@variables('db_schema')",
-							"db_table": "@item().OBJECT_NAME"
+							"db_schema": "EDWH",
+							"db_table": {
+								"value": "MX_F_EXPOSURE_POSITIONS_HOURLY",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DataExtraction_Parquet",
+						"type": "DatasetReference",
+						"parameters": {
+							"folder": {
+								"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/','MX_F_EXPOSURE_POSITIONS_HOURLY','/',variables('folderTimestamp'))",
+								"type": "Expression"
+							}
 						}
 					}
 				]
