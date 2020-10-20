@@ -88,7 +88,7 @@
 						},
 						"formatSettings": {
 							"type": "ParquetWriteSettings",
-							"maxRowsPerFile": 8000000,
+							"maxRowsPerFile": 2000000,
 							"fileNamePrefix": {
 								"value": "@concat('MX_F_EXPOSURE_POSITIONS_HOURLY', '_', variables('fileTimestamp'),'_')",
 								"type": "Expression"
