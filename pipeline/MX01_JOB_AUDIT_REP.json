@@ -169,6 +169,10 @@
 							"typeProperties": {
 								"source": {
 									"type": "OracleSource",
+									"oracleReaderQuery": {
+										"value": "@concat(\n'select * from ', \nitem().OBJECT_NAME, \n' where M_STATUS in (''Done'',''Corrected'')\nand to_char(to_date(TO_CHAR (M_DATE, ''DDMMYYYY'')|| ''_'' || TO_CHAR (M_TIME),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') >''',variables('lastRunTimestamp'), ''' \nand to_char(to_date(TO_CHAR (M_DATE, ''DDMMYYYY'')|| ''_''|| TO_CHAR (M_TIME),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') <= ''',formatDateTime(variables('extractionTimestamp'), 'yyyy-MM-dd HH-mm-ss'), '''\n'\n)",
+										"type": "Expression"
+									},
 									"partitionOption": "None",
 									"queryTimeout": "02:00:00"
 								},
