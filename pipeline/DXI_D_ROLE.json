@@ -123,7 +123,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"folder": {
-								"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/','DXI_D_ROLE','/',variables('folderTimestamp'))",
+								"value": "@concat('HANA/',variables('dbHost'),'/',variables('dbSchema'),'/','DXI_D_ROLE','/',variables('folderTimestamp'))",
 								"type": "Expression"
 							}
 						}
