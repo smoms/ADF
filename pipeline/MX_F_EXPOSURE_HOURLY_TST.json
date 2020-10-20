@@ -77,7 +77,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SapHanaSource",
-						"query": "select * from \"EDWH\".\"MX_F_EXPOSURE_POSITIONS_HOURLY\" where closing_id=20191231 and \npeak_offpeak in ('OFFPEAK 22-06','PEAK 06-22','OFFPEAK 19-07','PEAK 07-19','PEAK GAS')",
+						"query": "select * from \"EDWH\".\"MX_F_EXPOSURE_POSITIONS_HOURLY\" where closing_id=20191231 and \npeak_offpeak in ('PEAK GAS')",
 						"packetSize": 102400,
 						"partitionOption": "None"
 					},
