@@ -16,7 +16,7 @@
 				}
 			},
 			{
-				"name": "Copy data for each table in lookup",
+				"name": "Copy data",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -34,72 +34,6 @@
 					},
 					"batchCount": 1,
 					"activities": [
-						{
-							"name": "Extract data to Parquet in BLOB Storage",
-							"type": "Copy",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"source": {
-									"type": "SapHanaSource",
-									"packetSize": 102400,
-									"partitionOption": "None"
-								},
-								"sink": {
-									"type": "ParquetSink",
-									"storeSettings": {
-										"type": "AzureBlobStorageWriteSettings",
-										"maxConcurrentConnections": 1
-									},
-									"formatSettings": {
-										"type": "ParquetWriteSettings",
-										"maxRowsPerFile": 8000000,
-										"fileNamePrefix": {
-											"value": "@concat(item().OBJECT_NAME, '_', variables('fileTimestamp'),'_')",
-											"type": "Expression"
-										}
-									}
-								},
-								"enableStaging": false,
-								"translator": {
-									"type": "TabularTranslator",
-									"typeConversion": true,
-									"typeConversionSettings": {
-										"allowDataTruncation": true,
-										"treatBooleanAsNumber": false
-									}
-								}
-							},
-							"inputs": [
-								{
-									"referenceName": "TEST_HANA_Dynamic",
-									"type": "DatasetReference",
-									"parameters": {
-										"db_schema": "@variables('db_schema')",
-										"db_table": "@item().OBJECT_NAME"
-									}
-								}
-							],
-							"outputs": [
-								{
-									"referenceName": "DataExtraction_Parquet",
-									"type": "DatasetReference",
-									"parameters": {
-										"folder": {
-											"value": "@concat('HANA/',ERS,'/',EDWH,'/',MX_F_EXPOSURE_POSITIONS_HOURLY,'/',variables('folderTimestamp'))",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						},
 						{
 							"name": "Extract data to Parquet in BLOB Storage_copy1",
 							"type": "Copy",
