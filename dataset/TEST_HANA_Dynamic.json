@@ -12,8 +12,8 @@
 		"type": "SapHanaTable",
 		"schema": [],
 		"typeProperties": {
-			"schema": "@dataset().db_schema",
-			"table": "@dataset().db_table"
+			"schema": "EDWH",
+			"table": "MX_F_EXPOSURE_POSITIONS_HOURLY"
 		}
 	}
 }
