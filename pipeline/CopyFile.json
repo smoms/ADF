@@ -1,0 +1,9 @@
+{
+	"name": "CopyFile",
+	"properties": {
+		"folder": {
+			"name": "ERSExtractionJobTesting/CopyFile"
+		},
+		"annotations": []
+	}
+}
