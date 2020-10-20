@@ -62,7 +62,7 @@
 										"type": "ParquetWriteSettings",
 										"maxRowsPerFile": 8000000,
 										"fileNamePrefix": {
-											"value": "@concat(item().OBJECT_NAME, '_', variables('fileTimestamp'),'_')",
+											"value": "@concat(variables('tableName'), '_', variables('fileTimestamp'),'_')",
 											"type": "Expression"
 										}
 									}
@@ -82,8 +82,8 @@
 									"referenceName": "TEST_HANA_Dynamic",
 									"type": "DatasetReference",
 									"parameters": {
-										"db_schema": "@variables('db_schema')",
-										"db_table": "@item().OBJECT_NAME"
+										"db_schema": "EDWH",
+										"db_table": "MX_F_EXPOSURE_POSITIONS_HOURLY"
 									}
 								}
 							],
@@ -93,7 +93,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"folder": {
-											"value": "@concat('HANA/',variables('dbHost'),'/',variables('dbSchema'),'/',item().OBJECT_NAME,'/',variables('folderTimestamp'))",
+											"value": "@concat('HANA/',variables('dbHost'),'/',variables('dbSchema'),'/',variables('tableName'),'/',variables('folderTimestamp'))",
 											"type": "Expression"
 										}
 									}
