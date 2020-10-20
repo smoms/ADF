@@ -1,5 +1,5 @@
 {
-	"name": "SapHanaTable1",
+	"name": "PRO_HANA_Dynamic",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "PRO_ERS_HANA",
