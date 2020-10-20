@@ -49,7 +49,6 @@
 							"typeProperties": {
 								"source": {
 									"type": "SapHanaSource",
-									"query": "select * from \"EDWH\".\"MX_F_EXPOSURE_POSITIONS_HOURLY\"",
 									"packetSize": 102400,
 									"partitionOption": "None"
 								},
