@@ -5,6 +5,9 @@
 			"referenceName": "PRO_ERS_HANA",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "ERSExtractionJobTesting/Source"
+		},
 		"annotations": [],
 		"type": "SapHanaTable",
 		"schema": [],
