@@ -1,0 +1,19 @@
+{
+	"name": "PRO_HANA_Dynamic_copy1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "TEST_ERS_HANA",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "ERSExtractionJobTesting/Source"
+		},
+		"annotations": [],
+		"type": "SapHanaTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "@dataset().db_schema",
+			"table": "@dataset().db_table"
+		}
+	}
+}
