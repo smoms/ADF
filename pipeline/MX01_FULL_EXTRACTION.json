@@ -123,6 +123,18 @@
 						"dependencyConditions": [
 							"Succeeded"
 						]
+					},
+					{
+						"activity": "MX01_JOB_AUDIT_REP",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "MX01_DYN_AUDIT_REP",
+						"dependencyConditions": [
+							"Succeeded"
+						]
 					}
 				],
 				"userProperties": [],
@@ -228,6 +240,46 @@
 				"userProperties": [],
 				"typeProperties": {
 					"waitTimeInSeconds": 600
+				}
+			},
+			{
+				"name": "MX01_JOB_AUDIT_REP",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Wait 10 minutes",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "MX01_JOB_AUDIT_REP",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": false
+				}
+			},
+			{
+				"name": "MX01_DYN_AUDIT_REP",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Wait 10 minutes",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "MX01_DYN_AUDIT_REP",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": false
 				}
 			}
 		],
