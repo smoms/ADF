@@ -170,7 +170,7 @@
 								"source": {
 									"type": "OracleSource",
 									"oracleReaderQuery": {
-										"value": "@concat(\n'select * from ', \nitem().OBJECT_NAME, \n' where .M_DELETED  = ''N'' \nand  m_idjob in (select m_mx_ref_job from JOB_AUDIT_REP where M_STATUS in  (''Done'',''Corrected'') \nand  to_char(to_date(TO_CHAR (M_DATEGEN, ''DDMMYYYY'')|| ''_'' || TO_CHAR (M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') >''', variables('lastRunTimestamp'), ''' \nand  to_char(to_date(TO_CHAR (M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') <= ''', formatDateTime(variables('extractionTimestamp'), 'yyyy-MM-dd HH-mm-ss'), '''\n'\n)",
+										"value": "@concat(\n'select * from ', \nitem().OBJECT_NAME, \n' where M_DELETED  = ''N'' \nand  m_idjob in (select m_mx_ref_job from JOB_AUDIT_REP where M_STATUS in  (''Done'',''Corrected'') \nand  to_char(to_date(TO_CHAR (M_DATEGEN, ''DDMMYYYY'')|| ''_'' || TO_CHAR (M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') >''', variables('lastRunTimestamp'), ''' \nand  to_char(to_date(TO_CHAR (M_DATEGEN, ''DDMMYYYY'')|| ''_''|| TO_CHAR (M_TIMEGEN),''DDMMYYYY SSSSS''),''YYYY-MM-DD HH24-MI-SS'') <= ''', formatDateTime(variables('extractionTimestamp'), 'yyyy-MM-dd HH-mm-ss'), '''\n'\n)",
 										"type": "Expression"
 									},
 									"partitionOption": "None",
