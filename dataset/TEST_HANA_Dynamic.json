@@ -5,6 +5,14 @@
 			"referenceName": "TEST_ERS_HANA",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"@dataset().db_schema": {
+				"type": "string"
+			},
+			"@dataset().db_table": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "ERSExtractionJobTesting/Source"
 		},
