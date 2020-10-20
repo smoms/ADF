@@ -20,7 +20,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Look up Tables",
+						"activity": "Set timestamp for file",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -29,7 +29,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Look up Tables').output.value",
+						"value": "@variables('tableName')",
 						"type": "Expression"
 					},
 					"batchCount": 1,
@@ -48,9 +48,9 @@
 							"userProperties": [],
 							"typeProperties": {
 								"source": {
-									"type": "OracleSource",
-									"partitionOption": "None",
-									"queryTimeout": "02:00:00"
+									"type": "SapHanaSource",
+									"packetSize": 102400,
+									"partitionOption": "None"
 								},
 								"sink": {
 									"type": "ParquetSink",
@@ -79,15 +79,8 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MX03_MX_BO_Dynamic",
-									"type": "DatasetReference",
-									"parameters": {
-										"db_schema": {
-											"value": "@variables('dbSchema')",
-											"type": "Expression"
-										},
-										"db_table": "@item().OBJECT_NAME"
-									}
+									"referenceName": "TEST_HANA_Dynamic",
+									"type": "DatasetReference"
 								}
 							],
 							"outputs": [
@@ -96,7 +89,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"folder": {
-											"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/',item().OBJECT_NAME,'/',variables('folderTimestamp'))",
+											"value": "@concat('HANA/',variables('dbHost'),'/',variables('dbSchema'),'/',item().OBJECT_NAME,'/',variables('folderTimestamp'))",
 											"type": "Expression"
 										}
 									}
@@ -145,49 +138,6 @@
 						"type": "Expression"
 					}
 				}
-			},
-			{
-				"name": "Look up Tables",
-				"type": "Lookup",
-				"dependsOn": [
-					{
-						"activity": "Set timestamp for file",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "OracleSource",
-						"oracleReaderQuery": {
-							"value": "select OBJECT_NAME from ALL_OBJECTS WHERE OBJECT_NAME IN (\n'MX_HDR_DBF'\n)",
-							"type": "Expression"
-						},
-						"partitionOption": "None",
-						"queryTimeout": "02:00:00"
-					},
-					"dataset": {
-						"referenceName": "MX03_MX_BO_Dynamic",
-						"type": "DatasetReference",
-						"parameters": {
-							"db_schema": {
-								"value": "@variables('dbSchema')",
-								"type": "Expression"
-							},
-							"db_table": "ALL_OBJECTS"
-						}
-					},
-					"firstRowOnly": false
-				}
 			}
 		],
 		"variables": {
@@ -202,7 +152,7 @@
 			},
 			"dbSchema": {
 				"type": "String",
-				"defaultValue": "MXPRO"
+				"defaultValue": "EDWH"
 			},
 			"dbHost": {
 				"type": "String",
@@ -216,7 +166,7 @@
 			},
 			"tableName": {
 				"type": "String",
-				"defaultValue": "ALPIQ_DLT_EXP_HR_REP"
+				"defaultValue": "MX_F_EXPOSURE_POSITIONS_HOURLY"
 			},
 			"processCount": {
 				"type": "String",
