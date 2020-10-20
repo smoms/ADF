@@ -1,5 +1,5 @@
 {
-	"name": "PRO_HANA_Dynamic_copy1",
+	"name": "TEST_HANA_Dynamic",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "TEST_ERS_HANA",
