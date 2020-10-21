@@ -1,0 +1,81 @@
+{
+	"name": "AvroFile",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Avro",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "MX_DATAMART.TST_DATA_TYPES.avro",
+				"folderPath": "ORACLE/MX09/MX_DATAMART/TST_DATA_TYPES/2020-06-22 20-38-46",
+				"container": "tst-alpiq-datalake-bi"
+			}
+		},
+		"schema": {
+			"type": "record",
+			"name": "HybridDelivery.ClientLibraryJob",
+			"fields": [
+				{
+					"name": "LINENUMBER",
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				{
+					"name": "STRINGVALUES",
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				{
+					"name": "INTEGERVALUES",
+					"type": [
+						"double",
+						"null"
+					]
+				},
+				{
+					"name": "BIGINTVALUES",
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				{
+					"name": "DECIMALDOUBLEVALUES",
+					"type": [
+						"double",
+						"null"
+					]
+				},
+				{
+					"name": "FLOATVALUES",
+					"type": [
+						"double",
+						"null"
+					]
+				},
+				{
+					"name": "DATEVALUES",
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				{
+					"name": "DATETIMEVALUES",
+					"type": [
+						"string",
+						"null"
+					]
+				}
+			]
+		}
+	}
+}
