@@ -88,7 +88,7 @@
 						},
 						"formatSettings": {
 							"type": "ParquetWriteSettings",
-							"maxRowsPerFile": 8000000,
+							"maxRowsPerFile": 4000000,
 							"fileNamePrefix": {
 								"value": "@concat('MX_F_POSITION_EOD', '_', variables('fileTimestamp'),'_')",
 								"type": "Expression"
@@ -124,7 +124,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"folder": {
-								"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/','\t\nMX_F_POSITION_EOD','/',variables('folderTimestamp'))",
+								"value": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/','MX_F_POSITION_EOD','/',variables('folderTimestamp'))",
 								"type": "Expression"
 							}
 						}
