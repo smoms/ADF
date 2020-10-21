@@ -77,7 +77,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SapHanaSource",
-						"query": "select * from \"EDWH\".\"MX_F_EXPOSURE_POSITIONS_HOURLY\" where closing_id=20191231 and \npeak_offpeak in ('PEAK GAS')",
+						"query": "select * from \"EDWH\".\"MX_F_POSITION_EOD\" where closing_id='20160706'",
 						"packetSize": 102400,
 						"partitionOption": "None"
 					},
@@ -112,7 +112,7 @@
 						"parameters": {
 							"db_schema": "EDWH",
 							"db_table": {
-								"value": "MX_F_EXPOSURE_POSITIONS_HOURLY",
+								"value": "MX_F_POSITION_EOD",
 								"type": "Expression"
 							}
 						}
