@@ -1,0 +1,12 @@
+{
+	"name": "RestResource_BOE_PRO",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "RestService_BOE_PRO",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "RestResource",
+		"schema": []
+	}
+}
