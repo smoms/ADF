@@ -184,6 +184,9 @@
 				"defaultValue": "2020/06/20/13"
 			}
 		},
+		"folder": {
+			"name": "ERSExtractionJobTesting/MoveFile"
+		},
 		"annotations": []
 	}
 }
