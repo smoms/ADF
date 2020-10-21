@@ -1,0 +1,12 @@
+{
+	"name": "RestResource_BOE_TST",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "RestService_BOE_TST",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "RestResource",
+		"schema": []
+	}
+}
