@@ -1,0 +1,19 @@
+{
+	"name": "RestService_BOE_PRO",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "RestService",
+		"typeProperties": {
+			"url": "https://boe02wpr.argon.corp.ch/BOE/CMC",
+			"enableServerCertificateValidation": true,
+			"authenticationType": "Basic",
+			"userName": "administrator",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI0Nzk3ZTY3Ni01NWE2LTQzNDgtOTBhNy05OWQxODRkZTM0ZDgiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "IR-Fujitsu",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
