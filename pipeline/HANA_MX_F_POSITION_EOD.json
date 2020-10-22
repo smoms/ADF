@@ -78,7 +78,10 @@
 					"source": {
 						"type": "SapHanaSource",
 						"packetSize": 500000,
-						"partitionOption": "None"
+						"partitionOption": "SapHanaDynamicRange",
+						"partitionSettings": {
+							"partitionColumnName": "LOCATION_ID"
+						}
 					},
 					"sink": {
 						"type": "ParquetSink",
@@ -87,7 +90,7 @@
 						},
 						"formatSettings": {
 							"type": "ParquetWriteSettings",
-							"maxRowsPerFile": 4000000,
+							"maxRowsPerFile": 3000000,
 							"fileNamePrefix": {
 								"value": "@concat('MX_F_POSITION_EOD', '_', variables('fileTimestamp'),'_')",
 								"type": "Expression"
@@ -95,6 +98,7 @@
 						}
 					},
 					"enableStaging": false,
+					"parallelCopies": 4,
 					"translator": {
 						"type": "TabularTranslator",
 						"typeConversion": true,
