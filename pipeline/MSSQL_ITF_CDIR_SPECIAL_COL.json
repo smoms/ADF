@@ -1,0 +1,9 @@
+{
+	"name": "MSSQL_ITF_CDIR_SPECIAL_COL",
+	"properties": {
+		"folder": {
+			"name": "ERSExtractionJobTesting"
+		},
+		"annotations": []
+	}
+}
