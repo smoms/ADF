@@ -106,15 +106,8 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "TEST_HANA_Dynamic",
-						"type": "DatasetReference",
-						"parameters": {
-							"db_schema": "MIS",
-							"db_table": {
-								"value": "MIS_COMMENTS",
-								"type": "Expression"
-							}
-						}
+						"referenceName": "PRO_HANA_Dynamic",
+						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
