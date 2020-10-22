@@ -77,7 +77,6 @@
 				"typeProperties": {
 					"source": {
 						"type": "SapHanaSource",
-						"query": "select * from \"EDWH\".\"MX_F_POSITION_EOD\" where closing_id='20160706'",
 						"packetSize": 102400,
 						"partitionOption": "None"
 					},
@@ -112,7 +111,7 @@
 						"parameters": {
 							"db_schema": "EDWH",
 							"db_table": {
-								"value": "MX_F_POSITION_EOD",
+								"value": "MX_F_POSITION_EOD_20180604",
 								"type": "Expression"
 							}
 						}
