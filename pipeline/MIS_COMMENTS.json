@@ -77,7 +77,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SapHanaSource",
-						"packetSize": 102400,
+						"packetSize": 100000,
 						"partitionOption": "None"
 					},
 					"sink": {
@@ -106,8 +106,12 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "PRO_HANA_Dynamic",
-						"type": "DatasetReference"
+						"referenceName": "PROD_HANA_Dynamic",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_schema": "MIS",
+							"db_table": "MIS_COMMENTS"
+						}
 					}
 				],
 				"outputs": [
