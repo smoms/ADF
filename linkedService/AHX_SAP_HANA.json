@@ -1,0 +1,16 @@
+{
+	"name": "AHX_SAP_HANA",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SapHana",
+		"typeProperties": {
+			"connectionString": "servernode=alphanadb1x:31015;uid=ERS",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJiMzg5NzQ4OS01MzYzLTRlZTktODY1My04M2IzY2Q3NTE2Y2EiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "IR-Fujitsu",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
