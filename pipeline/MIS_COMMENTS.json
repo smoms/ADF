@@ -110,7 +110,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"db_schema": "MIS",
-							"db_table": "MIS_COMMENTS"
+							"db_table": "MIS_COMMENT_TOPICS"
 						}
 					}
 				],
