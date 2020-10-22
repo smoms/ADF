@@ -2,7 +2,7 @@
 	"name": "TEST_HANA_Dynamic",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "TEST_ERS_HANA",
+			"referenceName": "AHX_SAP_HANA",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
