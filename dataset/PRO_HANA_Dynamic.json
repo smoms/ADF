@@ -2,7 +2,7 @@
 	"name": "PRO_HANA_Dynamic",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "PRO_ERS_HANA",
+			"referenceName": "AHP_SAP_HANA",
 			"type": "LinkedServiceReference"
 		},
 		"folder": {
@@ -12,14 +12,8 @@
 		"type": "SapHanaTable",
 		"schema": [],
 		"typeProperties": {
-			"schema": {
-				"value": "MIS",
-				"type": "Expression"
-			},
-			"table": {
-				"value": "MIS_COMMENTS",
-				"type": "Expression"
-			}
+			"schema": "@dataset().db_schema",
+			"table": "@dataset().db_table"
 		}
 	}
 }
