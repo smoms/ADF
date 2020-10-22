@@ -78,10 +78,7 @@
 					"source": {
 						"type": "SapHanaSource",
 						"packetSize": 500000,
-						"partitionOption": "SapHanaDynamicRange",
-						"partitionSettings": {
-							"partitionColumnName": "LOCATION_ID"
-						}
+						"partitionOption": "None"
 					},
 					"sink": {
 						"type": "ParquetSink",
