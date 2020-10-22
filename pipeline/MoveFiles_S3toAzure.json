@@ -73,7 +73,7 @@
 								"source": {
 									"type": "BinarySource",
 									"storeSettings": {
-										"type": "AzureBlobStorageReadSettings",
+										"type": "AmazonS3ReadSettings",
 										"recursive": true
 									},
 									"formatSettings": {
