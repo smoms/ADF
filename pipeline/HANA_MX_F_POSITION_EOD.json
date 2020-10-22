@@ -109,7 +109,7 @@
 						"referenceName": "TEST_HANA_Dynamic",
 						"type": "DatasetReference",
 						"parameters": {
-							"db_schema": "EDWH",
+							"db_schema": "EDWH_STG",
 							"db_table": {
 								"value": "MX_F_POSITION_EOD_20180604",
 								"type": "Expression"
