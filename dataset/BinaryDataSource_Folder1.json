@@ -19,6 +19,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
+				"fileName": "MX_DATAMART.TST_DATA_TYPES.avro",
 				"folderPath": {
 					"value": "@{dataset().Directory}",
 					"type": "Expression"
