@@ -18,25 +18,16 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataset": {
-						"referenceName": "BinaryDataSource_Folder1",
+						"referenceName": "BinaryDataSource_Folder",
 						"type": "DatasetReference",
 						"parameters": {
-							"Container": {
-								"value": "@pipeline().parameters.SourceStore_Location",
-								"type": "Expression"
-							},
-							"Directory": {
-								"value": "@pipeline().parameters.SourceStore_Directory",
-								"type": "Expression"
-							}
+							"Bucket": "tst-alpiq-datalake-bi",
+							"Directory": "ORACLE/CCRLC01/CCRLC/ALPIQ_CVAR_INPUT/2020-06-23 08-27-21"
 						}
 					},
-					"fieldList": [
-						"childItems"
-					],
+					"fieldList": [],
 					"storeSettings": {
-						"type": "AzureBlobStorageReadSettings",
-						"recursive": true
+						"type": "AmazonS3ReadSettings"
 					},
 					"formatSettings": {
 						"type": "BinaryReadSettings"
