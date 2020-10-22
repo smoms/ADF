@@ -3,7 +3,7 @@
 	"properties": {
 		"description": "It describes the folder in the data source store.",
 		"linkedServiceName": {
-			"referenceName": "AWS_S3_Snowflake_ComplexDataTypes",
+			"referenceName": "S3_TST_DataLake",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
@@ -26,7 +26,8 @@
 				"folderPath": {
 					"value": "@{dataset().Directory}",
 					"type": "Expression"
-				}
+				},
+				"fileName": "ALPIQ_CVAR_INPUT_20200623082721_1.avro"
 			}
 		}
 	}
