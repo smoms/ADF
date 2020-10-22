@@ -89,7 +89,7 @@
 							"type": "ParquetWriteSettings",
 							"maxRowsPerFile": 2000000,
 							"fileNamePrefix": {
-								"value": "@concat('DXI_D_ROLE', '_', variables('fileTimestamp'),'_')",
+								"value": "@concat('MIS_COMMENTS', '_', variables('fileTimestamp'),'_')",
 								"type": "Expression"
 							}
 						}
@@ -109,9 +109,9 @@
 						"referenceName": "TEST_HANA_Dynamic",
 						"type": "DatasetReference",
 						"parameters": {
-							"db_schema": "EDWH",
+							"db_schema": "MIS",
 							"db_table": {
-								"value": "DXI_D_ROLE",
+								"value": "MIS_COMMENTS",
 								"type": "Expression"
 							}
 						}
@@ -123,7 +123,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"folder": {
-								"value": "@concat('HANA/',variables('dbHost'),'/',variables('dbSchema'),'/','DXI_D_ROLE','/',variables('folderTimestamp'))",
+								"value": "@concat('HANA/',variables('dbHost'),'/',variables('dbSchema'),'/','MIS_COMMENTS','/',variables('folderTimestamp'))",
 								"type": "Expression"
 							}
 						}
