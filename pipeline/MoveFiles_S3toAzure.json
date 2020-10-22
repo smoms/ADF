@@ -21,8 +21,8 @@
 						"referenceName": "BinaryDataSource_Folder",
 						"type": "DatasetReference",
 						"parameters": {
-							"Bucket": "tst-alpiq-datalake-bi",
-							"Directory": "ORACLE/CCRLC01/CCRLC/ALPIQ_CVAR_INPUT/2020-06-23 08-27-21"
+							"Bucket": "@pipeline().parameters.SourceStore_Location",
+							"Directory": "@pipeline().parameters.SourceStore_Directory"
 						}
 					},
 					"fieldList": [
@@ -42,7 +42,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "FilterFiles",
+						"activity": "GetFileList",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -132,30 +132,6 @@
 							]
 						}
 					]
-				}
-			},
-			{
-				"name": "FilterFiles",
-				"description": "Only files will be selected, the source-folders will not be selected.",
-				"type": "Filter",
-				"dependsOn": [
-					{
-						"activity": "GetFileList",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"items": {
-						"value": "@activity('GetFileList').output",
-						"type": "Expression"
-					},
-					"condition": {
-						"value": "@equals(item().type, 'File')",
-						"type": "Expression"
-					}
 				}
 			}
 		],
