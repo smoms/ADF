@@ -1,0 +1,33 @@
+{
+	"name": "PROD_HANA_Dynamic",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AHP_SAP_HANA",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"db_schema": {
+				"type": "string"
+			},
+			"db_table": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "ERSExtractionJobTesting/Source"
+		},
+		"annotations": [],
+		"type": "SapHanaTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().db_schema",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().db_table",
+				"type": "Expression"
+			}
+		}
+	}
+}
