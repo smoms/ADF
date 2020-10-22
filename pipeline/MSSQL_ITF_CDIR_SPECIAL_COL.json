@@ -110,7 +110,7 @@
 						"referenceName": "DataExtraction_Parquet",
 						"type": "DatasetReference",
 						"parameters": {
-							"folder": "@concat('MSSQL/',variables('dbHost'),'/',variables('dbSchema'),'/',item().OBJECT_NAME,'/',variables('folderTimestamp'))"
+							"folder": "@concat('MSSQL/',variables('dbHost'),'/',variables('dbSchema'),'/TST_SPECIAL_DATA/',variables('folderTimestamp'))"
 						}
 					}
 				]
