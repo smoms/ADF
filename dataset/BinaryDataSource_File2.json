@@ -1,0 +1,40 @@
+{
+	"name": "BinaryDataSource_File2",
+	"properties": {
+		"description": "It describes the file in the data source store.",
+		"linkedServiceName": {
+			"referenceName": "S3_TST_DataLake",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Bucket": {
+				"type": "String"
+			},
+			"Directory": {
+				"type": "String"
+			},
+			"filename": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AmazonS3Location",
+				"bucketName": {
+					"value": "@{dataset().Bucket}",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@{dataset().Directory}",
+					"type": "Expression"
+				},
+				"fileName": {
+					"value": "@dataset().filename",
+					"type": "Expression"
+				}
+			}
+		}
+	}
+}
