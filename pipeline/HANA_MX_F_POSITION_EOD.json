@@ -77,8 +77,8 @@
 				"typeProperties": {
 					"source": {
 						"type": "SapHanaSource",
-						"packetSize": 102400,
-						"partitionOption": "PhysicalPartitionsOfTable"
+						"packetSize": 500000,
+						"partitionOption": "None"
 					},
 					"sink": {
 						"type": "ParquetSink",
