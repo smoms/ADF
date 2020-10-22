@@ -37,6 +37,9 @@
 					"storeSettings": {
 						"type": "AmazonS3ReadSettings",
 						"recursive": true
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
 					}
 				}
 			},
@@ -79,6 +82,9 @@
 									"storeSettings": {
 										"type": "AmazonS3ReadSettings",
 										"recursive": true
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
 									},
 									"recursive": false
 								},
