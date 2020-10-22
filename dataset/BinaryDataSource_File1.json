@@ -3,7 +3,7 @@
 	"properties": {
 		"description": "It describes the file in the data source store.",
 		"linkedServiceName": {
-			"referenceName": "AzureBlobStorage1",
+			"referenceName": "S3_TST_DataLake",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
@@ -21,19 +21,14 @@
 		"type": "Binary",
 		"typeProperties": {
 			"location": {
-				"type": "AzureBlobStorageLocation",
-				"fileName": {
-					"value": "@dataset().filename",
-					"type": "Expression"
-				},
-				"folderPath": {
-					"value": "@{dataset().Directory}",
-					"type": "Expression"
-				},
-				"container": {
-					"value": "@{dataset().Container}",
-					"type": "Expression"
-				}
+				"type": "AmazonS3Location",
+				"bucketName": "tst-alpiq-datalake-bi",
+				"folderPath": "ORACLE/CCRLC01/CCRLC/ALPIQ_CVAR_INPUT/2020-06-23 08-27-21",
+				"fileName": "ALPIQ_CVAR_INPUT_20200623082721_1.avro"
+			},
+			"compression": {
+				"type": "gzip",
+				"level": "Optimal"
 			}
 		}
 	}
