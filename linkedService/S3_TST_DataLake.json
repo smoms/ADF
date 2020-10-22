@@ -1,0 +1,17 @@
+{
+	"name": "S3_TST_DataLake",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AmazonS3",
+		"typeProperties": {
+			"serviceUrl": "",
+			"accessKeyId": "AKIA57Z3DSAK4GKXBCMR",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJjNjhhNWM2OC1lMTc2LTQ0NGUtODZkOC0zNWUzMDZiM2ZhMDciLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "IR-Fujitsu",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
