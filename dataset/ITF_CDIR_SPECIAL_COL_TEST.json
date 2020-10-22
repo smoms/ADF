@@ -1,0 +1,61 @@
+{
+	"name": "ITF_CDIR_SPECIAL_COL_TEST",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ITF_CDIR_TST",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "ERSExtractionJobTesting/Source"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [
+			{
+				"name": "LineNumber",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 0
+			},
+			{
+				"name": "StringValues",
+				"type": "varchar"
+			},
+			{
+				"name": "IntegerValues",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "BigintValues",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "DecimalDoubleValues",
+				"type": "decimal",
+				"precision": 10,
+				"scale": 3
+			},
+			{
+				"name": "FloatValues",
+				"type": "float",
+				"precision": 15
+			},
+			{
+				"name": "DateValues",
+				"type": "date"
+			},
+			{
+				"name": "DatetimeValues",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "TST_DATA_TYPES"
+		}
+	}
+}
