@@ -3,7 +3,7 @@
 	"properties": {
 		"description": "It describes the destination store.",
 		"linkedServiceName": {
-			"referenceName": "S3_TST_DataLake",
+			"referenceName": "AzureBlobStorage2",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
@@ -21,9 +21,9 @@
 		"type": "Binary",
 		"typeProperties": {
 			"location": {
-				"type": "AmazonS3Location",
-				"bucketName": "tst-alpiq-datalake-bi",
-				"folderPath": "BOE/boreporting/BO_Reports/CMS_data/2020-10-15 10-36-31"
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "BOE/boreporting/BO_Reports/CMS_data/2020-10-15 10-36-31",
+				"container": "tst-alpiq-datalake-bi"
 			}
 		}
 	}
