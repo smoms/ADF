@@ -77,7 +77,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SapHanaSource",
-						"query": "select ID, ACTION, DASHBOARD_ID from MIS_COMMENTS_AUDIT",
+						"query": "select ID, ACTION, DASHBOARD_ID from MIS.MIS_COMMENTS_AUDIT",
 						"packetSize": 100000,
 						"partitionOption": "None"
 					},
