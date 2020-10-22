@@ -25,7 +25,9 @@
 							"Directory": "ORACLE/CCRLC01/CCRLC/ALPIQ_CVAR_INPUT/2020-06-23 08-27-21"
 						}
 					},
-					"fieldList": [],
+					"fieldList": [
+						"itemName"
+					],
 					"storeSettings": {
 						"type": "AmazonS3ReadSettings"
 					},
