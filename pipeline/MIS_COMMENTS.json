@@ -122,7 +122,7 @@
 				]
 			},
 			{
-				"name": "Copy data_copy1",
+				"name": "Copy data_copy_1",
 				"type": "Copy",
 				"dependsOn": [
 					{
@@ -188,7 +188,7 @@
 				]
 			},
 			{
-				"name": "Copy data_copy1_copy1",
+				"name": "Copy data_copy_2",
 				"type": "Copy",
 				"dependsOn": [
 					{
