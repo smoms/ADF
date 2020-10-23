@@ -82,17 +82,12 @@
 						"partitionOption": "None"
 					},
 					"sink": {
-						"type": "ParquetSink",
+						"type": "AvroSink",
 						"storeSettings": {
 							"type": "AzureBlobStorageWriteSettings"
 						},
 						"formatSettings": {
-							"type": "ParquetWriteSettings",
-							"maxRowsPerFile": 2000000,
-							"fileNamePrefix": {
-								"value": "@concat('MIS_COMMENTS', '_', variables('fileTimestamp'),'_')",
-								"type": "Expression"
-							}
+							"type": "AvroWriteSettings"
 						}
 					},
 					"enableStaging": false,
@@ -117,14 +112,8 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "DataExtraction_Parquet",
-						"type": "DatasetReference",
-						"parameters": {
-							"folder": {
-								"value": "@concat('HANA/',variables('dbHost'),'/',variables('dbSchema'),'/','MIS_COMMENTS','/',variables('folderTimestamp'))",
-								"type": "Expression"
-							}
-						}
+						"referenceName": "AvroFile",
+						"type": "DatasetReference"
 					}
 				]
 			}
