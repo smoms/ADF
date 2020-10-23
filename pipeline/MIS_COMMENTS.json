@@ -209,7 +209,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SapHanaSource",
-						"query": "select * from MIS.MIS_COMMENTS_AUDIT where id between 200 and 400",
+						"query": "select * from MIS.MIS_COMMENTS_AUDIT where id between 400 and 600",
 						"packetSize": 2000000,
 						"partitionOption": "None"
 					},
