@@ -113,7 +113,10 @@
 				"outputs": [
 					{
 						"referenceName": "DataExtraction_Parquet",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"folder": "MIS"
+						}
 					}
 				]
 			}
