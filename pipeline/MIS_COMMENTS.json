@@ -78,7 +78,7 @@
 					"source": {
 						"type": "SapHanaSource",
 						"query": "select * from MIS.MIS_COMMENTS_AUDIT",
-						"packetSize": 100000,
+						"packetSize": 2000000,
 						"partitionOption": "None"
 					},
 					"sink": {
