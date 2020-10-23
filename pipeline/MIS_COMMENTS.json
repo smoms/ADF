@@ -77,19 +77,17 @@
 				"typeProperties": {
 					"source": {
 						"type": "SapHanaSource",
-						"query": "select * from MIS.MIS_COMMENTS_AUDIT",
+						"query": "select ID from MIS.MIS_COMMENTS_AUDIT",
 						"packetSize": 2000000,
 						"partitionOption": "None"
 					},
 					"sink": {
-						"type": "DelimitedTextSink",
+						"type": "ParquetSink",
 						"storeSettings": {
 							"type": "AzureBlobStorageWriteSettings"
 						},
 						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".txt"
+							"type": "ParquetWriteSettings"
 						}
 					},
 					"enableStaging": false,
@@ -114,8 +112,11 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "AzureBlobDataset",
-						"type": "DatasetReference"
+						"referenceName": "DataExtraction_Parquet",
+						"type": "DatasetReference",
+						"parameters": {
+							"folder": "@concat('HANA/',variables('dbHost'),'/',variables('dbSchema'),'/','MIS_COMMENTS','/',variables('folderTimestamp'))"
+						}
 					}
 				]
 			}
