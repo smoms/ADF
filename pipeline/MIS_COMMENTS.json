@@ -77,7 +77,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SapHanaSource",
-						"query": "select * from MIS.MIS_COMMENTS_AUDIT where id=122",
+						"query": "select * from MIS.MIS_COMMENTS_AUDIT",
 						"packetSize": 2000000,
 						"partitionOption": "None"
 					},
@@ -87,7 +87,8 @@
 							"type": "AzureBlobStorageWriteSettings"
 						},
 						"formatSettings": {
-							"type": "ParquetWriteSettings"
+							"type": "ParquetWriteSettings",
+							"maxRowsPerFile": 100
 						}
 					},
 					"enableStaging": false,
