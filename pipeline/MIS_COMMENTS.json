@@ -77,9 +77,8 @@
 				"typeProperties": {
 					"source": {
 						"type": "SapHanaSource",
-						"query": "select top 200 * from MIS.MIS_COMMENTS_AUDIT",
 						"packetSize": 2000000,
-						"partitionOption": "None"
+						"partitionOption": "PhysicalPartitionsOfTable"
 					},
 					"sink": {
 						"type": "ParquetSink",
