@@ -143,7 +143,73 @@
 				"typeProperties": {
 					"source": {
 						"type": "SapHanaSource",
-						"query": "select * from MIS.MIS_COMMENTS_AUDIT where id between 100 and 200",
+						"query": "select * from MIS.MIS_COMMENTS_AUDIT where id between 1 and 200",
+						"packetSize": 2000000,
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings",
+							"maxRowsPerFile": 100
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "PROD_HANA_Dynamic",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_schema": "MIS",
+							"db_table": "MIS_COMMENTS_AUDIT"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DataExtraction_Parquet",
+						"type": "DatasetReference",
+						"parameters": {
+							"folder": "@concat('HANA/',variables('dbHost'),'/',variables('dbSchema'),'/','MIS_COMMENTS','/',variables('folderTimestamp'))"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy data_copy1_copy1",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Set timestamp for file",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SapHanaSource",
+						"query": "select * from MIS.MIS_COMMENTS_AUDIT where id between 200 and 400",
 						"packetSize": 2000000,
 						"partitionOption": "None"
 					},
