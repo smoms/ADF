@@ -192,7 +192,7 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "Set timestamp for file",
+						"activity": "Copy data",
 						"dependencyConditions": [
 							"Succeeded"
 						]
