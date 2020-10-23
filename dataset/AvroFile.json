@@ -13,7 +13,8 @@
 				"fileName": "MX_DATAMART.TST_DATA_TYPES.avro",
 				"folderPath": "ORACLE/MX09/MX_DATAMART/TST_DATA_TYPES/2020-06-22 20-38-46",
 				"container": "tst-alpiq-datalake-bi"
-			}
+			},
+			"avroCompressionCodec": "snappy"
 		},
 		"schema": {
 			"type": "record",
