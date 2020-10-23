@@ -115,7 +115,7 @@
 						"referenceName": "DataExtraction_Parquet",
 						"type": "DatasetReference",
 						"parameters": {
-							"folder": "MIS"
+							"folder": "@concat('HANA/',variables('dbHost'),'/',variables('dbSchema'),'/','MIS_COMMENTS','/',variables('folderTimestamp'))"
 						}
 					}
 				]
