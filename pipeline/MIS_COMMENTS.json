@@ -77,7 +77,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SapHanaSource",
-						"query": "select top 100 * from MIS.MIS_COMMENTS_AUDIT",
+						"query": "select * from MIS.MIS_COMMENTS_AUDIT",
 						"packetSize": 2000000,
 						"partitionOption": "None"
 					},
