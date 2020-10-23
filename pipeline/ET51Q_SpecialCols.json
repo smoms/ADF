@@ -231,7 +231,7 @@
 			},
 			"table": {
 				"type": "String",
-				"defaultValue": "PROGFP_ID"
+				"defaultValue": "LOG_PROGST_LEIST"
 			}
 		},
 		"folder": {
