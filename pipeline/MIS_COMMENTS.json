@@ -82,12 +82,12 @@
 						"partitionOption": "None"
 					},
 					"sink": {
-						"type": "AvroSink",
+						"type": "ParquetSink",
 						"storeSettings": {
 							"type": "AzureBlobStorageWriteSettings"
 						},
 						"formatSettings": {
-							"type": "AvroWriteSettings"
+							"type": "ParquetWriteSettings"
 						}
 					},
 					"enableStaging": false,
@@ -112,7 +112,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "AvroFile",
+						"referenceName": "DataExtraction_Parquet",
 						"type": "DatasetReference"
 					}
 				]
