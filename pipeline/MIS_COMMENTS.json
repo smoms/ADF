@@ -82,12 +82,14 @@
 						"partitionOption": "None"
 					},
 					"sink": {
-						"type": "ParquetSink",
+						"type": "DelimitedTextSink",
 						"storeSettings": {
 							"type": "AzureBlobStorageWriteSettings"
 						},
 						"formatSettings": {
-							"type": "ParquetWriteSettings"
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
 						}
 					},
 					"enableStaging": false,
@@ -112,11 +114,8 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "DataExtraction_Parquet",
-						"type": "DatasetReference",
-						"parameters": {
-							"folder": "@concat('HANA/',variables('dbHost'),'/',variables('dbSchema'),'/','MIS_COMMENTS','/',variables('folderTimestamp'))"
-						}
+						"referenceName": "AzureBlobDataset",
+						"type": "DatasetReference"
 					}
 				]
 			}
