@@ -96,7 +96,7 @@
 					"source": {
 						"type": "OracleSource",
 						"oracleReaderQuery": {
-							"value": "@concat('SELECT * FROM ',variables('schema'),'.',variables('table'), ' WHERE ROWNUM < 101')",
+							"value": "@concat('SELECT * FROM ',variables('schema'),'.',variables('table'), ' WHERE ORA_ROWSCN BETWEEN 114934870681 AND 115220313843')",
 							"type": "Expression"
 						},
 						"partitionOption": "None",
@@ -173,7 +173,7 @@
 					"source": {
 						"type": "OracleSource",
 						"oracleReaderQuery": {
-							"value": "@concat('SELECT * FROM ',variables('schema'),'.',variables('table'), ' WHERE ROWNUM < 101')",
+							"value": "@concat('SELECT * FROM ',variables('schema'),'.',variables('table'), ' WHERE ORA_ROWSCN BETWEEN 114934870681 AND 115220313843')",
 							"type": "Expression"
 						},
 						"partitionOption": "None",
@@ -231,7 +231,7 @@
 			},
 			"table": {
 				"type": "String",
-				"defaultValue": "LOG_PROGST_LEIST"
+				"defaultValue": "PROGFP_ID"
 			}
 		},
 		"folder": {
