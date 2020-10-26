@@ -37,7 +37,14 @@
 						{
 							"name": "Extract data to Parquet in BLOB Storage",
 							"type": "Copy",
-							"dependsOn": [],
+							"dependsOn": [
+								{
+									"activity": "HTTPmapper",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
 							"policy": {
 								"timeout": "7.00:00:00",
 								"retry": 0,
@@ -72,12 +79,8 @@
 								},
 								"enableStaging": false,
 								"translator": {
-									"type": "TabularTranslator",
-									"typeConversion": true,
-									"typeConversionSettings": {
-										"allowDataTruncation": true,
-										"treatBooleanAsNumber": false
-									}
+									"value": "@activity('HTTPmapper').output",
+									"type": "Expression"
 								}
 							},
 							"inputs": [
@@ -108,6 +111,77 @@
 									}
 								}
 							]
+						},
+						{
+							"name": "Get ColumnInfo",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "OracleSource",
+									"oracleReaderQuery": {
+										"value": "@concat(\n'SELECT \nCOLUMN_NAME\n, DATA_TYPE\n, DATA_TYPE_MOD\n, DATA_TYPE_OWNER\n, DATA_LENGTH\n, DATA_PRECISION\n, DATA_SCALE\n, NULLABLE\n, COLUMN_ID\n, DEFAULT_LENGTH\n, DATA_DEFAULT\n, CHARACTER_SET_NAME\n, CHAR_COL_DECL_LENGTH\n, QUALIFIED_COL_NAME\nFROM ALL_TAB_COLS\nWHERE \nCOLUMN_NAME NOT LIKE(''','SYS_%',''') AND\nTABLE_NAME =''',\nvariables('tableName')\n, ''' '\n)",
+										"type": "Expression"
+									},
+									"partitionOption": "None",
+									"queryTimeout": "02:00:00"
+								},
+								"dataset": {
+									"referenceName": "MX03_MXDM_Dynamic",
+									"type": "DatasetReference",
+									"parameters": {
+										"db_schema": {
+											"value": "@variables('dbSchema')",
+											"type": "Expression"
+										},
+										"db_table": {
+											"value": "@variables('tableName')",
+											"type": "Expression"
+										}
+									}
+								},
+								"firstRowOnly": false
+							}
+						},
+						{
+							"name": "HTTPmapper",
+							"type": "AzureFunctionActivity",
+							"dependsOn": [
+								{
+									"activity": "Get ColumnInfo",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"functionName": "HTTPmapper",
+								"method": "POST",
+								"body": {
+									"value": "@activity('Get ColumnInfo').output",
+									"type": "Expression"
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ERSMetadataFunctionsAPP",
+								"type": "LinkedServiceReference"
+							}
 						}
 					]
 				}
