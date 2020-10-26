@@ -1,0 +1,16 @@
+{
+	"name": "ECOUNT_TEST",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "Oracle",
+		"typeProperties": {
+			"connectionString": "host=alpedmdbs1vt.argon.corp.ch;port=1521;sid=EDM14T;user id=APP_EDMCH",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIyMjU3NTc2ZC05MzkwLTRhYzYtYmExMS1hNDcxYjU5Yjk1MGMiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "IR-Fujitsu",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
