@@ -78,6 +78,7 @@
 			},
 			{
 				"name": "Set timestamp for folder",
+				"description": "@formatDateTime(variables('extractionTimestamp'),'yyyy-MM-dd HH-mm-ss')",
 				"type": "SetVariable",
 				"dependsOn": [
 					{
