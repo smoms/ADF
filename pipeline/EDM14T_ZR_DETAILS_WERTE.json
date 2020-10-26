@@ -57,6 +57,12 @@
 				]
 			}
 		],
+		"variables": {
+			"dbSchema": {
+				"type": "String",
+				"defaultValue": "EC_ZRV"
+			}
+		},
 		"folder": {
 			"name": "ERSExtractionJobTesting/EDM14T_ECOUNT"
 		},
