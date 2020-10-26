@@ -5,7 +5,14 @@
 			{
 				"name": "Copy data",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Set timestamp for folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -55,12 +62,51 @@
 						}
 					}
 				]
+			},
+			{
+				"name": "Set extraction timestamp",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "extractionTimestamp",
+					"value": {
+						"value": "@utcnow()",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set timestamp for folder",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set extraction timestamp",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "folderTimestamp",
+					"value": {
+						"value": "@formatDateTime(variables('extractionTimestamp'),'yyyy-MM-dd HH-mm-ss')",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"variables": {
 			"dbSchema": {
 				"type": "String",
 				"defaultValue": "EC_ZRV"
+			},
+			"extractionTimestamp": {
+				"type": "String"
+			},
+			"folderTimestamp": {
+				"type": "String"
 			}
 		},
 		"folder": {
