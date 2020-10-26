@@ -1,5 +1,5 @@
 {
-	"name": "OracleTable1",
+	"name": "ZR_DETAILS_WERTE",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "EDM14T_ECOUNT",
@@ -7,6 +7,10 @@
 		},
 		"annotations": [],
 		"type": "OracleTable",
-		"schema": []
+		"schema": [],
+		"typeProperties": {
+			"schema": "EC_ZRV",
+			"table": "ZR_DETAILS_WERTE"
+		}
 	}
 }
