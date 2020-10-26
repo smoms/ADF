@@ -24,7 +24,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "OracleSource",
-						"oracleReaderQuery": "SELECT\n*\nFROM\nec_zrv.zr_details_werte\nwhere d_von >= '22.12.13' and d_bis < '24.12.13'",
+						"oracleReaderQuery": "SELECT\n*\nFROM\nec_zrv.zr_details_werte\nwhere d_von >= TO_DATE('22.12.13','DD.MM.YY') and d_bis < TO_DATE('24.12.13','DD.MM.YY')",
 						"partitionOption": "None",
 						"queryTimeout": "02:00:00"
 					},
