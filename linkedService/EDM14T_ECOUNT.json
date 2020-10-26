@@ -1,0 +1,16 @@
+{
+	"name": "EDM14T_ECOUNT",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "Oracle",
+		"typeProperties": {
+			"connectionString": "host=alpedmdbs1vt.argon.corp.ch;port=1521;sid=EDM14T;user id=APP_EDMCH",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIwYTc1N2ExMS05Nzg4LTRlZjctOWI5ZC05YzdkZWQ3NzQ5ZjYiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "IR-Fujitsu",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
