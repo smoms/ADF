@@ -108,6 +108,10 @@
 			},
 			"folderTimestamp": {
 				"type": "String"
+			},
+			"dbHost": {
+				"type": "String",
+				"defaultValue": "EDM14T"
 			}
 		},
 		"folder": {
