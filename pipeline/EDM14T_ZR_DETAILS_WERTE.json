@@ -1,6 +1,62 @@
 {
 	"name": "EDM14T_ZR_DETAILS_WERTE",
 	"properties": {
+		"activities": [
+			{
+				"name": "Copy data",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"oracleReaderQuery": "SELECT\n*\nFROM\nec_zrv.zr_details_werte\nwhere d_von >= '22.12.13' and d_bis < '24.12.13'",
+						"partitionOption": "None",
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ZR_DETAILS_WERTE",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DataExtraction_Parquet",
+						"type": "DatasetReference",
+						"parameters": {
+							"folder": "@concat('ORACLE/',variables('dbHost'),'/',variables('dbSchema'),'/','ZR_DETAILS_WERTE','/',variables('folderTimestamp'))"
+						}
+					}
+				]
+			}
+		],
 		"folder": {
 			"name": "ERSExtractionJobTesting/EDM14T_ECOUNT"
 		},
