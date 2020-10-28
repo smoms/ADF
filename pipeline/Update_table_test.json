@@ -24,6 +24,39 @@
 						"computeType": "General"
 					}
 				}
+			},
+			{
+				"name": "Lookup",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "dataflow1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SnowflakeSource",
+						"query": "update \"EDW90_DEV_LND\".\"SHARED\".\"EXTR_LAST_RUN_INFO\"\nset last_run_closing=CURRENT_TIMESTAMP\nwhere job_name='MX03_TP_REP'",
+						"exportSettings": {
+							"type": "SnowflakeExportCopyCommand"
+						}
+					},
+					"dataset": {
+						"referenceName": "SnowflakeTable1",
+						"type": "DatasetReference"
+					}
+				}
 			}
 		],
 		"variables": {
