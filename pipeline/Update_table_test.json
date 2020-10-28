@@ -47,7 +47,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SnowflakeSource",
-						"query": "call SHARED.UPDATE_EXTR_LAST_RUN_INFO();",
+						"query": "call SHARED.UPDATE_EXTR_LAST_RUN_INFO('MX03_MEDIUM_TABLES');",
 						"exportSettings": {
 							"type": "SnowflakeExportCopyCommand"
 						}
