@@ -47,7 +47,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SnowflakeSource",
-						"query": "update EDW90_DEV_LND.SHARED.EXTR_LAST_RUN_INFO\nset last_run_closing=CURRENT_TIMESTAMP\nwhere job_name='MX03_TP_REP';\nselect 1;",
+						"query": "select 1;",
 						"exportSettings": {
 							"type": "SnowflakeExportCopyCommand"
 						}
