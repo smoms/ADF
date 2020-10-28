@@ -47,7 +47,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SnowflakeSource",
-						"query": "select 1;",
+						"query": "call UPDATE_EXTR_LAST_RUN_INFO();",
 						"exportSettings": {
 							"type": "SnowflakeExportCopyCommand"
 						}
