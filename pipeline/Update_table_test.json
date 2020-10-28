@@ -26,7 +26,7 @@
 				}
 			},
 			{
-				"name": "Lookup",
+				"name": "Lookup_Update_Table",
 				"type": "Lookup",
 				"dependsOn": [
 					{
@@ -48,6 +48,42 @@
 					"source": {
 						"type": "SnowflakeSource",
 						"query": "call SHARED.UPDATE_EXTR_LAST_RUN_INFO('MX03_MEDIUM_TABLES');",
+						"exportSettings": {
+							"type": "SnowflakeExportCopyCommand"
+						}
+					},
+					"dataset": {
+						"referenceName": "SnowflakeTable1",
+						"type": "DatasetReference",
+						"parameters": {
+							"table_name": "EXTR_LAST_RUN_INFO"
+						}
+					}
+				}
+			},
+			{
+				"name": "Lookup_Create_Table",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Lookup_Update_Table",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SnowflakeSource",
+						"query": "call shared.create_table('create table shared.dummy_table (identifier varchar)');",
 						"exportSettings": {
 							"type": "SnowflakeExportCopyCommand"
 						}
