@@ -1,0 +1,318 @@
+{
+	"name": "MIS_COMMENTS_copy1",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set extraction timestamp",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "extractionTimestamp",
+					"value": {
+						"value": "@utcnow()",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set timestamp for folder",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set extraction timestamp",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "folderTimestamp",
+					"value": {
+						"value": "@formatDateTime(variables('extractionTimestamp'),'yyyy-MM-dd HH-mm-ss')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set timestamp for file",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set timestamp for folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "fileTimestamp",
+					"value": {
+						"value": "@formatDateTime(variables('extractionTimestamp'),'yyyyMMddHHmmss')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Copy data",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Set timestamp for file",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SapHanaSource",
+						"query": "select * from MIS.MIS_COMMENTS_AUDIT where id between 1000 and 1200",
+						"packetSize": 2000000,
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings",
+							"maxRowsPerFile": 100
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "PROD_HANA_Dynamic",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_schema": "MIS",
+							"db_table": "MIS_COMMENTS_AUDIT"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DataExtraction_Parquet",
+						"type": "DatasetReference",
+						"parameters": {
+							"folder": "@concat('HANA/',variables('dbHost'),'/',variables('dbSchema'),'/','MIS_COMMENTS','/',variables('folderTimestamp'))"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy data_copy_1",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Set timestamp for file",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SapHanaSource",
+						"query": "select * from MIS.MIS_COMMENTS_AUDIT where id between 1 and 200",
+						"packetSize": 2000000,
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings",
+							"maxRowsPerFile": 100
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "PROD_HANA_Dynamic",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_schema": "MIS",
+							"db_table": "MIS_COMMENTS_AUDIT"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DataExtraction_Parquet",
+						"type": "DatasetReference",
+						"parameters": {
+							"folder": "@concat('HANA/',variables('dbHost'),'/',variables('dbSchema'),'/','MIS_COMMENTS','/',variables('folderTimestamp'))"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy data_copy_2",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SapHanaSource",
+						"query": "select * from MIS.MIS_COMMENTS_AUDIT where id between 500 and 600",
+						"packetSize": 2000000,
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings",
+							"maxRowsPerFile": 100
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "PROD_HANA_Dynamic",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_schema": "MIS",
+							"db_table": "MIS_COMMENTS_AUDIT"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DataExtraction_Parquet",
+						"type": "DatasetReference",
+						"parameters": {
+							"folder": "@concat('HANA/',variables('dbHost'),'/',variables('dbSchema'),'/','MIS_COMMENTS','/',variables('folderTimestamp'))"
+						}
+					}
+				]
+			},
+			{
+				"name": "dataflow1",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "dataflow1",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					}
+				}
+			}
+		],
+		"variables": {
+			"extractionTimestamp": {
+				"type": "String"
+			},
+			"lastRunTimestamp": {
+				"type": "String"
+			},
+			"lastRunClosing": {
+				"type": "String"
+			},
+			"dbSchema": {
+				"type": "String",
+				"defaultValue": "EDWH"
+			},
+			"dbHost": {
+				"type": "String",
+				"defaultValue": "ERS"
+			},
+			"folderTimestamp": {
+				"type": "String"
+			},
+			"fileTimestamp": {
+				"type": "String"
+			},
+			"tableName": {
+				"type": "String",
+				"defaultValue": "MX_F_EXPOSURE_POSITIONS_HOURLY"
+			},
+			"processCount": {
+				"type": "String",
+				"defaultValue": "0"
+			}
+		},
+		"folder": {
+			"name": "ERSExtractionJobTesting/TST_HANA"
+		},
+		"annotations": []
+	}
+}
