@@ -54,44 +54,14 @@
 					},
 					"dataset": {
 						"referenceName": "SnowflakeTable1",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"table_name": "EXTR_LAST_RUN_INFO"
+						}
 					}
 				}
 			}
 		],
-		"variables": {
-			"extractionTimestamp": {
-				"type": "String"
-			},
-			"lastRunTimestamp": {
-				"type": "String"
-			},
-			"lastRunClosing": {
-				"type": "String"
-			},
-			"dbSchema": {
-				"type": "String",
-				"defaultValue": "EDWH"
-			},
-			"dbHost": {
-				"type": "String",
-				"defaultValue": "ERS"
-			},
-			"folderTimestamp": {
-				"type": "String"
-			},
-			"fileTimestamp": {
-				"type": "String"
-			},
-			"tableName": {
-				"type": "String",
-				"defaultValue": "MX_F_EXPOSURE_POSITIONS_HOURLY"
-			},
-			"processCount": {
-				"type": "String",
-				"defaultValue": "0"
-			}
-		},
 		"folder": {
 			"name": "ERSExtractionJobTesting/TST_HANA"
 		},
