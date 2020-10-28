@@ -16,9 +16,15 @@
 			"transformations": [
 				{
 					"name": "Filter"
+				},
+				{
+					"name": "AlterRow"
+				},
+				{
+					"name": "DerivedColumn1"
 				}
 			],
-			"script": "source(output(\n\t\tJOB_NAME as string,\n\t\tSOURCESYSTEM as string,\n\t\tLAST_RUN_TIMESTAMP as timestamp,\n\t\tLAST_RUN_CLOSING as date\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tlimit: 100,\n\tformat: 'table',\n\ttableName: 'EXTR_LAST_RUN_INFO',\n\tschemaName: 'SHARED',\n\tstore: 'snowflake') ~> source\nsource filter(JOB_NAME=='MX01_MXDM_SMALL_TABLES') ~> Filter"
+			"script": "source(output(\n\t\tJOB_NAME as string,\n\t\tSOURCESYSTEM as string,\n\t\tLAST_RUN_TIMESTAMP as timestamp,\n\t\tLAST_RUN_CLOSING as date\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tlimit: 100,\n\tformat: 'table',\n\ttableName: 'EXTR_LAST_RUN_INFO',\n\tschemaName: 'SHARED',\n\tstore: 'snowflake') ~> source\nsource filter(JOB_NAME=='MX01_MXDM_SMALL_TABLES') ~> Filter\nDerivedColumn1 alterRow(updateIf(true())) ~> AlterRow\nFilter derive(LAST_RUN_TIMESTAMP = currentTimestamp()) ~> DerivedColumn1"
 		}
 	}
 }
