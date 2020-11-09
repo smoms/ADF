@@ -1,0 +1,9 @@
+{
+	"name": "DigiGenPOC",
+	"properties": {
+		"folder": {
+			"name": "MAATests"
+		},
+		"annotations": []
+	}
+}
