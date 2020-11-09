@@ -1,0 +1,17 @@
+{
+	"name": "UDriveDigiGenXML",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "FileServer",
+		"typeProperties": {
+			"host": "\\\\fcl04eai\\eai\\EAI_DATA_PUB\\VPR\\DigiGen\\ADFPoc",
+			"userId": "argon\\ajil_m",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJjYjI5MTI1Yi00OWM5LTQ1NzAtODk4MC1mYmQ3NmZiOTZhOTAiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "IR-Fujitsu",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
