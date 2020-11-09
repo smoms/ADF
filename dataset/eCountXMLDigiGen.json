@@ -1,0 +1,17 @@
+{
+	"name": "eCountXMLDigiGen",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "UDriveDigiGenXML",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Xml",
+		"typeProperties": {
+			"location": {
+				"type": "FileServerLocation",
+				"fileName": "2017_01_01_00_15.xml"
+			}
+		}
+	}
+}

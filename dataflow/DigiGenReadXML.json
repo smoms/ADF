@@ -1,0 +1,20 @@
+{
+	"name": "DigiGenReadXML",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "eCountXMLDigiGen",
+						"type": "DatasetReference"
+					},
+					"name": "ParseEcountSchema"
+				}
+			],
+			"sinks": [],
+			"transformations": [],
+			"script": "source(allowSchemaDrift: false,\n\tvalidateSchema: true,\n\tignoreNoFilesFound: false,\n\tfileList: true,\n\tvalidationMode: 'xsd',\n\tnamespaces: true) ~> ParseEcountSchema"
+		}
+	}
+}
