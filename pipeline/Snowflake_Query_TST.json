@@ -1,0 +1,45 @@
+{
+	"name": "Snowflake_Query_TST",
+	"properties": {
+		"activities": [
+			{
+				"name": "SelectFromSnowflake",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SnowflakeSource",
+						"query": {
+							"value": "@concat('''select * from\n\"EDW90_DEV_LND\".\"JIRA1P_DBO\".\"CUSTOMFIELD\" as cfield\njoin \"EDW90_DEV_LND\".\"JIRA1P_DBO\".\"CUSTOMFIELDOPTION\" as copt\non cfield.id = copt.customfield\nWHERE cfield.LDTS > ''', pipeline().parameters.LDTS,''';''')",
+							"type": "Expression"
+						},
+						"exportSettings": {
+							"type": "SnowflakeExportCopyCommand"
+						}
+					},
+					"dataset": {
+						"referenceName": "SnowflakeTable1",
+						"type": "DatasetReference"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"LDTS": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "ERSExtractionJobTesting"
+		},
+		"annotations": []
+	}
+}
